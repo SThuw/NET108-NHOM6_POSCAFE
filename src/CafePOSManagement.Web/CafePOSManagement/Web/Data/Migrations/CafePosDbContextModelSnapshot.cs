@@ -23,6 +23,203 @@ namespace CafePOSManagement.Web.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.AiMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("SessionId")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(40)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionId");
+
+                    b.ToTable("AiMessages", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            Content = "Khách muốn đồ uống đậm vị cà phê và bánh ăn kèm bữa sáng",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            Role = "user",
+                            SessionId = "sess_01"
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            Content = "Gợi ý combo: Cà phê sữa đá (p1) + Bánh Croissant bơ (p3), áp dụng mã SALE10 giảm 10%.",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            Role = "assistant",
+                            SessionId = "sess_01"
+                        },
+                        new
+                        {
+                            Id = 3L,
+                            Content = "Khách nữ thích uống ngọt dịu, thanh mát ít đá",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            Role = "user",
+                            SessionId = "sess_02"
+                        },
+                        new
+                        {
+                            Id = 4L,
+                            Content = "Gợi ý: Trà chanh thanh mát (p8) hoặc Cold Brew cam sả (p16) 50% đường.",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            Role = "assistant",
+                            SessionId = "sess_02"
+                        });
+                });
+
+            modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.AiSession", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(40)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(40)");
+
+                    b.Property<string>("Context")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("UserId")
+                        .HasMaxLength(40)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(40)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AiSessions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "sess_01",
+                            Context = "PolyCafe AI Assistant - Trợ lý quầy POS",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            IsActive = true,
+                            Title = "Gợi ý combo cà phê sáng cho khách",
+                            UserId = "u1"
+                        },
+                        new
+                        {
+                            Id = "sess_02",
+                            Context = "PolyCafe AI Assistant - Tư vấn thực đơn",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            IsActive = true,
+                            Title = "Tư vấn món trà thanh nhiệt buổi chiều",
+                            UserId = "u4"
+                        });
+                });
+
+            modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.AiStateStore", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("SessionId")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(40)");
+
+                    b.Property<string>("StateKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("StateValue")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionId", "StateKey")
+                        .IsUnique();
+
+                    b.ToTable("AiStateStores", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            SessionId = "sess_01",
+                            StateKey = "intent",
+                            StateValue = "recommend_combo",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = 2L,
+                            SessionId = "sess_01",
+                            StateKey = "suggested_items",
+                            StateValue = "[\"p1\", \"p3\"]",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = 3L,
+                            SessionId = "sess_02",
+                            StateKey = "intent",
+                            StateValue = "recommend_drink",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0))
+                        },
+                        new
+                        {
+                            Id = 4L,
+                            SessionId = "sess_02",
+                            StateKey = "taste_preference",
+                            StateValue = "less_sweet,fruity",
+                            UpdatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0))
+                        });
+                });
+
             modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.Card", b =>
                 {
                     b.Property<string>("Id")
@@ -886,6 +1083,38 @@ namespace CafePOSManagement.Web.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.AiMessage", b =>
+                {
+                    b.HasOne("CafePOSManagement.Web.Models.Entities.AiSession", "Session")
+                        .WithMany("Messages")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.AiSession", b =>
+                {
+                    b.HasOne("CafePOSManagement.Web.Models.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.AiStateStore", b =>
+                {
+                    b.HasOne("CafePOSManagement.Web.Models.Entities.AiSession", "Session")
+                        .WithMany("States")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Session");
+                });
+
             modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.Order", b =>
                 {
                     b.HasOne("CafePOSManagement.Web.Models.Entities.Discount", "Discount")
@@ -924,6 +1153,13 @@ namespace CafePOSManagement.Web.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.AiSession", b =>
+                {
+                    b.Navigation("Messages");
+
+                    b.Navigation("States");
                 });
 
             modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.Category", b =>

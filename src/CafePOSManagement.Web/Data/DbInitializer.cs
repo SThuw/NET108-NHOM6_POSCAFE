@@ -85,5 +85,22 @@ public static class DbInitializer
             new Card("c3", "TB03", "Thẻ Bàn 03", false, true) { CreatedAt = created },
             new Card("c4", "TR01", "Thẻ Rung 01", false, true) { CreatedAt = created },
             new Card("c5", "TR02", "Thẻ Rung 02", true, true) { CreatedAt = created });
+
+        // Dữ liệu mẫu cụm bảng AI State Store (Lời dặn giảng viên Lab 2)
+        modelBuilder.Entity<AiSession>().HasData(
+            new { Id = "sess_01", UserId = "u1", Title = "Gợi ý combo cà phê sáng cho khách", Context = "PolyCafe AI Assistant - Trợ lý quầy POS", IsActive = true, CreatedAt = created },
+            new { Id = "sess_02", UserId = "u4", Title = "Tư vấn món trà thanh nhiệt buổi chiều", Context = "PolyCafe AI Assistant - Tư vấn thực đơn", IsActive = true, CreatedAt = created });
+
+        modelBuilder.Entity<AiMessage>().HasData(
+            new { Id = 1L, SessionId = "sess_01", Role = "user", Content = "Khách muốn đồ uống đậm vị cà phê và bánh ăn kèm bữa sáng", CreatedAt = created },
+            new { Id = 2L, SessionId = "sess_01", Role = "assistant", Content = "Gợi ý combo: Cà phê sữa đá (p1) + Bánh Croissant bơ (p3), áp dụng mã SALE10 giảm 10%.", CreatedAt = created },
+            new { Id = 3L, SessionId = "sess_02", Role = "user", Content = "Khách nữ thích uống ngọt dịu, thanh mát ít đá", CreatedAt = created },
+            new { Id = 4L, SessionId = "sess_02", Role = "assistant", Content = "Gợi ý: Trà chanh thanh mát (p8) hoặc Cold Brew cam sả (p16) 50% đường.", CreatedAt = created });
+
+        modelBuilder.Entity<AiStateStore>().HasData(
+            new { Id = 1L, SessionId = "sess_01", StateKey = "intent", StateValue = "recommend_combo", UpdatedAt = created },
+            new { Id = 2L, SessionId = "sess_01", StateKey = "suggested_items", StateValue = "[\"p1\", \"p3\"]", UpdatedAt = created },
+            new { Id = 3L, SessionId = "sess_02", StateKey = "intent", StateValue = "recommend_drink", UpdatedAt = created },
+            new { Id = 4L, SessionId = "sess_02", StateKey = "taste_preference", StateValue = "less_sweet,fruity", UpdatedAt = created });
     }
 }

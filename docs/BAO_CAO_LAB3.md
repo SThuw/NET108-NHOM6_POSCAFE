@@ -1,4 +1,4 @@
-﻿# BÁO CÁO KẾT QUẢ THỰC HÀNH LAB 3 — DỰ ÁN .NET 1 (NET108)
+# BÁO CÁO KẾT QUẢ THỰC HÀNH LAB 3 — DỰ ÁN .NET 1 (NET108)
 **Đề tài:** Hệ thống Quản lý Bán hàng Quán Đồ uống (PolyCafe - POS Cafe)  
 **Nhóm thực hiện:** Nhóm 6  
 **Lớp / Khóa:** Dự án .NET 1 (FPT Polytechnic)  
@@ -12,7 +12,7 @@ Dựa trên chỉ đạo của giảng viên hướng dẫn (phát triển tiế
 
 | STT | Họ và tên | MSSV | Vai trò | Phân hệ phụ trách (Từ Lab 1 & 2) | Sản phẩm bàn giao LAB 3 | Đánh giá |
 | :-: | :--- | :---: | :---: | :--- | :--- | :---: |
-| **1** | **Nguyễn Kim Song Thư** | **TB02272** | **Nhóm trưởng** | Kiến trúc hệ thống & Hạ tầng lõi | - Dựng khung Solution MVC 3 lớp, cấu hình Entity Framework Core.<br>- Xây dựng lớp tiện ích **`DBUtil.cs`** (ADO.NET thuần: `queryDataTable`, `executeScalar`, `executeNonQuery`).<br>- Quản lý GitHub nhóm, khởi tạo nhánh `feature/lab3-dal-and-entities`, review code.<br>- Tổng hợp báo cáo nộp LMS. | 100% |
+| **1** | **Nguyễn Kim Song Thư** | **TB02272** | **Nhóm trưởng** | Kiến trúc hệ thống, Hạ tầng lõi & Cụm bảng AI | - Dựng khung Solution MVC 3 lớp, cấu hình Entity Framework Core.<br>- Xây dựng lớp tiện ích **`DBUtil.cs`** (ADO.NET thuần: `queryDataTable`, `executeScalar`, `executeNonQuery`).<br>- **Bổ sung Cụm bảng AI State Store** (`AiSessions`, `AiMessages`, `AiStateStores`) và lớp **`AiStateStoreDAL.cs`** (đáp ứng trọn vẹn lời dặn chấm điểm Lab 2 của Giảng viên).<br>- Quản lý GitHub nhóm, khởi tạo nhánh `feature/lab3-dal-and-entities`, review code.<br>- Tổng hợp báo cáo nộp LMS. | 100% |
 | **2** | **Ninh Văn Đức** | **TB02291** | Thành viên | Quản lý Thực đơn (Menu & Danh mục) | - Thiết kế Entity `Category.cs`, `Product.cs` + Seed Data Menu.<br>- Xây dựng các lớp truy cập dữ liệu **`CategoryDAL.cs`** và **`ProductDAL.cs`** với đầy đủ 5 hàm CRUD (`GetAll`, `GetById`, `Insert`, `Update`, `Delete`). | 100% |
 | **3** | **Trần Thị Tuyết Kha** | **TB02214** | Thành viên | Thẻ định danh & Thẻ bàn (Cards) | - Thiết kế Entity `Card.cs` (Thẻ bàn / Thẻ rung) + Seed Data Thẻ.<br>- Xây dựng lớp **`CardDAL.cs`** với đầy đủ 5 hàm CRUD và phương thức kiểm tra trạng thái thẻ phục vụ. | 100% |
 | **4** | **Nguyễn Trí Nguyễn** | **TB02277** | Thành viên | POS Bán hàng & Hóa đơn (Bills) | - Thiết kế Entity `Order.cs`, `OrderItem.cs` + Seed Data Hóa đơn.<br>- Xây dựng các lớp **`OrderDAL.cs`** và **`OrderItemDAL.cs`** với đầy đủ 5 hàm CRUD và phương thức lấy chi tiết món theo đơn `GetByOrderId`. | 100% |
@@ -31,16 +31,22 @@ Hệ thống sử dụng **Entity Framework Core 8.0** kết nối SQL Server Lo
 5. **`Orders`**: Bảng hóa đơn bán hàng (`Id`, `RequestId`, `OrderNumber`, `OrderType`, `Subtotal`, `DiscountAmount`, `TaxAmount`, `TotalAmount`, `PaymentMethod`, `Status`, `CreatedAt`, `Note`).
 6. **`OrderItems`**: Bảng chi tiết hóa đơn (`Id`, `OrderId`, `ProductId`, `ProductName`, `UnitPrice`, `Quantity`, `LineTotal`).
 7. **`Discounts`**: Bảng mã khuyến mãi / giảm giá (`Id`, `Code`, `Name`, `DiscountPercent`).
+8. **`AiSessions`** *(Bổ sung theo nhận xét Lab 2)*: Bảng phiên hội thoại AI (`Id`, `UserId`, `Title`, `Context`, `IsActive`, `CreatedAt`).
+9. **`AiMessages`** *(Bổ sung theo nhận xét Lab 2)*: Bảng lịch sử Prompt/Response (`Id`, `SessionId`, `Role`, `Content`, `CreatedAt`).
+10. **`AiStateStores`** *(Bổ sung theo nhận xét Lab 2)*: Bảng lưu trạng thái ngữ cảnh/bộ nhớ AI (`Id`, `SessionId`, `StateKey`, `StateValue`, `UpdatedAt`).
 
 ### 1.2. Lệnh thực thi Migration và Sinh CSDL
 ```powershell
-# 1. Tạo Migration mới ghi nhận thêm thực thể Users và Cards
+# 1. Tạo Migration ghi nhận thực thể Users và Cards
 dotnet ef migrations add AddUsersAndCardsForLab3 --project src/CafePOSManagement.Web
 
-# 2. Cập nhật sinh tự động Database và các bảng trên SQL Server
+# 2. Tạo Migration ghi nhận Cụm bảng AI State Store (Lời dặn giảng viên)
+dotnet ef migrations add AddAiStateStoreCluster --project src/CafePOSManagement.Web
+
+# 3. Cập nhật sinh tự động Database và toàn bộ các bảng trên SQL Server
 dotnet ef database update --project src/CafePOSManagement.Web
 ```
-**Kết quả thực thi:** CSDL `CafePOS` được tạo lập thành công 100% trên LocalDB với đầy đủ khóa chính, khóa ngoại, ràng buộc CHECK và nạp sẵn toàn bộ dữ liệu mẫu ban đầu.
+**Kết quả thực thi:** CSDL `CafePOS` được tạo lập thành công 100% trên LocalDB với đầy đủ 10 bảng, khóa chính, khóa ngoại, ràng buộc CHECK và nạp sẵn toàn bộ dữ liệu mẫu ban đầu.
 
 ---
 
@@ -116,15 +122,18 @@ Tất cả các lớp DAL đều có đủ 5 hàm CRUD:
 - **`Delete(id)`**: Xóa bản ghi (hỗ trợ cả xóa mềm cập nhật trạng thái `IsActive = 0`).
 
 ### Phân công chi tiết:
-1. **Ninh Văn Đức (TB02291):**
+1. **Nguyễn Kim Song Thư (TB02272 - Nhóm trưởng):**
+   - `DBUtil`: Lớp tiện ích ADO.NET cốt lõi dùng chung cho toàn bộ dự án.
+   - `AiStateStoreDAL`: Quản lý truy xuất phiên hội thoại AI (`AiSessions`), tin nhắn ngữ cảnh (`AiMessages`) và các khóa trạng thái bộ nhớ AI (`AiStateStores`) phục vụ nghiệp vụ trợ lý POS thông minh (bổ sung theo nhận xét Lab 2 của Giảng viên).
+2. **Ninh Văn Đức (TB02291):**
    - `CategoryDAL`: Quản lý danh mục thực đơn.
    - `ProductDAL` (alias `DrinkDAL`): Quản lý món đồ uống, giá bán, giá gốc, hình ảnh, mô tả.
-2. **Trần Thị Tuyết Kha (TB02214):**
+3. **Trần Thị Tuyết Kha (TB02214):**
    - `CardDAL`: Quản lý thẻ bàn, thẻ rung định danh (`IsOccupied`: Trống / Đang phục vụ).
-3. **Nguyễn Trí Nguyễn (TB02277):**
+4. **Nguyễn Trí Nguyễn (TB02277):**
    - `OrderDAL` (alias `BillDAL`): Quản lý hóa đơn bán hàng, tạm tính, giảm giá, VAT, tổng tiền, phương thức thanh toán.
    - `OrderItemDAL` (alias `BillDetailDAL`): Quản lý từng dòng món trong hóa đơn, thành tiền.
-4. **Nguyễn Lâm Chí Tâm (TB02234):**
+5. **Nguyễn Lâm Chí Tâm (TB02234):**
    - `UserDAL`: Quản lý thông tin tài khoản nhân sự, phân quyền vai trò (0: Nhân viên, 1: Quản lý) và hàm `Login(email, password)`.
 
 ---
@@ -142,10 +151,11 @@ Nhóm đã xây dựng chương trình kiểm thử tự động tại `tests/Ca
 [CardDAL] Lấy thành công 5 thẻ bàn/thẻ rung.
 [OrderDAL] Lấy thành công 3 hóa đơn.
 [OrderItemDAL] Hóa đơn #003 có 2 chi tiết món.
+[AiStateStoreDAL] Lấy thành công 2 phiên AI, 4 tin nhắn lịch sử và 4 trạng thái bộ nhớ AI.
 >>> TẤT CẢ CÁC LỚP DAL & DBUTIL HOẠT ĐỘNG HOÀN HẢO 100% <<<
 ```
 - **Tổng số ca kiểm thử logic:** 33/33 Passed.
-- **Toàn bộ 6 lớp DAL:** Hoạt động chính xác 100% trên CSDL SQL Server thật.
+- **Toàn bộ 7 lớp DAL & Tiện ích:** Hoạt động chính xác 100% trên CSDL SQL Server thật.
 
 ---
 

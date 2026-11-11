@@ -1,4 +1,4 @@
-﻿@model CafePOSManagement.Web.Controllers.Lab3ViewModel
+@model CafePOSManagement.Web.Controllers.Lab3ViewModel
 @{
     ViewData["Title"] = "Lab 3 - Kiến trúc 3 Lớp & ADO.NET";
     ViewData["PageClass"] = "bg-light";
@@ -113,6 +113,11 @@
                 <li class="nav-item">
                     <button class="nav-link fw-bold" id="dbutil-tab" data-bs-toggle="tab" data-bs-target="#tab-dbutil" type="button">
                         ⚙️ Tiện ích DBUtil (ADO.NET)
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold text-success" id="ai-tab" data-bs-toggle="tab" data-bs-target="#tab-ai" type="button">
+                        🤖 AI State Store (@Model.AiSessions.Count phiên)
                     </button>
                 </li>
             </ul>
@@ -329,6 +334,89 @@
                         <div class="alert alert-success mb-0">
                             <strong>Trạng thái kết nối:</strong> Đã kết nối thành công tới SQL Server LocalDB (<code>Database=CafePOS</code>).
                         </div>
+                    </div>
+                </div>
+
+                <!-- TAB 6: AI STATE STORE (Lời dặn giảng viên Lab 2) -->
+                <div class="tab-pane fade" id="tab-ai" role="tabpanel">
+                    <div class="alert alert-success py-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Cụm bảng AI State Store (Đáp ứng nhận xét Lab 2 của Giảng viên)</strong> — Quản lý phiên làm việc, lịch sử Prompt/Response và bộ nhớ ngữ cảnh AI (State Store).
+                        </div>
+                        <span class="badge bg-success">AI State Store · Code First</span>
+                    </div>
+
+                    <div class="row g-4 mt-1">
+                        @foreach (var sess in Model.AiSessions)
+                        {
+                            var messages = CafePOSManagement.Web.DAL.AiStateStoreDAL.GetMessages(sess.Id);
+                            var states = CafePOSManagement.Web.DAL.AiStateStoreDAL.GetStates(sess.Id);
+
+                            <div class="col-12">
+                                <div class="card border border-success border-opacity-25 shadow-sm">
+                                    <div class="card-header bg-success bg-opacity-10 d-flex justify-content-between align-items-center py-3">
+                                        <div>
+                                            <span class="badge bg-success me-2">Phiên: @sess.Id</span>
+                                            <strong class="fs-6 text-dark">@sess.Title</strong>
+                                            <span class="text-muted ms-2 small">(@sess.Context)</span>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-light text-dark border me-2">Nhân viên: @sess.UserFullName</span>
+                                            <small class="text-muted">@sess.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <!-- Cột 1: Lịch sử tin nhắn Prompt / Response -->
+                                            <div class="col-md-7 border-end">
+                                                <h6 class="fw-bold text-primary mb-3">💬 Lịch sử tương tác AI (AiMessages)</h6>
+                                                <div class="d-flex flex-column gap-2">
+                                                    @foreach (var msg in messages)
+                                                    {
+                                                        if (msg.Role == "user")
+                                                        {
+                                                            <div class="p-2 bg-light border rounded">
+                                                                <span class="badge bg-primary me-1">👤 Thu ngân:</span>
+                                                                <span>@msg.Content</span>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="p-2 bg-success bg-opacity-10 border border-success border-opacity-25 rounded">
+                                                                <span class="badge bg-success me-1">🤖 AI Trợ lý:</span>
+                                                                <span>@msg.Content</span>
+                                                            </div>
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <!-- Cột 2: Trạng thái bộ nhớ AI (AiStateStores) -->
+                                            <div class="col-md-5">
+                                                <h6 class="fw-bold text-success mb-3">🧠 Trạng thái bộ nhớ (AiStateStores)</h6>
+                                                <table class="table table-sm table-bordered">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>Khóa (StateKey)</th>
+                                                            <th>Giá trị (StateValue)</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var st in states)
+                                                        {
+                                                            <tr>
+                                                                <td><code>@st.StateKey</code></td>
+                                                                <td><small class="text-break">@st.StateValue</small></td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>

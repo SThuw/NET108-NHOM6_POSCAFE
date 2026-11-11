@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using CafePOSManagement.Web.DAL;
@@ -12,6 +12,7 @@ public class Lab3ViewModel
     public List<UserDAL> Users { get; set; } = new();
     public List<CardDAL> Cards { get; set; } = new();
     public List<OrderDAL> Orders { get; set; } = new();
+    public List<AiSessionDTO> AiSessions { get; set; } = new();
 }
 
 public class Lab3Controller : Controller
@@ -26,7 +27,8 @@ public class Lab3Controller : Controller
             Products = ProductDAL.GetAll(),
             Users = UserDAL.GetAll(),
             Cards = CardDAL.GetAll(),
-            Orders = OrderDAL.GetAll()
+            Orders = OrderDAL.GetAll(),
+            AiSessions = AiStateStoreDAL.GetAllSessions()
         };
         return View(model);
     }

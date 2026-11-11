@@ -13,6 +13,9 @@ public sealed class CafePosDbContext(DbContextOptions<CafePosDbContext> options)
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Card> Cards => Set<Card>();
+    public DbSet<AiSession> AiSessions => Set<AiSession>();
+    public DbSet<AiMessage> AiMessages => Set<AiMessage>();
+    public DbSet<AiStateStore> AiStateStores => Set<AiStateStore>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -119,6 +122,36 @@ public sealed class CafePosDbContext(DbContextOptions<CafePosDbContext> options)
         card.Property(x => x.Code).HasMaxLength(50).IsUnicode(false).IsRequired();
         card.Property(x => x.Name).HasMaxLength(100).IsRequired();
         card.HasIndex(x => x.Code).IsUnique();
+
+        // Cụm bảng AI State Store (Lời dặn giảng viên Lab 2)
+        var aiSession = modelBuilder.Entity<AiSession>();
+        aiSession.ToTable("AiSessions");
+        aiSession.HasKey(x => x.Id);
+        aiSession.Property(x => x.Id).HasMaxLength(40).IsUnicode(false).ValueGeneratedNever();
+        aiSession.Property(x => x.UserId).HasMaxLength(40).IsUnicode(false);
+        aiSession.Property(x => x.Title).HasMaxLength(200).IsRequired();
+        aiSession.Property(x => x.Context).HasMaxLength(1000);
+        aiSession.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIMEOFFSET()");
+        aiSession.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.SetNull);
+
+        var aiMessage = modelBuilder.Entity<AiMessage>();
+        aiMessage.ToTable("AiMessages");
+        aiMessage.HasKey(x => x.Id);
+        aiMessage.Property(x => x.SessionId).HasMaxLength(40).IsUnicode(false).IsRequired();
+        aiMessage.Property(x => x.Role).HasMaxLength(50).IsUnicode(false).IsRequired();
+        aiMessage.Property(x => x.Content).IsRequired();
+        aiMessage.Property(x => x.CreatedAt).HasDefaultValueSql("SYSDATETIMEOFFSET()");
+        aiMessage.HasOne(x => x.Session).WithMany(x => x.Messages).HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Cascade);
+
+        var aiState = modelBuilder.Entity<AiStateStore>();
+        aiState.ToTable("AiStateStores");
+        aiState.HasKey(x => x.Id);
+        aiState.Property(x => x.SessionId).HasMaxLength(40).IsUnicode(false).IsRequired();
+        aiState.Property(x => x.StateKey).HasMaxLength(100).IsUnicode(false).IsRequired();
+        aiState.Property(x => x.StateValue).IsRequired();
+        aiState.Property(x => x.UpdatedAt).HasDefaultValueSql("SYSDATETIMEOFFSET()");
+        aiState.HasOne(x => x.Session).WithMany(x => x.States).HasForeignKey(x => x.SessionId).OnDelete(DeleteBehavior.Cascade);
+        aiState.HasIndex(x => new { x.SessionId, x.StateKey }).IsUnique();
 
         DbInitializer.ConfigureSeedData(modelBuilder);
     }
