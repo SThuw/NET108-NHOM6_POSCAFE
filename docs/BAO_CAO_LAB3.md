@@ -2,7 +2,7 @@
 **Đề tài:** Hệ thống Quản lý Bán hàng Quán Đồ uống (PolyCafe - POS Cafe)  
 **Nhóm thực hiện:** Nhóm 6  
 **Lớp / Khóa:** Dự án .NET 1 (FPT Polytechnic)  
-**Kho lưu trữ GitHub:** [https://github.com/ducnvtb02291-pixel/NET108-NHOM-6](https://github.com/ducnvtb02291-pixel/NET108-NHOM-6)
+**Kho lưu trữ GitHub:** [https://github.com/SThuw/NET108-NHOM6_POSCAFE](https://github.com/SThuw/NET108-NHOM6_POSCAFE)
 
 ---
 
@@ -92,7 +92,7 @@ CafePOSManagement/
 ```
 
 ### 3.2. Quản lý mã nguồn với Git
-- Repository nhóm: `https://github.com/ducnvtb02291-pixel/NET108-NHOM-6`
+- Repository nhóm: `https://github.com/SThuw/NET108-NHOM6_POSCAFE`
 - Phân nhánh: Tạo nhánh `feature/lab3-dal-and-entities` để triển khai các nội dung mới của Lab 3 mà không làm gián đoạn mã nguồn `main`.
 
 ---
