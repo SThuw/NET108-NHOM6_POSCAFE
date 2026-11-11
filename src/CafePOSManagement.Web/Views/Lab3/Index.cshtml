@@ -1,0 +1,337 @@
+﻿@model CafePOSManagement.Web.Controllers.Lab3ViewModel
+@{
+    ViewData["Title"] = "Lab 3 - Kiến trúc 3 Lớp & ADO.NET";
+    ViewData["PageClass"] = "bg-light";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <span class="badge bg-primary px-3 py-2 fs-6">LAB 3 · DỰ ÁN .NET 1 (NET108)</span>
+            <h2 class="mt-2 fw-bold text-dark">Hệ thống Quản lý Quán Cà phê (PolyCafe - Nhóm 6)</h2>
+            <p class="text-muted mb-0">Mô hình 3 Lớp · Code First Entity Framework Core · Lớp tiện ích DBUtil (ADO.NET)</p>
+        </div>
+        <div>
+            <a asp-controller="Pos" asp-action="Index" class="btn btn-outline-primary btn-sm me-2">
+                <i class="bi bi-cart"></i> Màn hình Bán hàng (POS)
+            </a>
+            <span class="badge bg-success py-2 px-3">Database: CafePOS (LocalDB)</span>
+        </div>
+    </div>
+
+    <!-- Bảng phân công nhiệm vụ nhóm -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold text-primary">
+                📋 Bảng phân chia nhiệm vụ 5 thành viên (Nhóm 6)
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center" style="width: 60px;">STT</th>
+                            <th>Thành viên & MSSV</th>
+                            <th>Vai trò</th>
+                            <th>Phân hệ phụ trách (Từ Lab 1 & 2)</th>
+                            <th>Sản phẩm bàn giao LAB 3</th>
+                            <th class="text-center">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-center fw-bold">1</td>
+                            <td><strong class="text-dark">Nguyễn Kim Song Thư</strong><br><small class="text-muted">MSSV: TB02272</small></td>
+                            <td><span class="badge bg-danger">Nhóm trưởng</span></td>
+                            <td>Kiến trúc tổng thể & Hạ tầng lõi</td>
+                            <td>Lớp tiện ích <code>DBUtil.cs</code> (ADO.NET), DbContext, Quản trị Git, Báo cáo Word</td>
+                            <td class="text-center"><span class="badge bg-success">Hoàn thành 100%</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center fw-bold">2</td>
+                            <td><strong class="text-dark">Ninh Văn Đức</strong><br><small class="text-muted">MSSV: TB02291</small></td>
+                            <td><span class="badge bg-secondary">Thành viên</span></td>
+                            <td>Quản lý Thực đơn (Menu & Danh mục)</td>
+                            <td>Entity Category, Product + <code>CategoryDAL.cs</code>, <code>ProductDAL.cs</code> (5 hàm CRUD)</td>
+                            <td class="text-center"><span class="badge bg-success">Hoàn thành 100%</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center fw-bold">3</td>
+                            <td><strong class="text-dark">Trần Thị Tuyết Kha</strong><br><small class="text-muted">MSSV: TB02214</small></td>
+                            <td><span class="badge bg-secondary">Thành viên</span></td>
+                            <td>Thẻ định danh & Thẻ bàn (Cards)</td>
+                            <td>Entity Card + <code>CardDAL.cs</code> (5 hàm CRUD thẻ bàn/thẻ rung)</td>
+                            <td class="text-center"><span class="badge bg-success">Hoàn thành 100%</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center fw-bold">4</td>
+                            <td><strong class="text-dark">Nguyễn Trí Nguyễn</strong><br><small class="text-muted">MSSV: TB02277</small></td>
+                            <td><span class="badge bg-secondary">Thành viên</span></td>
+                            <td>POS Bán hàng & Hóa đơn (Bills)</td>
+                            <td>Entity Order, OrderItem + <code>OrderDAL.cs</code>, <code>OrderItemDAL.cs</code> (5 hàm CRUD)</td>
+                            <td class="text-center"><span class="badge bg-success">Hoàn thành 100%</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center fw-bold">5</td>
+                            <td><strong class="text-dark">Nguyễn Lâm Chí Tâm</strong><br><small class="text-muted">MSSV: TB02234</small></td>
+                            <td><span class="badge bg-secondary">Thành viên</span></td>
+                            <td>Nhân sự & Tài khoản (Users)</td>
+                            <td>Entity User + <code>UserDAL.cs</code> (5 hàm CRUD + Xác thực Login)</td>
+                            <td class="text-center"><span class="badge bg-success">Hoàn thành 100%</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dữ liệu thực tế truy vấn từ các lớp DAL -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white p-3">
+            <ul class="nav nav-pills card-header-pills" id="lab3Tab" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active fw-bold" id="menu-tab" data-bs-toggle="tab" data-bs-target="#tab-menu" type="button">
+                        ☕ Thực đơn (@Model.Products.Count món · @Model.Categories.Count loại)
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold" id="users-tab" data-bs-toggle="tab" data-bs-target="#tab-users" type="button">
+                        👤 Nhân sự (@Model.Users.Count tài khoản)
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold" id="cards-tab" data-bs-toggle="tab" data-bs-target="#tab-cards" type="button">
+                        🏷️ Thẻ bàn (@Model.Cards.Count thẻ)
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold" id="orders-tab" data-bs-toggle="tab" data-bs-target="#tab-orders" type="button">
+                        🧾 Hóa đơn (@Model.Orders.Count đơn)
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold" id="dbutil-tab" data-bs-toggle="tab" data-bs-target="#tab-dbutil" type="button">
+                        ⚙️ Tiện ích DBUtil (ADO.NET)
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="tab-content" id="lab3TabContent">
+                <!-- TAB 1: MENU -->
+                <div class="tab-pane fade show active" id="tab-menu" role="tabpanel">
+                    <div class="alert alert-info py-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Phụ trách: Ninh Văn Đức (TB02291)</strong> — Dữ liệu truy vấn trực tiếp qua <code>CategoryDAL.GetAll()</code> và <code>ProductDAL.GetAll()</code> bằng ADO.NET.
+                        </div>
+                        <span class="badge bg-primary">Bài 4 DAL</span>
+                    </div>
+
+                    <h5 class="fw-bold mt-3 mb-2">1. Danh mục đồ uống (Categories)</h5>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered table-striped table-sm">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Mã loại (Id)</th>
+                                    <th>Tên danh mục</th>
+                                    <th>Mã hiển thị (Code)</th>
+                                    <th class="text-center">Thứ tự</th>
+                                    <th class="text-center">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var cat in Model.Categories)
+                                {
+                                    <tr>
+                                        <td><code>@cat.Id</code></td>
+                                        <td class="fw-bold">@cat.Name</td>
+                                        <td>@cat.Code</td>
+                                        <td class="text-center">@cat.DisplayOrder</td>
+                                        <td class="text-center"><span class="badge bg-success">Hoạt động</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h5 class="fw-bold mt-4 mb-2">2. Danh sách đồ uống (Products / Drinks)</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover table-sm align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 60px;">Mã</th>
+                                    <th>Ảnh</th>
+                                    <th>Tên món</th>
+                                    <th>Danh mục</th>
+                                    <th class="text-end">Giá bán</th>
+                                    <th>Mô tả</th>
+                                    <th class="text-center">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in Model.Products)
+                                {
+                                    <tr>
+                                        <td><code>@p.Id</code></td>
+                                        <td style="width: 50px;">
+                                            <img src="@p.ImageUrl" width="40" height="40" class="rounded object-fit-cover" alt="" onerror="this.src='/images/product-fallback.svg'" />
+                                        </td>
+                                        <td class="fw-bold text-primary">@p.Name</td>
+                                        <td><span class="badge bg-secondary">@p.CategoryName</span></td>
+                                        <td class="text-end fw-bold text-danger">@p.Price.ToString("N0") ₫</td>
+                                        <td><small class="text-muted">@p.Description</small></td>
+                                        <td class="text-center"><span class="badge bg-success">Đang bán</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 2: USERS -->
+                <div class="tab-pane fade" id="tab-users" role="tabpanel">
+                    <div class="alert alert-info py-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Phụ trách: Nguyễn Lâm Chí Tâm (TB02234)</strong> — Dữ liệu truy vấn trực tiếp qua <code>UserDAL.GetAll()</code> và kiểm thử hàm <code>UserDAL.Login()</code>.
+                        </div>
+                        <span class="badge bg-primary">Bài 4 DAL</span>
+                    </div>
+
+                    <div class="table-responsive mt-3">
+                        <table class="table table-bordered table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Mã NV</th>
+                                    <th>Họ và tên</th>
+                                    <th>Email</th>
+                                    <th>Số điện thoại</th>
+                                    <th>Vai trò</th>
+                                    <th class="text-center">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var u in Model.Users)
+                                {
+                                    <tr>
+                                        <td><code>@u.Id</code></td>
+                                        <td class="fw-bold">@u.FullName</td>
+                                        <td>@u.Email</td>
+                                        <td>@u.Phone</td>
+                                        <td>
+                                            @if (u.Role)
+                                            {
+                                                <span class="badge bg-danger">Quản lý</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-primary">Nhân viên</span>
+                                            }
+                                        </td>
+                                        <td class="text-center"><span class="badge bg-success">Đang làm việc</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 3: CARDS -->
+                <div class="tab-pane fade" id="tab-cards" role="tabpanel">
+                    <div class="alert alert-info py-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Phụ trách: Trần Thị Tuyết Kha (TB02214)</strong> — Dữ liệu truy vấn trực tiếp qua <code>CardDAL.GetAll()</code>.
+                        </div>
+                        <span class="badge bg-primary">Bài 4 DAL</span>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        @foreach (var c in Model.Cards)
+                        {
+                            <div class="col-md-4 col-sm-6">
+                                <div class="card h-100 border @(c.Status ? "border-warning bg-warning bg-opacity-10" : "border-success bg-success bg-opacity-10")">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="fw-bold mb-1">@c.Name</h5>
+                                            <span class="badge @(c.Status ? "bg-warning text-dark" : "bg-success")">
+                                                @c.StatusText
+                                            </span>
+                                        </div>
+                                        <p class="text-muted small mb-0">Mã thẻ: <code>@c.Code</code></p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- TAB 4: ORDERS -->
+                <div class="tab-pane fade" id="tab-orders" role="tabpanel">
+                    <div class="alert alert-info py-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Phụ trách: Nguyễn Trí Nguyễn (TB02277)</strong> — Dữ liệu truy vấn trực tiếp qua <code>OrderDAL.GetAll()</code> và <code>OrderItemDAL.GetByOrderId()</code>.
+                        </div>
+                        <span class="badge bg-primary">Bài 4 DAL</span>
+                    </div>
+
+                    <div class="table-responsive mt-3">
+                        <table class="table table-bordered table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Loại đơn</th>
+                                    <th>Thời gian lập</th>
+                                    <th class="text-end">Tạm tính</th>
+                                    <th class="text-end">Giảm giá</th>
+                                    <th class="text-end">VAT</th>
+                                    <th class="text-end">Tổng tiền</th>
+                                    <th>Thanh toán</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var o in Model.Orders)
+                                {
+                                    <tr>
+                                        <td class="fw-bold text-primary">@o.Code</td>
+                                        <td><span class="badge bg-info text-dark">@o.OrderType</span></td>
+                                        <td><small>@o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small></td>
+                                        <td class="text-end">@o.Subtotal.ToString("N0") ₫</td>
+                                        <td class="text-end text-success">-@o.DiscountAmount.ToString("N0") ₫</td>
+                                        <td class="text-end text-muted">+@o.TaxAmount.ToString("N0") ₫</td>
+                                        <td class="text-end fw-bold text-danger fs-6">@o.Total.ToString("N0") ₫</td>
+                                        <td><span class="badge bg-secondary">@o.PaymentMethod</span></td>
+                                        <td><span class="badge bg-success">@o.Status</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 5: DBUTIL -->
+                <div class="tab-pane fade" id="tab-dbutil" role="tabpanel">
+                    <div class="alert alert-info py-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Phụ trách: Nguyễn Kim Song Thư (Nhóm trưởng - TB02272)</strong> — Lớp tiện ích ADO.NET cốt lõi của Bài 3.
+                        </div>
+                        <span class="badge bg-primary">Bài 3 DBUtil</span>
+                    </div>
+
+                    <div class="card bg-light border-0 p-3 mt-3">
+                        <h6 class="fw-bold text-dark">Các phương thức chính của DBUtil:</h6>
+                        <ul>
+                            <li><code>DBUtil.queryDataTable(string sql, List&lt;object&gt; parameters)</code>: Thực thi câu lệnh SELECT trả về <code>DataTable</code>, hỗ trợ tham số Unicode với <code>SqlDbType.NVarChar</code>.</li>
+                            <li><code>DBUtil.executeScalar(string sql, List&lt;object&gt; parameters)</code>: Thực thi câu lệnh SQL trả về giá trị đơn (dùng cho <code>COUNT</code>, <code>SCOPE_IDENTITY</code>).</li>
+                            <li><code>DBUtil.executeNonQuery(string sql, List&lt;object&gt; parameters)</code>: Thực thi các thao tác <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code> trả về số dòng bị ảnh hưởng.</li>
+                        </ul>
+                        <div class="alert alert-success mb-0">
+                            <strong>Trạng thái kết nối:</strong> Đã kết nối thành công tới SQL Server LocalDB (<code>Database=CafePOS</code>).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

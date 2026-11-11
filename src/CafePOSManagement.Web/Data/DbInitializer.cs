@@ -69,5 +69,21 @@ public static class DbInitializer
             new { Id = 3L, OrderId = 2L, ProductId = "p3", ProductName = "Bánh Croissant bơ", UnitPrice = 45000m, Quantity = 1 },
             new { Id = 4L, OrderId = 3L, ProductId = "p13", ProductName = "Cà phê bọt biển Whipped Coffee", UnitPrice = 45000m, Quantity = 2 },
             new { Id = 5L, OrderId = 3L, ProductId = "p16", ProductName = "Cold Brew cam sả", UnitPrice = 45000m, Quantity = 1 });
+
+        // Dữ liệu mẫu bảng Users (Nhóm 6 PolyCafe) - Phân hệ của Tâm
+        modelBuilder.Entity<User>().HasData(
+            new User("u1", "thu@polycafe.vn", "123456", "Nguyễn Kim Song Thư", "0901234567", true, true) { CreatedAt = created },
+            new User("u2", "kha@polycafe.vn", "123456", "Trần Thị Tuyết Kha", "0902345678", false, true) { CreatedAt = created },
+            new User("u3", "nguyen@polycafe.vn", "123456", "Nguyễn Trí Nguyễn", "0903456789", false, true) { CreatedAt = created },
+            new User("u4", "duc@polycafe.vn", "123456", "Ninh Văn Đức", "0904567890", false, true) { CreatedAt = created },
+            new User("u5", "tam@polycafe.vn", "123456", "Nguyễn Lâm Chí Tâm", "0905678901", true, true) { CreatedAt = created });
+
+        // Dữ liệu mẫu bảng Cards (Thẻ bàn / Thẻ rung) - Phân hệ của Kha
+        modelBuilder.Entity<Card>().HasData(
+            new Card("c1", "TB01", "Thẻ Bàn 01", false, true) { CreatedAt = created },
+            new Card("c2", "TB02", "Thẻ Bàn 02", true, true) { CreatedAt = created },
+            new Card("c3", "TB03", "Thẻ Bàn 03", false, true) { CreatedAt = created },
+            new Card("c4", "TR01", "Thẻ Rung 01", false, true) { CreatedAt = created },
+            new Card("c5", "TR02", "Thẻ Rung 02", true, true) { CreatedAt = created });
     }
 }

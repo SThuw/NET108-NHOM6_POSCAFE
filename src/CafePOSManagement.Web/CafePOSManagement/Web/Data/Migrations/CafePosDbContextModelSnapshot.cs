@@ -23,6 +23,88 @@ namespace CafePOSManagement.Web.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.Card", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(40)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(40)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsOccupied")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Cards", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "c1",
+                            Code = "TB01",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            IsActive = true,
+                            IsOccupied = false,
+                            Name = "Thẻ Bàn 01"
+                        },
+                        new
+                        {
+                            Id = "c2",
+                            Code = "TB02",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            IsActive = true,
+                            IsOccupied = true,
+                            Name = "Thẻ Bàn 02"
+                        },
+                        new
+                        {
+                            Id = "c3",
+                            Code = "TB03",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            IsActive = true,
+                            IsOccupied = false,
+                            Name = "Thẻ Bàn 03"
+                        },
+                        new
+                        {
+                            Id = "c4",
+                            Code = "TR01",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            IsActive = true,
+                            IsOccupied = false,
+                            Name = "Thẻ Rung 01"
+                        },
+                        new
+                        {
+                            Id = "c5",
+                            Code = "TR02",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            IsActive = true,
+                            IsOccupied = true,
+                            Name = "Thẻ Rung 02"
+                        });
+                });
+
             modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.Category", b =>
                 {
                     b.Property<string>("Id")
@@ -698,6 +780,109 @@ namespace CafePOSManagement.Web.Data.Migrations
                             IsAvailable = true,
                             Name = "Cold Brew cam sả",
                             Price = 45000m
+                        });
+                });
+
+            modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.User", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(40)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(40)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(15)");
+
+                    b.Property<bool>("Role")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Users", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "u1",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            Email = "thu@polycafe.vn",
+                            FullName = "Nguyễn Kim Song Thư",
+                            IsActive = true,
+                            Password = "123456",
+                            Phone = "0901234567",
+                            Role = true
+                        },
+                        new
+                        {
+                            Id = "u2",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            Email = "kha@polycafe.vn",
+                            FullName = "Trần Thị Tuyết Kha",
+                            IsActive = true,
+                            Password = "123456",
+                            Phone = "0902345678",
+                            Role = false
+                        },
+                        new
+                        {
+                            Id = "u3",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            Email = "nguyen@polycafe.vn",
+                            FullName = "Nguyễn Trí Nguyễn",
+                            IsActive = true,
+                            Password = "123456",
+                            Phone = "0903456789",
+                            Role = false
+                        },
+                        new
+                        {
+                            Id = "u4",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            Email = "duc@polycafe.vn",
+                            FullName = "Ninh Văn Đức",
+                            IsActive = true,
+                            Password = "123456",
+                            Phone = "0904567890",
+                            Role = false
+                        },
+                        new
+                        {
+                            Id = "u5",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            Email = "tam@polycafe.vn",
+                            FullName = "Nguyễn Lâm Chí Tâm",
+                            IsActive = true,
+                            Password = "123456",
+                            Phone = "0905678901",
+                            Role = true
                         });
                 });
 

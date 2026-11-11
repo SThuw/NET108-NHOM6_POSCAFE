@@ -66,4 +66,5 @@ Check(rounded.DiscountAmount == 1 && rounded.TaxAmount == 0 && rounded.Total == 
 var unavailable = products.Create(new() { Name = "Ngừng bán", CategoryId = "tea", Price = 10000, IsAvailable = false });
 invalid = Basket(); invalid.Items[0].ProductId = unavailable.Id; Reject(() => orders.Checkout(invalid), "Unavailable product rejected");
 Console.WriteLine($"ALL {passed} CHECKS PASSED");
+if (args.Contains("--lab3") || args.Contains("--database")) Lab3DalChecks.Run();
 if (args.Contains("--database")) await Stage4Checks.RunAsync();

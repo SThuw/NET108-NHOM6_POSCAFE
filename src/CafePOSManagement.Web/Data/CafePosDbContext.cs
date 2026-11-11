@@ -11,6 +11,8 @@ public sealed class CafePosDbContext(DbContextOptions<CafePosDbContext> options)
     public DbSet<Discount> Discounts => Set<Discount>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Card> Cards => Set<Card>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -99,6 +101,24 @@ public sealed class CafePosDbContext(DbContextOptions<CafePosDbContext> options)
         item.HasOne(x => x.Order).WithMany(x => x.Items).HasForeignKey(x => x.OrderId).OnDelete(DeleteBehavior.Cascade);
         item.HasOne(x => x.Product).WithMany(x => x.OrderItems).HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Restrict);
         item.HasIndex(x => new { x.OrderId, x.ProductId }).IsUnique();
+
+        var user = modelBuilder.Entity<User>();
+        user.ToTable("Users");
+        user.HasKey(x => x.Id);
+        user.Property(x => x.Id).HasMaxLength(40).IsUnicode(false).ValueGeneratedNever();
+        user.Property(x => x.Email).HasMaxLength(100).IsUnicode(false).IsRequired();
+        user.Property(x => x.FullName).HasMaxLength(60).IsRequired();
+        user.Property(x => x.Password).HasMaxLength(255).IsRequired();
+        user.Property(x => x.Phone).HasMaxLength(15).IsUnicode(false).IsRequired();
+        user.HasIndex(x => x.Email).IsUnique();
+
+        var card = modelBuilder.Entity<Card>();
+        card.ToTable("Cards");
+        card.HasKey(x => x.Id);
+        card.Property(x => x.Id).HasMaxLength(40).IsUnicode(false).ValueGeneratedNever();
+        card.Property(x => x.Code).HasMaxLength(50).IsUnicode(false).IsRequired();
+        card.Property(x => x.Name).HasMaxLength(100).IsRequired();
+        card.HasIndex(x => x.Code).IsUnique();
 
         DbInitializer.ConfigureSeedData(modelBuilder);
     }

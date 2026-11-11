@@ -13,10 +13,16 @@
     <partial name="_PosIcons" />
     <a class="skip-link" href="#main-content">Đến nội dung chính</a>
     <header class="app-header">
-        <a class="brand" asp-controller="Pos" asp-action="Index" aria-label="CafePOS — Trang bán hàng">
-            <img src="~/images/cafepos-mark.svg" width="40" height="40" alt="" />
-            <span>Cafe<span class="brand-accent">POS</span><small>QUẢN LÝ BÁN HÀNG</small></span>
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a class="brand" asp-controller="Pos" asp-action="Index" aria-label="CafePOS — Trang bán hàng">
+                <img src="~/images/cafepos-mark.svg" width="40" height="40" alt="" />
+                <span>Cafe<span class="brand-accent">POS</span><small>QUẢN LÝ BÁN HÀNG</small></span>
+            </a>
+            <div class="nav-links ms-3 d-none d-md-flex gap-2">
+                <a asp-controller="Pos" asp-action="Index" class="btn btn-sm btn-outline-light">🛒 Bán hàng POS</a>
+                <a asp-controller="Lab3" asp-action="Index" class="btn btn-sm btn-warning fw-bold text-dark">📋 Báo cáo LAB 3 (DAL)</a>
+            </div>
+        </div>
         @if (IsSectionDefined("PosToolbar"))
         {
             @await RenderSectionAsync("PosToolbar", required: false)
