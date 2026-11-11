@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using CafePOSManagement.Web.Utils;
@@ -6,8 +6,8 @@ using CafePOSManagement.Web.Utils;
 namespace CafePOSManagement.Web.DAL;
 
 /// <summary>
-/// Lớp truy cập dữ liệu Cụm bảng AI State Store (Lời dặn giảng viên Lab 2)
-/// Phụ trách: Nguyễn Kim Song Thư (Nhóm trưởng)
+/// Lớp truy cập dữ liệu cho tính năng Trợ lý AI và Bộ nhớ trạng thái (AiStateStore)
+/// Thực hiện: Nguyễn Kim Song Thư
 /// </summary>
 public class AiSessionDTO
 {

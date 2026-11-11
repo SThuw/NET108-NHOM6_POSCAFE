@@ -86,7 +86,7 @@ public static class DbInitializer
             new Card("c4", "TR01", "Thẻ Rung 01", false, true) { CreatedAt = created },
             new Card("c5", "TR02", "Thẻ Rung 02", true, true) { CreatedAt = created });
 
-        // Dữ liệu mẫu cụm bảng AI State Store (Lời dặn giảng viên Lab 2)
+        // Dữ liệu mẫu Trợ lý AI và Bộ nhớ trạng thái (AiStateStore)
         modelBuilder.Entity<AiSession>().HasData(
             new { Id = "sess_01", UserId = "u1", Title = "Gợi ý combo cà phê sáng cho khách", Context = "PolyCafe AI Assistant - Trợ lý quầy POS", IsActive = true, CreatedAt = created },
             new { Id = "sess_02", UserId = "u4", Title = "Tư vấn món trà thanh nhiệt buổi chiều", Context = "PolyCafe AI Assistant - Tư vấn thực đơn", IsActive = true, CreatedAt = created });

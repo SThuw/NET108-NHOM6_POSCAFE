@@ -123,7 +123,7 @@ public sealed class CafePosDbContext(DbContextOptions<CafePosDbContext> options)
         card.Property(x => x.Name).HasMaxLength(100).IsRequired();
         card.HasIndex(x => x.Code).IsUnique();
 
-        // Cụm bảng AI State Store (Lời dặn giảng viên Lab 2)
+        // Cấu hình cụm bảng Trợ lý AI và Bộ nhớ trạng thái (AiStateStore)
         var aiSession = modelBuilder.Entity<AiSession>();
         aiSession.ToTable("AiSessions");
         aiSession.HasKey(x => x.Id);

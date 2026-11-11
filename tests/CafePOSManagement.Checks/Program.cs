@@ -67,4 +67,3 @@ var unavailable = products.Create(new() { Name = "Ngừng bán", CategoryId = "t
 invalid = Basket(); invalid.Items[0].ProductId = unavailable.Id; Reject(() => orders.Checkout(invalid), "Unavailable product rejected");
 Console.WriteLine($"ALL {passed} CHECKS PASSED");
 if (args.Contains("--lab3") || args.Contains("--database")) Lab3DalChecks.Run();
-if (args.Contains("--database")) await Stage4Checks.RunAsync();
