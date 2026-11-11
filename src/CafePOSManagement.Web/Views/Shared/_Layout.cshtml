@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#FF5722" />
+    <title>@ViewData["Title"] · CafePOS Management</title>
+    <link rel="icon" type="image/svg+xml" href="~/images/cafepos-mark.svg" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="@ViewData["PageClass"]">
+    <partial name="_PosIcons" />
+    <a class="skip-link" href="#main-content">Đến nội dung chính</a>
+    <header class="app-header">
+        <a class="brand" asp-controller="Pos" asp-action="Index" aria-label="CafePOS — Trang bán hàng">
+            <img src="~/images/cafepos-mark.svg" width="40" height="40" alt="" />
+            <span>Cafe<span class="brand-accent">POS</span><small>QUẢN LÝ BÁN HÀNG</small></span>
+        </a>
+        @if (IsSectionDefined("PosToolbar"))
+        {
+            @await RenderSectionAsync("PosToolbar", required: false)
+        }
+    </header>
+    <main id="main-content" class="app-main" tabindex="-1">@RenderBody()</main>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true" defer></script>
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
