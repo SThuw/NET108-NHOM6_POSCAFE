@@ -68,8 +68,7 @@ public sealed class DbProductService(CafePosDbContext db) : IProductService
         if (nameExists)
             throw new ValidationException("Món này đã tồn tại trong danh mục.");
 
-        // Tạo Id dạng "p<số>" giống in-memory, dùng timestamp để tránh race condition.
-        var newId = $"p{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
+        var newId = $"p{Guid.NewGuid():N}";
 
         var product = new Product(
             newId,

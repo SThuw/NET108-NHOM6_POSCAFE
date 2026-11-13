@@ -1,0 +1,14 @@
+@model UserProfileViewModel
+@{ ViewData["Title"] = "Thông tin cá nhân"; }
+<div class="container py-4" style="max-width: 720px">
+    <h1 class="h3 mb-4">Thông tin cá nhân</h1>
+    <dl class="row border rounded p-3 mb-4">
+        <dt class="col-sm-4 py-2">Mã nhân viên</dt><dd class="col-sm-8 py-2">@Model.Id</dd>
+        <dt class="col-sm-4 py-2">Họ và tên</dt><dd class="col-sm-8 py-2">@Model.FullName</dd>
+        <dt class="col-sm-4 py-2">Email</dt><dd class="col-sm-8 py-2">@Model.Email</dd>
+        <dt class="col-sm-4 py-2">Số điện thoại</dt><dd class="col-sm-8 py-2">@Model.Phone</dd>
+        <dt class="col-sm-4 py-2">Vai trò</dt><dd class="col-sm-8 py-2">@Model.Role</dd>
+    </dl>
+    <a asp-controller="Pos" asp-action="Index" class="btn btn-outline-secondary">Về quầy bán hàng</a>
+    <form asp-action="Logout" method="post" class="d-inline"><button type="submit" class="btn btn-primary">Đăng xuất</button></form>
+</div>

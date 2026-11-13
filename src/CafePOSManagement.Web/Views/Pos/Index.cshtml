@@ -6,25 +6,26 @@
 @section PosToolbar {
     <div class="header-search"><svg class="icon"><use href="#i-search" /></svg><label class="visually-hidden" for="product-search">Tìm kiếm đồ uống, món ăn</label><input id="product-search" type="search" placeholder="Tìm kiếm đồ uống, món ăn..." maxlength="100" autocomplete="off" /></div>
     <div class="header-actions">
-        <button class="clear-link" id="clear-cart" type="button">Xóa giỏ hàng</button>
-        <button class="btn btn-primary add-product" type="button" data-bs-toggle="modal" data-bs-target="#add-product-modal"><span aria-hidden="true">+</span> Thêm món mới</button>
+        @if (User.IsInRole("Manager"))
+        {
+            <button class="clear-link" id="clear-cart" type="button">Xóa giỏ hàng</button>
+            <button class="btn btn-primary add-product" type="button" data-bs-toggle="modal" data-bs-target="#add-product-modal"><span aria-hidden="true">+</span> Thêm món mới</button>
+        }
         <div class="utility-actions">
             <button class="icon-button" id="refresh-pos" title="Làm mới giao diện, giữ giỏ hàng" aria-label="Làm mới" type="button"><svg class="icon"><use href="#i-refresh" /></svg></button>
             <button class="icon-button" title="Máy tính nhẩm" aria-label="Máy tính nhẩm" type="button" data-bs-toggle="modal" data-bs-target="#calculator-modal"><svg class="icon"><use href="#i-calculator" /></svg></button>
-            <div class="dropdown"><button class="icon-button" title="Thông báo" aria-label="Thông báo" type="button" data-bs-toggle="dropdown" aria-expanded="false"><svg class="icon"><use href="#i-bell" /></svg></button><div class="dropdown-menu dropdown-menu-end notification-menu"><strong>Thông báo</strong><p>Chưa có thông báo mới.</p><small>Dữ liệu được lưu vào SQL Server.</small></div></div>
         </div>
         <button class="btn btn-outline-secondary" id="print-receipt" type="button"><svg class="icon"><use href="#i-print" /></svg><span>In hóa đơn</span></button>
-        <button class="btn btn-outline-secondary back-button" id="go-back" type="button"><svg class="icon"><use href="#i-back" /></svg><span>Quay lại</span></button>
+        <form asp-controller="Login" asp-action="Logout" method="post" id="pos-logout"><button class="btn btn-outline-secondary back-button" type="submit">Đăng xuất</button></form>
     </div>
 }
-<div class="workspace-bar"><div><span class="live-dot" aria-hidden="true"></span><h1>Bán hàng tại quầy</h1><span class="workspace-divider">/</span><span class="workspace-caption">Một ngày mới, những ly cà phê ngon.</span></div><span class="demo-badge">Giai đoạn 4 · SQL Server</span></div>
+<div class="workspace-bar"><div><span class="live-dot" aria-hidden="true"></span><h1>Bán hàng tại quầy</h1><span class="workspace-divider">/</span><span class="workspace-caption">Chọn món và hoàn tất đơn hàng</span></div></div>
 @Html.AntiForgeryToken()
 <script id="pos-data" type="application/json">@Json.Serialize(Model)</script>
-<div class="pos-workspace" id="pos-app" data-products-url="@Url.Action("Products", "Pos")" data-create-url="@Url.Action("CreateProduct", "Pos")" data-checkout-url="@Url.Action("Checkout", "Pos")" data-preview-url="@Url.Action("Preview", "Pos")" data-image-root="@Url.Content("~/images/menu/")" data-fallback-image="@Url.Content("~/images/product-fallback.svg")">
+<div class="pos-workspace" id="pos-app" data-user-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" data-products-url="@Url.Action("Products", "Pos")" data-create-url="@Url.Action("CreateProduct", "Pos")" data-checkout-url="@Url.Action("Checkout", "Pos")" data-preview-url="@Url.Action("Preview", "Pos")" data-image-root="@Url.Content("~/images/menu/")" data-fallback-image="@Url.Content("~/images/product-fallback.svg")">
     <aside class="categories-panel surface" aria-labelledby="categories-title">
         <div class="sidebar-heading"><span class="eyebrow">THỰC ĐƠN</span><h2 id="categories-title">Danh mục món</h2></div>
         <nav id="category-list" class="category-list" aria-label="Danh mục thực đơn"></nav>
-        <div class="sidebar-bottom"><svg class="icon"><use href="#i-cup" /></svg><div><strong>Được pha bằng cả tâm huyết</strong><p>Mỗi món, một chút niềm vui.</p></div></div>
     </aside>
     <section class="menu-panel" aria-labelledby="menu-title">
         <div class="order-controls surface">
@@ -38,11 +39,11 @@
         </div>
         <div class="menu-heading"><div><h2 id="menu-title">Tất cả món</h2><span id="product-count">Đang tải thực đơn...</span></div><span class="menu-tip"><svg class="icon"><use href="#i-bag" /></svg>Chọn món để thêm vào giỏ</span></div>
         <div id="product-scroll" class="product-scroll" tabindex="0" aria-label="Danh sách món, có thể cuộn"><div id="product-grid" class="product-grid" aria-busy="true"><p class="loading-message">Đang tải thực đơn...</p></div><div id="no-results" class="empty-state" hidden><svg class="icon"><use href="#i-search" /></svg><h3>Không tìm thấy món phù hợp</h3><p>Thử từ khóa khác hoặc xem tất cả món.</p><button class="btn btn-outline-secondary" id="reset-search" type="button">Xem tất cả món</button></div></div>
-        <div class="menu-footnote">Ảnh minh họa từ Unsplash <span>Dữ liệu được lưu vào SQL Server</span></div>
+        <div class="menu-footnote">Ảnh minh họa món ăn và đồ uống</div>
     </section>
     <aside class="cart-panel surface" id="cart-panel" aria-labelledby="cart-title">
         <div class="cart-heading"><div><h2 id="cart-title">Giỏ hàng <span id="cart-count">0</span></h2><p>Đơn hàng hiện tại</p></div><div class="order-meta"><strong id="order-number">Đơn @Model.NextOrderNumber</strong><time data-local-clock datetime="@Model.CurrentTime.ToString("O")">@Model.CurrentTime.ToString("dd/MM/yyyy HH:mm")</time></div></div>
-        <div class="cart-scroll" tabindex="0" aria-label="Các món trong giỏ"><div id="cart-items"></div><div id="cart-empty" class="empty-state" hidden><svg class="icon"><use href="#i-bag" /></svg><h3>Giỏ hàng trống</h3><p>Chọn một món từ thực đơn để bắt đầu.</p></div></div>
+        <div class="cart-scroll" tabindex="0" aria-label="Các món trong giỏ"><div id="cart-items"></div><div id="cart-empty" class="empty-state" hidden><svg class="icon"><use href="#i-bag" /></svg><h3>Giỏ hàng trống</h3><p>Chọn món để bắt đầu đơn hàng.</p></div></div>
         <div class="cart-bottom">
             <dl class="order-summary"><div><dt>Tạm tính</dt><dd id="subtotal">0 ₫</dd></div><div id="discount-row" hidden><dt id="discount-label">Giảm giá</dt><dd id="discount-amount">0 ₫</dd></div><div><dt><label for="tax-percent">Thuế VAT (%)</label> <select id="tax-percent" aria-label="Thuế VAT phần trăm">@foreach (var rate in Model.TaxRates) { <option value="@rate">@rate%</option> }</select></dt><dd id="tax-amount">0 ₫</dd></div><div class="total-row"><dt>Tổng cộng</dt><dd id="total" data-testid="cart-total">0 ₫</dd></div></dl>
             <fieldset class="payment-field"><legend>Phương thức thanh toán</legend><div class="payment-options" id="payment-options">
@@ -60,11 +61,13 @@
 <noscript><p class="alert alert-warning">Vui lòng bật JavaScript để xem thực đơn và sử dụng POS.</p></noscript>
 <template id="product-template"><button class="product-card" type="button"><div class="product-image"><img width="600" height="600" loading="lazy" /><span class="selected-mark" aria-hidden="true"><svg class="icon"><use href="#i-check" /></svg></span></div><div class="product-info"><span class="product-name"></span><div class="product-prices"><del></del><strong></strong></div><span class="product-add" aria-hidden="true">+</span></div></button></template>
 <template id="cart-template"><article class="cart-item"><img class="cart-thumbnail" width="44" height="44" alt="" /><div class="cart-item-detail"><h3></h3><span class="cart-unit-price"></span><div class="quantity-control"><button type="button" data-action="decrease">−</button><span class="quantity"></span><button type="button" data-action="increase">+</button></div></div><div class="cart-item-end"><button class="remove-item icon-button" type="button" data-action="remove"><svg class="icon"><use href="#i-trash" /></svg></button><strong class="line-total"></strong></div></article></template>
+@if (User.IsInRole("Manager"))
+{
 <div class="modal fade" id="add-product-modal" tabindex="-1" aria-labelledby="add-product-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered"><form id="add-product-form" class="modal-content">
         <div class="modal-header"><div><span class="eyebrow">THỰC ĐƠN CỦA QUÁN</span><h2 class="modal-title fs-5" id="add-product-title">Thêm món mới</h2></div><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
         <div class="modal-body">
-            <p class="form-preview-note">Món mới được lưu trong bộ nhớ máy chủ ở giai đoạn này.</p>
+            <p class="form-preview-note">Món mới được lưu vào thực đơn của quán.</p>
             <p id="product-error" class="text-danger" role="alert" hidden></p>
             <div class="mb-3"><label class="form-label" for="new-name">Tên món</label><input class="form-control" id="new-name" required maxlength="100" placeholder="Ví dụ: Cà phê sữa đá" /></div>
             <div class="mb-3"><label class="form-label" for="new-category">Danh mục</label><select id="new-category" class="form-select" required></select></div>
@@ -72,13 +75,17 @@
                 <div class="col-sm-6"><label class="form-label" for="new-price">Giá bán (₫)</label><input class="form-control" id="new-price" type="number" required min="1" max="10000000" step="1" /></div>
                 <div class="col-sm-6"><label class="form-label" for="new-original-price">Giá gốc (tùy chọn)</label><input class="form-control" id="new-original-price" type="number" min="1" max="10000000" step="1" /></div>
             </div>
-            <div class="mb-3"><label class="form-label" for="new-image">Đường dẫn ảnh HTTPS (tùy chọn)</label><input class="form-control" id="new-image" type="url" maxlength="2048" placeholder="https://..." /><small class="text-secondary">Để trống để dùng ảnh mặc định. Ảnh không tải được sẽ có ảnh thay thế.</small></div>
+            <div class="mb-3"><label class="form-label" for="new-image">Đường dẫn ảnh HTTPS (tùy chọn)</label><input class="form-control" id="new-image" type="url" maxlength="500" placeholder="https://..." /><small class="text-secondary">Để trống để dùng ảnh mặc định. Ảnh không tải được sẽ có ảnh thay thế.</small></div>
             <label class="form-check"><input id="new-available" class="form-check-input" type="checkbox" checked /><span class="form-check-label">Đang bán</span></label>
         </div>
         <div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Đóng</button><button class="btn btn-primary" id="save-product" type="submit">Lưu món</button></div>
     </form></div>
 </div>
+}
+@if (User.IsInRole("Manager"))
+{
 <div class="modal fade" id="clear-modal" tabindex="-1" aria-labelledby="clear-title" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content"><div class="modal-header"><h2 class="modal-title fs-5" id="clear-title">Xóa giỏ hàng?</h2><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Đóng"></button></div><div class="modal-body">Các món đang chọn sẽ được bỏ khỏi giỏ hàng.</div><div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Giữ lại</button><button class="btn btn-primary" id="confirm-clear" type="button">Xóa tất cả món</button></div></div></div></div>
+}
 <div class="modal fade" id="calculator-modal" tabindex="-1" aria-labelledby="calculator-title" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content"><div class="modal-header"><h2 class="modal-title fs-5" id="calculator-title">Máy tính nhẩm</h2><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Đóng"></button></div><div class="modal-body"><form id="calculator-form"><label for="calc-a" class="form-label">Số thứ nhất</label><input class="form-control mb-3" id="calc-a" type="number" step="any" required /><label for="calc-operation" class="form-label">Phép tính</label><select id="calc-operation" class="form-select mb-3"><option value="add">Cộng (+)</option><option value="subtract">Trừ (−)</option><option value="multiply">Nhân (×)</option><option value="divide">Chia (÷)</option></select><label for="calc-b" class="form-label">Số thứ hai</label><input class="form-control mb-3" id="calc-b" type="number" step="any" required /><button class="btn btn-primary w-100" type="submit">Tính kết quả</button><output class="calculator-result" id="calc-result" aria-live="polite">Nhập hai số để bắt đầu.</output></form></div></div></div></div>
 <div class="modal fade" id="receipt-modal" tabindex="-1" aria-labelledby="receipt-title" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h2 class="modal-title fs-5" id="receipt-title">Xem trước đơn hàng</h2><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Đóng"></button></div><div class="modal-body receipt-content"><div class="receipt-brand">Cafe<span>POS</span></div><p class="receipt-watermark">TẠM TÍNH · CHƯA CHỐT ĐƠN</p><p id="receipt-meta"></p><div id="receipt-lines"></div><dl id="receipt-summary" class="order-summary"></dl><p id="receipt-note"></p><p class="receipt-disclaimer">Phiếu nội bộ, không phải hóa đơn điện tử. Chưa kết nối ngân hàng hoặc ví điện tử.</p></div><div class="modal-footer"><button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Quay lại đơn</button><button class="btn btn-primary" id="print-preview" type="button"><svg class="icon"><use href="#i-print" /></svg>In hóa đơn</button></div></div></div></div>
 @section Scripts { <script src="~/js/pos.js" asp-append-version="true" defer></script> }

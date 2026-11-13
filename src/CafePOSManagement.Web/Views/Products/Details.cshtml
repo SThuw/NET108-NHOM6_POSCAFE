@@ -1,0 +1,6 @@
+@model CafePOSManagement.Web.Models.Entities.Product
+@{ ViewData["Title"] = "Chi tiết món"; ViewData["PageClass"] = "management-page"; var returnUrl = (string)ViewBag.ReturnUrl; }
+<div class="management-shell"><div class="management-heading"><div><p class="management-eyebrow">CHI TIẾT SẢN PHẨM</p><h1>@Model.Name</h1><p>Mã món: @Model.Id</p></div><a href="@returnUrl" class="btn btn-outline-secondary">Về danh sách</a></div>
+    <div class="product-detail"><img src="@Model.ImageUrl" data-image-fallback alt="@Model.Name" /><dl><dt>Danh mục</dt><dd>@Model.Category?.Name</dd><dt>Giá bán</dt><dd class="price-cell">@Model.Price.ToString("N0") ₫</dd><dt>Giá gốc</dt><dd>@(Model.OriginalPrice?.ToString("N0") ?? "—") @(Model.OriginalPrice.HasValue ? "₫" : "")</dd><dt>Trạng thái</dt><dd><span class="status-pill @(Model.IsAvailable ? "available" : "stopped")">@(Model.IsAvailable ? "Đang bán" : "Ngừng bán")</span></dd><dt>Mô tả</dt><dd>@(string.IsNullOrWhiteSpace(Model.Description) ? "Chưa có mô tả" : Model.Description)</dd><dt>Ngày tạo</dt><dd>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd></dl></div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" asp-route-returnUrl="@returnUrl" class="btn btn-primary mt-3">Sửa món</a>
+</div>

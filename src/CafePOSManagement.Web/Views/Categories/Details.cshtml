@@ -1,0 +1,3 @@
+@model CafePOSManagement.Web.Models.Entities.Category
+@{ ViewData["Title"] = "Chi tiết danh mục"; }
+<div class="container py-4"><h1 class="h3">@Model.Name</h1><dl class="row"><dt class="col-sm-3">Mã</dt><dd class="col-sm-9">@Model.Id</dd><dt class="col-sm-3">Mã hiển thị</dt><dd class="col-sm-9">@Model.Code</dd><dt class="col-sm-3">Thứ tự</dt><dd class="col-sm-9">@Model.DisplayOrder</dd></dl><a asp-action="Index">Trở về danh sách</a></div>

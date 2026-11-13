@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using CafePOSManagement.Web.Models.ViewModels;
 using CafePOSManagement.Web.Services.Implementations;
+using CafePOSManagement.Web.Utils;
+using Microsoft.AspNetCore.Http;
 
 var products = new ProductService();
 var orders = new OrderService(products, TimeProvider.System);
@@ -65,5 +67,7 @@ var rounded = orders.Preview(new() { RequestId = Guid.NewGuid(), Items = [new() 
 Check(rounded.DiscountAmount == 1 && rounded.TaxAmount == 0 && rounded.Total == 4, "Half-dong rounding away from zero");
 var unavailable = products.Create(new() { Name = "Ngừng bán", CategoryId = "tea", Price = 10000, IsAvailable = false });
 invalid = Basket(); invalid.Items[0].ProductId = unavailable.Id; Reject(() => orders.Checkout(invalid), "Unavailable product rejected");
+Reject(() => FileUtil.SaveImageAsync(new FormFile(new MemoryStream([1, 2, 3]), 0, 3, "image", "test.png"), ".").GetAwaiter().GetResult(), "Image content must match extension");
+Reject(() => FileUtil.SaveImageAsync(new FormFile(new MemoryStream([1, 2, 3]), 0, 3, "image", "test.svg"), ".").GetAwaiter().GetResult(), "SVG upload rejected");
 Console.WriteLine($"ALL {passed} CHECKS PASSED");
 if (args.Contains("--lab3") || args.Contains("--database")) Lab3DalChecks.Run();

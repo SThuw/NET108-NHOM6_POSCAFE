@@ -2,9 +2,11 @@ using System.ComponentModel.DataAnnotations;
 using CafePOSManagement.Web.Models.ViewModels;
 using CafePOSManagement.Web.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CafePOSManagement.Web.Controllers;
 
+[Authorize(Policy = "EmployeeOrManager")]
 public sealed class PosController(IPosService posService, IProductService products, IOrderService orders) : Controller
 {
     [HttpGet]
@@ -22,7 +24,7 @@ public sealed class PosController(IPosService posService, IProductService produc
         return Json(products.GetProducts(categoryId, search));
     }
 
-    [HttpPost, RequestSizeLimit(32768)]
+    [HttpPost, Authorize(Policy = "ManagerOnly"), RequestSizeLimit(32768)]
     public IActionResult CreateProduct([FromBody] CreateProductDto input) => Execute(() => products.Create(input));
 
     [HttpPost, RequestSizeLimit(32768)]

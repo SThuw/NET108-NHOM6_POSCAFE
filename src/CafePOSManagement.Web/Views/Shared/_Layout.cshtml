@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="@ViewData["PageClass"]">
+    @{ var currentController = ViewContext.RouteData.Values["controller"]?.ToString(); }
     <partial name="_PosIcons" />
     <a class="skip-link" href="#main-content">Đến nội dung chính</a>
     <header class="app-header">
@@ -18,11 +19,22 @@
                 <img src="~/images/cafepos-mark.svg" width="40" height="40" alt="" />
                 <span>Cafe<span class="brand-accent">POS</span><small>QUẢN LÝ BÁN HÀNG</small></span>
             </a>
-            <div class="nav-links ms-3 d-none d-md-flex gap-2">
-                <a asp-controller="Pos" asp-action="Index" class="btn btn-sm btn-outline-light">Bán hàng (POS)</a>
-                <a asp-controller="Lab3" asp-action="Index" class="btn btn-sm btn-light fw-medium">Quản lý hệ thống</a>
-            </div>
+            <nav class="nav-links ms-3 d-flex gap-2" aria-label="Điều hướng chính">
+                <a asp-controller="Pos" asp-action="Index" class="nav-action @(currentController == "Pos" ? "selected" : "")" aria-current="@(currentController == "Pos" ? "page" : null)">Bán hàng (POS)</a>
+                @if (User.IsInRole("Manager"))
+                {
+                    <a asp-controller="Products" asp-action="Index" data-manage-link class="nav-action @((currentController == "Products" || currentController == "Categories" || currentController == "Lab3") ? "selected" : "")" aria-current="@(currentController == "Products" ? "page" : null)">Quản lý hệ thống</a>
+                }
+            </nav>
         </div>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a asp-controller="Login" asp-action="Profile" class="account-link ms-auto"><strong>@User.Identity?.Name</strong><small>@(User.IsInRole("Manager") ? "Quản lý" : "Nhân viên") · Thông tin cá nhân</small></a>
+            @if (!IsSectionDefined("PosToolbar"))
+            {
+                <form asp-controller="Login" asp-action="Logout" method="post"><button type="submit" class="btn btn-sm btn-outline-secondary">Đăng xuất</button></form>
+            }
+        }
         @if (IsSectionDefined("PosToolbar"))
         {
             @await RenderSectionAsync("PosToolbar", required: false)

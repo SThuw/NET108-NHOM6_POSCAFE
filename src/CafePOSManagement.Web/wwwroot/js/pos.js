@@ -10,6 +10,24 @@
     const productById = new Map(products.map(product => [product.id, product]));
     const state = { category: "all", search: "", discount: 0, discountCode: "", tax: 0,
         orderType: "pickup", payment: "cash", note: "", cart: new Map() };
+    const draftKey = `cafepos.pos-draft.${app.dataset.userId}`;
+    try {
+        const draft = JSON.parse(sessionStorage.getItem(draftKey) || "null");
+        sessionStorage.removeItem(draftKey);
+        if (draft && Array.isArray(draft.cart)) {
+            draft.cart.forEach(([id, quantity]) => {
+                if (productById.get(id)?.isAvailable && Number.isInteger(quantity) && quantity > 0 && quantity <= 99)
+                    state.cart.set(id, quantity);
+            });
+            if (categories.some(c => c.id === draft.category)) state.category = draft.category;
+            if (typeof draft.search === "string") state.search = draft.search.slice(0, 100);
+            if (["pickup", "delivery", "dinein"].includes(draft.orderType)) state.orderType = draft.orderType;
+            if (["cash", "card", "wallet"].includes(draft.payment)) state.payment = draft.payment;
+            if (typeof draft.note === "string") state.note = draft.note.slice(0, 200);
+            if (initial.discounts.some(d => d.code === draft.discountCode)) state.discountCode = draft.discountCode;
+            if (initial.taxRates.includes(draft.tax)) state.tax = draft.tax;
+        }
+    } catch { /* Trình duyệt chặn sessionStorage: tiếp tục với đơn trống. */ }
     let orderNumber = initial.nextOrderNumber;
     let pendingCheckout = null;
     let checkingOut = false;
@@ -23,6 +41,16 @@
     const grid = $("#product-grid");
     const cartItems = $("#cart-items");
     const status = $("#pos-status");
+    $("#product-search").value = state.search;
+    $("#discount").value = state.discountCode;
+    state.discount = initial.discounts.find(d => d.code === state.discountCode)?.percent || 0;
+    $("#tax-percent").value = String(state.tax);
+    $("#order-note").value = state.note;
+    $("input[name=payment][value=" + state.payment + "]").checked = true;
+    $("#order-types").querySelectorAll("button").forEach(button => {
+        button.classList.toggle("active", button.dataset.order === state.orderType);
+        button.setAttribute("aria-pressed", String(button.dataset.order === state.orderType));
+    });
     let notificationTimer;
 
     function notify(message) {
@@ -78,11 +106,14 @@
             fragment.append(button);
         });
         $("#category-list").replaceChildren(fragment);
-        $("#new-category").replaceChildren();
-        categories.filter(category => category.id !== "all").forEach(category => {
-            const option = new Option(category.name, category.id);
-            $("#new-category").add(option);
-        });
+        const categorySelect = $("#new-category");
+        if (categorySelect) {
+            categorySelect.replaceChildren();
+            categories.filter(category => category.id !== "all").forEach(category => {
+                const option = new Option(category.name, category.id);
+                categorySelect.add(option);
+            });
+        }
     }
 
     function renderProducts() {
@@ -156,7 +187,7 @@
         $("#checkout").disabled = checkingOut || previewing;
         $("#checkout").textContent = checkingOut ? "Đang ghi nhận đơn..." : pendingCheckout ? "Thử xác nhận lại đơn" : "Thanh toán ngay";
         $("#print-receipt").disabled = Boolean(pendingCheckout) || previewing || (!amount.count && !lastReceipt);
-        $("#clear-cart").disabled = Boolean(pendingCheckout) || previewing;
+        if ($("#clear-cart")) $("#clear-cart").disabled = Boolean(pendingCheckout) || previewing;
         $("#pos-app").querySelectorAll("#order-types button, #discount, #tax-percent, #order-note, input[name=payment]").forEach(el => { el.disabled = Boolean(pendingCheckout) || previewing; });
         updateSelectedProducts();
         if (focusedProduct && focusedAction) {
@@ -224,18 +255,28 @@
     $("#payment-options").addEventListener("change", event => {
         if (["cash", "card", "wallet"].includes(event.target.value)) state.payment = event.target.value;
     });
-    $("#clear-cart").addEventListener("click", () => bootstrap.Modal.getOrCreateInstance($("#clear-modal")).show());
-    $("#confirm-clear").addEventListener("click", () => {
+    $("#clear-cart")?.addEventListener("click", () => bootstrap.Modal.getOrCreateInstance($("#clear-modal")).show());
+    $("#confirm-clear")?.addEventListener("click", () => {
         if (pendingCheckout || previewing) return;
         resetOrder();
         bootstrap.Modal.getInstance($("#clear-modal")).hide();
         notify("Đã xóa giỏ và đặt lại cấu hình đơn.");
     });
     $("#refresh-pos").addEventListener("click", () => loadProducts(true));
-    $("#go-back").addEventListener("click", () => {
-        // Không tự chuyển người dùng tới một website khác từ bản xem trước.
-        if (document.referrer && new URL(document.referrer).origin === window.location.origin && window.history.length > 1) window.history.back();
-        else notify("Bạn đang ở màn hình đầu tiên. Trang quản trị chưa triển khai.");
+    let loggingOut = false;
+    let navigatingToManager = false;
+    $("#pos-logout").addEventListener("submit", () => {
+        loggingOut = true;
+        try { sessionStorage.removeItem(draftKey); } catch { /* Không có draft cần xóa. */ }
+    });
+    document.querySelector("[data-manage-link]")?.addEventListener("click", event => {
+        if (pendingCheckout) { event.preventDefault(); notify("Đơn đang chờ xác nhận. Hãy hoàn tất hoặc thử lại trước khi chuyển trang."); return; }
+        try {
+            sessionStorage.setItem(draftKey, JSON.stringify({ ...state, cart: [...state.cart] }));
+            navigatingToManager = true;
+        } catch {
+            if (state.cart.size) { event.preventDefault(); notify("Không thể giữ đơn đang lập khi chuyển trang. Hãy hoàn tất đơn trước."); }
+        }
     });
 
     async function request(url, data, signal) {
@@ -377,10 +418,10 @@
     });
     $("#print-preview").addEventListener("click", () => window.print());
     window.addEventListener("beforeunload", event => {
-        if (pendingCheckout || state.cart.size) { event.preventDefault(); event.returnValue = ""; }
+        if (!loggingOut && !navigatingToManager && (pendingCheckout || state.cart.size)) { event.preventDefault(); event.returnValue = ""; }
     });
 
-    $("#add-product-form").addEventListener("submit", async event => {
+    $("#add-product-form")?.addEventListener("submit", async event => {
         event.preventDefault();
         const button = $("#save-product");
         if (button.disabled) return;
@@ -415,4 +456,5 @@
     renderCategories();
     renderProducts();
     renderCart();
+    if (state.category !== "all" || state.search) loadProducts();
 })();
