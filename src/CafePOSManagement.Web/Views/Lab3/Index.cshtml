@@ -1,4 +1,4 @@
-﻿@model CafePOSManagement.Web.Controllers.Lab3ViewModel
+@model CafePOSManagement.Web.Controllers.Lab3ViewModel
 @{
     ViewData["Title"] = "Quản lý Hệ thống · PolyCafe";
     ViewData["PageClass"] = "bg-light";
@@ -20,6 +20,17 @@
             </span>
         </div>
     </div>
+
+    @if (ViewBag.DbError != null)
+    {
+        <div class="alert alert-warning border-warning d-flex align-items-center mb-4" role="alert">
+            <div>
+                <strong>Lưu ý kết nối Cơ sở dữ liệu:</strong> Không thể kết nối tới SQL Server LocalDB.
+                <div class="small text-muted mt-1">Chi tiết: @ViewBag.DbError</div>
+                <div class="small mt-1">Gợi ý: Đảm bảo SQL Server đang chạy và chuỗi kết nối trong <code>appsettings.json</code> là chính xác.</div>
+            </div>
+        </div>
+    }
 
     <!-- Thẻ thống kê tổng quan (Dashboard Summary Cards) -->
     <div class="row g-3 mb-4">

@@ -31,11 +31,10 @@ builder.Services.AddDbContext<CafePosDbContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("CafePos");
     if (string.IsNullOrWhiteSpace(connectionString))
     {
-        throw new InvalidOperationException(
-            "Chưa cấu hình SQL Server. Đặt ConnectionStrings:CafePos bằng User Secrets " +
-            "hoặc biến môi trường ConnectionStrings__CafePos trước khi sử dụng dữ liệu.");
+        connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=CafePOS;Integrated Security=True;TrustServerCertificate=True;";
     }
 
+    CafePOSManagement.Web.Utils.DBUtil.connString = connectionString;
     options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure());
 });
 
@@ -66,5 +65,19 @@ app.UseRouting();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Pos}/{action=Index}/{id?}");
+
+// Tự động khởi tạo / cập nhật CSDL trên máy mới (giúp máy thầy hoặc máy chấm thi chạy ngay không cần gõ lệnh)
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<CafePosDbContext>();
+        db.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[Lưu ý CSDL] Chưa thể tự động migrate: {ex.Message}");
+    }
+}
 
 app.Run();

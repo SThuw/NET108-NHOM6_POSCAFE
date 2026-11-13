@@ -20,16 +20,21 @@ public class Lab3Controller : Controller
     [HttpGet]
     public IActionResult Index()
     {
-        ViewData["Title"] = "Báo cáo Thực hành LAB 3 - Mô hình 3 Lớp & ADO.NET";
-        var model = new Lab3ViewModel
+        ViewData["Title"] = "Quản lý Hệ thống · PolyCafe";
+        var model = new Lab3ViewModel();
+        try
         {
-            Categories = CategoryDAL.GetAll(),
-            Products = ProductDAL.GetAll(),
-            Users = UserDAL.GetAll(),
-            Cards = CardDAL.GetAll(),
-            Orders = OrderDAL.GetAll(),
-            AiSessions = AiStateStoreDAL.GetAllSessions()
-        };
+            model.Categories = CategoryDAL.GetAll();
+            model.Products = ProductDAL.GetAll();
+            model.Users = UserDAL.GetAll();
+            model.Cards = CardDAL.GetAll();
+            model.Orders = OrderDAL.GetAll();
+            model.AiSessions = AiStateStoreDAL.GetAllSessions();
+        }
+        catch (Exception ex)
+        {
+            ViewBag.DbError = ex.Message;
+        }
         return View(model);
     }
 }
