@@ -12,7 +12,7 @@ public sealed class CreateProductDto : IValidatableObject
     public decimal Price { get; set; }
     [Range(1, 10000000, ErrorMessage = "Giá gốc phải từ 1 đến 10.000.000 đồng."), Display(Name = "Giá gốc")]
     public decimal? OriginalPrice { get; set; }
-    [StringLength(2048, ErrorMessage = "Đường dẫn ảnh tối đa 2048 ký tự."), Display(Name = "Đường dẫn ảnh")]
+    [StringLength(500, ErrorMessage = "Đường dẫn ảnh tối đa 500 ký tự."), Display(Name = "Đường dẫn ảnh")]
     public string? ImageUrl { get; set; }
     [StringLength(1000, ErrorMessage = "Mô tả tối đa 1000 ký tự."), Display(Name = "Mô tả")]
     public string? Description { get; set; }

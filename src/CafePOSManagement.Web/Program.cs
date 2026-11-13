@@ -5,6 +5,10 @@ using CafePOSManagement.Web.Services.Interfaces;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
+using CafePOSManagement.Web.DAL;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +28,32 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 });
 
 builder.Services.AddControllersWithViews(options =>
-    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
+{
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+    options.ModelBindingMessageProvider.SetAttemptedValueIsInvalidAccessor((_, field) => $"Giá trị nhập cho {field} không hợp lệ.");
+});
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+{
+    options.LoginPath = "/Login/Login";
+    options.AccessDeniedPath = "/Login/Denied";
+    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Events.OnValidatePrincipal = async context =>
+    {
+        var id = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+        var account = string.IsNullOrWhiteSpace(id) ? null : UserDAL.GetById(id);
+        var expectedRole = account?.Role == true ? "Manager" : "Employee";
+        if (account?.Active == true && context.Principal!.IsInRole(expectedRole)) return;
+        context.RejectPrincipal();
+        await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    };
+});
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("EmployeeOrManager", policy => policy.RequireRole("Employee", "Manager"));
+    options.AddPolicy("ManagerOnly", policy => policy.RequireRole("Manager"));
+});
 
 builder.Services.AddDbContext<CafePosDbContext>(options =>
 {
@@ -61,6 +90,17 @@ if (!app.Environment.IsDevelopment())
 app.UseRequestLocalization();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true)
+    {
+        context.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+        context.Response.Headers.Pragma = "no-cache";
+    }
+    await next();
+});
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

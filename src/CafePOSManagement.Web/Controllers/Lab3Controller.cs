@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using CafePOSManagement.Web.DAL;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CafePOSManagement.Web.Controllers;
 
@@ -15,6 +16,7 @@ public class Lab3ViewModel
     public List<AiSessionDTO> AiSessions { get; set; } = new();
 }
 
+[Authorize(Policy = "ManagerOnly")]
 public class Lab3Controller : Controller
 {
     [HttpGet]

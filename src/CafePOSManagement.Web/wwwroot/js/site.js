@@ -1,4 +1,29 @@
 "use strict";
+window.addEventListener("pageshow", event => {
+    if (event.persisted) window.location.reload();
+});
+document.querySelectorAll("[data-image-fallback]").forEach(image => {
+    image.addEventListener("error", () => {
+        if (!image.src.endsWith("/images/product-fallback.svg")) image.src = "/images/product-fallback.svg";
+    });
+});
+const imageInput = document.querySelector("[data-image-preview-input]");
+imageInput?.addEventListener("input", () => {
+    const preview = document.querySelector("[data-image-preview]");
+    preview.src = imageInput.value.trim() || preview.dataset.originalSrc;
+});
+document.querySelectorAll("[data-management-modal]").forEach(dialog => {
+    dialog.addEventListener("hidden.bs.modal", () => window.location.assign(dialog.dataset.returnUrl));
+    bootstrap.Modal.getOrCreateInstance(dialog).show();
+});
+document.querySelectorAll("[data-disable-on-submit]").forEach(form => {
+    form.addEventListener("submit", () => {
+        if (!form.checkValidity()) return;
+        const button = form.querySelector("button[type=submit]");
+        button.disabled = true;
+        button.textContent = button.dataset.savingLabel || "Đang lưu...";
+    });
+});
 {
     const clocks = document.querySelectorAll("[data-local-clock]");
     if (clocks.length) {

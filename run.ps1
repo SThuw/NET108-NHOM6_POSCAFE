@@ -1,4 +1,4 @@
-# Script khởi động nhanh CafePOS (dùng .NET 8 cục bộ trong .tools/dotnet)
+# Script khởi động nhanh CafePOS
 # Chạy: .\run.ps1
 # Dừng: Ctrl+C
 param(
@@ -6,23 +6,26 @@ param(
     [string]$Profile = "http"        # Launch profile mặc định: http (port 5088)
 )
 $ErrorActionPreference = "Stop"
-$root = Split-Path $PSScriptRoot -Parent
-if ($PSScriptRoot -eq (Get-Location).Path) { $root = $PSScriptRoot }
-
-# Nếu chạy từ thư mục gốc dự án
-$root = (Get-Location).Path
+$root = $PSScriptRoot
 
 $dotnet = Join-Path $root ".tools\dotnet\dotnet.exe"
 if (-not (Test-Path $dotnet)) { $dotnet = (Get-Command dotnet -ErrorAction Stop).Source }
+
+if (-not ((& $dotnet --list-runtimes) -match '^Microsoft\.AspNetCore\.App 8\.')) {
+    throw "Thiếu ASP.NET Core Runtime 8.x (x64). Cài .NET 8 SDK hoặc ASP.NET Core Runtime 8 rồi chạy lại."
+}
 
 $env:DOTNET_CLI_HOME = Join-Path $root ".tools\cli-home"
 $env:NUGET_PACKAGES  = Join-Path $root ".tools\nuget"
 
 if ($Build) {
     Write-Host "▶ Building..." -ForegroundColor Cyan
-    & $dotnet build (Join-Path $root "CafePOSManagement.sln") --no-restore
+    & $dotnet build (Join-Path $root "CafePOSManagement.sln")
     if ($LASTEXITCODE -ne 0) { throw "Build thất bại." }
 }
 
 Write-Host "▶ Starting CafePOS on http://localhost:5088 ..." -ForegroundColor Green
-& $dotnet run --project (Join-Path $root "src\CafePOSManagement.Web") --no-build --launch-profile $Profile
+$runArguments = @('run', '--project', (Join-Path $root 'src\CafePOSManagement.Web'), '--launch-profile', $Profile)
+if ($Build) { $runArguments += '--no-build' }
+& $dotnet @runArguments
+if ($LASTEXITCODE -ne 0) { throw "CafePOS dừng với mã lỗi $LASTEXITCODE." }

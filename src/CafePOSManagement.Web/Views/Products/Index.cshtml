@@ -1,0 +1,57 @@
+@model ProductManagementViewModel
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    ViewData["PageClass"] = "management-page";
+    var returnUrl = Url.Action("Index", "Products", new { search = Model.Search, categoryId = Model.CategoryId, status = Model.Status, page = Model.Page });
+}
+<div class="management-shell">
+    <div class="management-heading">
+        <div><p class="management-eyebrow">THỰC ĐƠN CAFE POS</p><h1>Quản lý sản phẩm</h1><p>Theo dõi món đang bán, cập nhật giá và quản lý thực đơn.</p></div>
+        <a asp-action="Create" asp-route-returnUrl="@returnUrl" class="btn btn-primary">+ Thêm món mới</a>
+    </div>
+    @if (TempData["ProductNotice"] is string notice) { <div class="alert alert-success" role="status">@notice</div> }
+    <div class="management-stats" aria-label="Thống kê sản phẩm">
+        <div><span>Tổng số sản phẩm</span><strong>@Model.Total</strong></div>
+        <div><span>Đang bán</span><strong>@Model.Active</strong></div>
+        <div><span>Ngừng bán</span><strong>@Model.Stopped</strong></div>
+    </div>
+    <form method="get" class="management-filters" role="search">
+        <div><label for="product-search-admin">Tên hoặc mã món</label><input id="product-search-admin" name="search" value="@Model.Search" maxlength="100" class="form-control" type="search" placeholder="Tìm món..." /></div>
+        <div><label for="category-filter">Danh mục</label><select id="category-filter" name="categoryId" class="form-select"><option value="">Tất cả danh mục</option>@foreach (var category in Model.Categories) { <option value="@category.Id" selected="@(Model.CategoryId == category.Id)">@category.Name</option> }</select></div>
+        <div><label for="status-filter">Trạng thái</label><select id="status-filter" name="status" class="form-select"><option value="all" selected="@(Model.Status == "all")">Tất cả</option><option value="active" selected="@(Model.Status == "active")">Đang bán</option><option value="stopped" selected="@(Model.Status == "stopped")">Ngừng bán</option></select></div>
+        <button class="btn btn-primary" type="submit">Lọc sản phẩm</button>
+    </form>
+    <div class="management-table-wrap">
+        <div class="management-table-top"><h2>Danh sách món</h2><span>@Model.ResultCount kết quả</span></div>
+        @if (Model.ResultCount == 0)
+        {
+            <div class="management-empty"><h3>Không tìm thấy món phù hợp</h3><p>Thử tên, mã món hoặc bộ lọc khác.</p><a asp-action="Index" class="btn btn-outline-secondary">Bỏ bộ lọc</a></div>
+        }
+        else
+        {
+            <div class="table-responsive"><table class="table management-table align-middle"><thead><tr><th scope="col">Ảnh</th><th scope="col">Mã món</th><th scope="col">Tên món</th><th scope="col">Danh mục</th><th scope="col" class="text-end">Giá bán</th><th scope="col">Trạng thái</th><th scope="col">Thao tác</th></tr></thead><tbody>
+            @foreach (var product in Model.Products)
+            {
+                <tr>
+                    <td data-label="Ảnh"><img class="management-thumb" src="@product.ImageUrl" data-image-fallback alt="@product.Name" loading="lazy" /></td>
+                    <td data-label="Mã món"><code>@product.Id</code></td>
+                    <td data-label="Tên món"><strong>@product.Name</strong></td>
+                    <td data-label="Danh mục">@product.Category?.Name</td>
+                    <td data-label="Giá bán" class="text-end price-cell">@product.Price.ToString("N0") ₫</td>
+                    <td data-label="Trạng thái"><span class="status-pill @(product.IsAvailable ? "available" : "stopped")">@(product.IsAvailable ? "Đang bán" : "Ngừng bán")</span></td>
+                    <td data-label="Thao tác"><div class="row-actions"><a asp-action="Details" asp-route-id="@product.Id" asp-route-returnUrl="@returnUrl">Xem</a><a asp-action="Edit" asp-route-id="@product.Id" asp-route-returnUrl="@returnUrl">Sửa</a><a class="delete-action" asp-action="Delete" asp-route-id="@product.Id" asp-route-returnUrl="@returnUrl">Xóa</a></div></td>
+                </tr>
+            }
+            </tbody></table></div>
+        }
+        @if (Model.PageCount > 1)
+        {
+            <nav class="management-pages" aria-label="Phân trang sản phẩm">
+                @for (var number = 1; number <= Model.PageCount; number++)
+                {
+                    <a asp-action="Index" asp-route-search="@Model.Search" asp-route-categoryId="@Model.CategoryId" asp-route-status="@Model.Status" asp-route-page="@number" class="@(number == Model.Page ? "current" : "")" aria-current="@(number == Model.Page ? "page" : null)">@number</a>
+                }
+            </nav>
+        }
+    </div>
+</div>

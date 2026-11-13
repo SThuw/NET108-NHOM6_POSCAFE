@@ -1,0 +1,12 @@
+@model CategoryForm
+@{ var editing = ViewContext.RouteData.Values["action"]?.ToString() == "Edit"; ViewData["Title"] = editing ? "Sửa danh mục" : "Thêm danh mục"; }
+<div class="container py-4" style="max-width: 640px"><h1 class="h3 mb-4">@ViewData["Title"]</h1>
+    <form asp-action="@(editing ? "Edit" : "Create")" asp-route-id="@(editing ? Model.Id : null)" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+        <div class="mb-3"><label asp-for="Id" class="form-label">Mã danh mục</label><input asp-for="Id" class="form-control" readonly="@editing" maxlength="40" /><span asp-validation-for="Id" class="text-danger"></span></div>
+        <div class="mb-3"><label asp-for="Name" class="form-label">Tên danh mục</label><input asp-for="Name" class="form-control" maxlength="100" /><span asp-validation-for="Name" class="text-danger"></span></div>
+        <div class="mb-3"><label asp-for="Code" class="form-label">Mã hiển thị</label><input asp-for="Code" class="form-control" maxlength="40" /><span asp-validation-for="Code" class="text-danger"></span></div>
+        <div class="mb-3"><label asp-for="DisplayOrder" class="form-label">Thứ tự</label><input asp-for="DisplayOrder" class="form-control" type="number" min="0" /><span asp-validation-for="DisplayOrder" class="text-danger"></span></div>
+        <button type="submit" class="btn btn-primary">Lưu</button> <a asp-action="Index" class="btn btn-outline-secondary">Hủy</a>
+    </form>
+</div>

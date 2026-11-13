@@ -12,9 +12,9 @@ namespace CafePOSManagement.Web.Utils;
 /// </summary>
 public static class DBUtil
 {
-    // Chuỗi kết nối mặc định đến SQL Server (LocalDB CafePOS)
+    // Chuỗi kết nối mặc định đến SQL Server trên máy (CafePOS)
     public static string connString { get; set; } =
-        "Server=(localdb)\\MSSQLLocalDB;Database=CafePOS;Integrated Security=True;TrustServerCertificate=True;";
+        "Server=.;Database=CafePOS;Integrated Security=True;TrustServerCertificate=True;";
 
     /// <summary>
     /// Thực thi câu lệnh SQL SELECT trả về DataTable

@@ -1,0 +1,33 @@
+@model CreateProductDto
+@using CafePOSManagement.Web.Models.Entities
+@{
+    ViewData["PageClass"] = "management-page";
+    var product = ViewBag.Product as Product;
+    var editing = product is not null;
+    ViewData["Title"] = editing ? "Sửa sản phẩm" : "Thêm món mới";
+    var categories = ViewBag.Categories as IReadOnlyList<Category> ?? [];
+    var returnUrl = (string)ViewBag.ReturnUrl;
+}
+<div class="management-shell"><a href="@returnUrl">Về danh sách sản phẩm</a></div>
+<div class="modal fade" id="product-editor" tabindex="-1" aria-labelledby="product-editor-title" data-management-modal data-return-url="@returnUrl">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg"><div class="modal-content management-dialog">
+    <div class="modal-header"><div><p class="management-eyebrow">QUẢN LÝ SẢN PHẨM</p><h1 class="modal-title" id="product-editor-title">@ViewData["Title"]</h1></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+    <form asp-action="@(editing ? "Edit" : "Create")" asp-route-id="@product?.Id" asp-route-returnUrl="@returnUrl" method="post" class="management-form" data-disable-on-submit>
+      <div class="modal-body">
+        <p class="text-muted">@(editing ? "Để trống ảnh mới để giữ ảnh hiện tại." : "Nhập thông tin món mới cho thực đơn.")</p>
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+        <div class="form-grid">
+            <div><label asp-for="Name" class="form-label">Tên món <span aria-hidden="true">*</span></label><input asp-for="Name" class="form-control" maxlength="100" required /><span asp-validation-for="Name" class="field-error"></span></div>
+            <div><label asp-for="CategoryId" class="form-label">Danh mục <span aria-hidden="true">*</span></label><select asp-for="CategoryId" class="form-select" required><option value="">Chọn danh mục</option>@foreach (var category in categories) { <option value="@category.Id">@category.Name</option> }</select><span asp-validation-for="CategoryId" class="field-error"></span></div>
+            <div><label asp-for="Price" class="form-label">Giá bán (₫) <span aria-hidden="true">*</span></label><input asp-for="Price" class="form-control" type="number" min="1" max="10000000" step="1" required /><span asp-validation-for="Price" class="field-error"></span></div>
+            <div><label asp-for="OriginalPrice" class="form-label">Giá gốc (₫)</label><input asp-for="OriginalPrice" class="form-control" type="number" min="1" max="10000000" step="1" /><span asp-validation-for="OriginalPrice" class="field-error"></span></div>
+            <div class="full"><label asp-for="ImageUrl" class="form-label">Ảnh HTTPS mới</label><input asp-for="ImageUrl" class="form-control" type="url" maxlength="500" placeholder="https://..." data-image-preview-input /><span asp-validation-for="ImageUrl" class="field-error"></span><small class="text-muted">@(editing ? "Để trống để giữ ảnh hiện tại." : "Để trống để dùng ảnh mặc định.")</small></div>
+            <div class="full"><label asp-for="Description" class="form-label">Mô tả</label><textarea asp-for="Description" class="form-control" rows="3" maxlength="1000"></textarea><span asp-validation-for="Description" class="field-error"></span></div>
+            <div class="full form-check"><input asp-for="IsAvailable" class="form-check-input" /><label asp-for="IsAvailable" class="form-check-label">Đang bán trên POS</label></div>
+        </div>
+        <div class="image-preview"><img src="@(product?.ImageUrl ?? "/images/product-fallback.svg")" data-original-src="@(product?.ImageUrl ?? "/images/product-fallback.svg")" data-image-preview data-image-fallback alt="Ảnh xem trước của món" /></div>
+      </div>
+        <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-primary" data-saving-label="Đang lưu...">Lưu món</button></div>
+    </form>
+  </div></div>
+</div>
