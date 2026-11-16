@@ -1,0 +1,47 @@
+@model CreateEmployeeViewModel
+@{
+    ViewData["Title"] = "Thêm nhân viên";
+    ViewData["PageClass"] = "management-page";
+}
+
+<div class="management-shell form-shell">
+    <div class="management-heading">
+        <div>
+            <p class="management-eyebrow">NHÂN SỰ VÀ TÀI KHOẢN</p>
+            <h1>Thêm nhân viên</h1>
+            <p>Tạo tài khoản đăng nhập mới cho nhân viên PolyCafe.</p>
+        </div>
+    </div>
+
+    <form asp-action="Create" method="post" class="management-form" data-disable-on-submit>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+        <div class="form-grid">
+            <div class="full">
+                <label asp-for="FullName" class="form-label">Họ và tên <span aria-hidden="true">*</span></label>
+                <input asp-for="FullName" class="form-control" autocomplete="name" autofocus />
+                <span asp-validation-for="FullName" class="field-error"></span>
+            </div>
+            <div>
+                <label asp-for="Email" class="form-label">Email <span aria-hidden="true">*</span></label>
+                <input asp-for="Email" class="form-control" type="email" autocomplete="email" />
+                <span asp-validation-for="Email" class="field-error"></span>
+            </div>
+            <div>
+                <label asp-for="Password" class="form-label">Mật khẩu <span aria-hidden="true">*</span></label>
+                <input asp-for="Password" class="form-control" autocomplete="new-password" />
+                <span asp-validation-for="Password" class="field-error"></span>
+            </div>
+            <div class="full">
+                <label asp-for="IsManager" class="form-label">Vai trò</label>
+                <select asp-for="IsManager" class="form-select">
+                    <option value="false">Employee - Nhân viên</option>
+                    <option value="true">Manager - Quản lý</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-outline-secondary">Hủy</a>
+            <button type="submit" class="btn btn-primary" data-saving-label="Đang lưu...">Thêm nhân viên</button>
+        </div>
+    </form>
+</div>

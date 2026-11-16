@@ -1,0 +1,50 @@
+@model EditEmployeeViewModel
+@{
+    ViewData["Title"] = "Sửa nhân viên";
+    ViewData["PageClass"] = "management-page";
+}
+
+<div class="management-shell form-shell">
+    <div class="management-heading">
+        <div>
+            <p class="management-eyebrow">NHÂN SỰ VÀ TÀI KHOẢN</p>
+            <h1>Sửa nhân viên</h1>
+            <p>Cập nhật họ tên, vai trò hoặc trạng thái tài khoản.</p>
+        </div>
+    </div>
+
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="post" class="management-form" data-disable-on-submit>
+        <input asp-for="Id" type="hidden" />
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+        <div class="form-grid">
+            <div class="full">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" readonly aria-describedby="email-note" />
+                <span id="email-note" class="form-text">Email đăng nhập không thay đổi tại màn hình này.</span>
+            </div>
+            <div class="full">
+                <label asp-for="FullName" class="form-label">Họ và tên <span aria-hidden="true">*</span></label>
+                <input asp-for="FullName" class="form-control" autocomplete="name" autofocus />
+                <span asp-validation-for="FullName" class="field-error"></span>
+            </div>
+            <div>
+                <label asp-for="IsManager" class="form-label">Vai trò</label>
+                <select asp-for="IsManager" class="form-select">
+                    <option value="false">Employee - Nhân viên</option>
+                    <option value="true">Manager - Quản lý</option>
+                </select>
+            </div>
+            <div>
+                <label asp-for="IsActive" class="form-label">Trạng thái</label>
+                <select asp-for="IsActive" class="form-select">
+                    <option value="true">Hoạt động</option>
+                    <option value="false">Đã khóa</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-outline-secondary">Hủy</a>
+            <button type="submit" class="btn btn-primary" data-saving-label="Đang lưu...">Lưu thay đổi</button>
+        </div>
+    </form>
+</div>

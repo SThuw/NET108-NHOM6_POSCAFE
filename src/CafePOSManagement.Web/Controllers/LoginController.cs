@@ -1,15 +1,27 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
 using CafePOSManagement.Web.DAL;
+using CafePOSManagement.Web.Data;
+using CafePOSManagement.Web.Models.Entities;
 using CafePOSManagement.Web.Models.ViewModels;
+using CafePOSManagement.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CafePOSManagement.Web.Controllers;
 
-public sealed class LoginController : Controller
+public sealed class LoginController(
+    CafePosDbContext db,
+    IConfiguration configuration,
+    ILogger<LoginController> logger) : Controller
 {
+    private static readonly PasswordHasher<User> PasswordHasher = new();
+    private readonly EmailService emailService = new(configuration);
+
     [HttpGet, AllowAnonymous]
     public IActionResult Login(string? returnUrl = null)
     {
@@ -46,6 +58,62 @@ public sealed class LoginController : Controller
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction(nameof(Login));
+    }
+
+    [HttpGet, AllowAnonymous, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public IActionResult ForgotPassword() => View(new ForgotPasswordViewModel());
+
+    [HttpPost, AllowAnonymous, ValidateAntiForgeryToken, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+    {
+        model.Email = model.Email?.Trim().ToLowerInvariant() ?? "";
+        ModelState.Clear();
+        TryValidateModel(model);
+        if (!ModelState.IsValid) return View(model);
+
+        if (!emailService.IsConfigured)
+        {
+            ModelState.AddModelError("", "Dịch vụ email chưa được cấu hình. Mật khẩu hiện tại chưa thay đổi.");
+            return View(model);
+        }
+
+        var account = await db.Users.FirstOrDefaultAsync(user => user.Email == model.Email && user.IsActive);
+        if (account is null)
+        {
+            TempData["ResetMessage"] = "Nếu email tồn tại và đang hoạt động, hệ thống đã gửi mật khẩu mới.";
+            return RedirectToAction(nameof(ForgotPassword));
+        }
+
+        var originalPasswordHash = account.Password;
+        // shortcut: Mật khẩu tạm 4 chữ số theo LAB 5; dùng reset token có hạn trước khi triển khai thật.
+        var newPassword = $"Poly@{RandomNumberGenerator.GetInt32(0, 10_000):D4}";
+        var newPasswordHash = PasswordHasher.HashPassword(account, newPassword);
+        db.Entry(account).CurrentValues.SetValues(account with { Password = newPasswordHash });
+
+        try
+        {
+            await db.SaveChangesAsync();
+            await emailService.SendResetPasswordAsync(account.Email, account.FullName, newPassword);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Không thể cấp lại mật khẩu qua email cho tài khoản {UserId}.", account.Id);
+            try
+            {
+                db.Entry(account).CurrentValues.SetValues(account with { Password = originalPasswordHash });
+                await db.SaveChangesAsync();
+            }
+            catch (Exception restoreException)
+            {
+                logger.LogCritical(restoreException, "Không thể khôi phục mật khẩu cũ cho tài khoản {UserId}.", account.Id);
+            }
+
+            ModelState.AddModelError("", "Không thể gửi email lúc này. Vui lòng thử lại sau.");
+            return View(model);
+        }
+
+        TempData["ResetMessage"] = "Nếu email tồn tại và đang hoạt động, hệ thống đã gửi mật khẩu mới.";
+        return RedirectToAction(nameof(ForgotPassword));
     }
 
     [HttpGet, Authorize, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
