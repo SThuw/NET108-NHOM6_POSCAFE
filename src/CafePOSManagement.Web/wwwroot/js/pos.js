@@ -426,6 +426,11 @@
         });
         $("#receipt-summary").replaceChildren(summary);
         $("#receipt-note").textContent = order.note ? `Ghi chú: ${order.note}` : "";
+        // Hiện nút "Sửa / Thêm món" chỉ khi đơn đã ghi nhận (committed)
+        const editBtn = $("#edit-last-order");
+        if (editBtn) {
+            editBtn.style.display = committed ? "" : "none";
+        }
         bootstrap.Modal.getOrCreateInstance($("#receipt-modal")).show();
     }
 
@@ -493,6 +498,70 @@
         const result = { add: () => first + second, subtract: () => first - second, multiply: () => first * second, divide: () => first / second }[operation]?.();
         output.textContent = Number.isFinite(result) ? `Kết quả: ${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 8 }).format(result)}` : "Không thể tính kết quả.";
     });
+    // === XỬ LÝ KHÁCH ĐỔI Ý: Load lại đơn vừa ghi nhận vào giỏ hàng ===
+    const editLastOrderBtn = $("#edit-last-order");
+    if (editLastOrderBtn) {
+        editLastOrderBtn.addEventListener("click", () => {
+            if (!lastReceipt || !lastReceipt.items || !lastReceipt.items.length) {
+                notify("Không tìm thấy đơn hàng vừa ghi nhận.");
+                return;
+            }
+
+            // Xóa giỏ hàng hiện tại trước khi load lại
+            state.cart.clear();
+
+            // Load tất cả món từ đơn vừa ghi nhận vào giỏ hàng
+            lastReceipt.items.forEach(item => {
+                // Thử match bằng productId trước, nếu không có thì match bằng tên
+                let matchedId = item.productId;
+                if (!matchedId) {
+                    for (const [id, product] of productById) {
+                        if (product.name === item.productName) {
+                            matchedId = id;
+                            break;
+                        }
+                    }
+                }
+                if (matchedId) {
+                    const product = productById.get(matchedId);
+                    if (product && product.isAvailable) {
+                        state.cart.set(matchedId, item.quantity);
+                    }
+                }
+            });
+
+            // Khôi phục loại đơn hàng
+            if (lastReceipt.orderType) {
+                state.orderType = lastReceipt.orderType;
+                $("#order-types")?.querySelectorAll("button").forEach(button => {
+                    button.classList.toggle("active", button.dataset.order === state.orderType);
+                    button.setAttribute("aria-pressed", String(button.dataset.order === state.orderType));
+                });
+            }
+
+            // Khôi phục phương thức thanh toán
+            if (lastReceipt.paymentMethod) {
+                state.payment = lastReceipt.paymentMethod;
+                const paymentInput = $(`input[name=payment][value=${state.payment}]`);
+                if (paymentInput) paymentInput.checked = true;
+            }
+
+            // Khôi phục ghi chú
+            if (lastReceipt.note) {
+                state.note = lastReceipt.note;
+                const noteInput = $("#order-note");
+                if (noteInput) noteInput.value = state.note;
+            }
+
+            // Render lại giỏ hàng
+            renderCart();
+
+            // Đóng modal
+            bootstrap.Modal.getInstance($("#receipt-modal"))?.hide();
+
+            notify("Đã nạp lại đơn " + lastReceipt.orderNumber + " vào giỏ hàng. Thêm/sửa món rồi bấm Ghi nhận đơn.");
+        });
+    }
     renderCategories();
     renderProducts();
     renderCart();
