@@ -169,7 +169,7 @@ public sealed class DbOrderService(CafePosDbContext db, IProductService products
             DiscountPercent = discountPercent,
             TaxPercent = input.TaxPercent,
             Note = input.Note?.Trim() ?? "",
-            Status = "Hoàn thành",
+            Status = "Đang chuẩn bị",
             CreatedAt = clock.GetUtcNow(),
             Items = Array.AsReadOnly(items),
             Subtotal = subtotal,

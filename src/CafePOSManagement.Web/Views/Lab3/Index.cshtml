@@ -319,7 +319,7 @@
                                         <th scope="col" class="text-end">VAT</th>
                                         <th scope="col" class="text-end">Tổng thanh toán</th>
                                         <th scope="col">Hình thức</th>
-                                        <th scope="col" class="text-center">Trạng thái</th>
+                                        <th scope="col" class="text-center" style="width: 200px;">Trạng thái</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -334,7 +334,29 @@
                                             <td class="text-end text-muted">+@o.TaxAmount.ToString("N0") ₫</td>
                                             <td class="text-end fw-bold price-cell">@o.Total.ToString("N0") ₫</td>
                                             <td><span class="badge bg-secondary-subtle text-secondary border">@o.PaymentMethod</span></td>
-                                            <td class="text-center"><span class="status-pill available">@o.Status</span></td>
+                                            <td class="text-center align-middle">
+                                                <div class="d-flex justify-content-center align-items-center gap-2">
+                                                    @if (o.Status == "Đang chuẩn bị")
+                                                    {
+                                                        <span class="badge bg-warning text-dark rounded-pill">@o.Status</span>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" onclick="updateStatus(@o.Id, 'Chờ nhận món')">Chờ nhận</button>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 0.75rem;" onclick="updateStatus(@o.Id, 'Hủy đơn')">Hủy</button>
+                                                    }
+                                                    else if (o.Status == "Chờ nhận món")
+                                                    {
+                                                        <span class="badge bg-primary rounded-pill">@o.Status</span>
+                                                        <button type="button" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.75rem;" onclick="updateStatus(@o.Id, 'Hoàn thành')">Hoàn thành</button>
+                                                    }
+                                                    else if (o.Status == "Hoàn thành")
+                                                    {
+                                                        <span class="badge bg-success rounded-pill">@o.Status</span>
+                                                    }
+                                                    else if (o.Status == "Hủy đơn")
+                                                    {
+                                                        <span class="badge bg-danger rounded-pill">@o.Status</span>
+                                                    }
+                                                </div>
+                                            </td>
                                         </tr>
                                     }
                                 </tbody>
@@ -506,3 +528,22 @@
         </p>
     </footer>
 </div>
+
+@section Scripts {
+    <script>
+        function updateStatus(orderId, newStatus) {
+            const token = document.cookie.split('; ').find(row => row.startsWith('.AspNetCore.Antiforgery.'))?.split('=')[1];
+            fetch('/Lab3/UpdateOrderStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': token || '' },
+                body: `id=${orderId}&newStatus=${encodeURIComponent(newStatus)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) window.location.reload();
+                else alert(data.message);
+            })
+            .catch(error => alert('Đã xảy ra lỗi khi cập nhật trạng thái.'));
+        }
+    </script>
+}

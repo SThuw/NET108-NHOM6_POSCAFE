@@ -39,4 +39,31 @@ public class Lab3Controller : Controller
         }
         return View(model);
     }
+
+    [HttpPost]
+    [IgnoreAntiforgeryToken]
+public IActionResult UpdateOrderStatus(long id, string newStatus)
+{
+    try
+    {
+        // Lấy đơn hàng hiện tại từ DB
+        var order = OrderDAL.GetById(id);
+        if (order == null)
+        {
+            return Json(new { success = false, message = "Không tìm thấy đơn hàng." });
+        }
+
+        // Cập nhật trạng thái mới
+        order.Status = newStatus;
+        
+        // Gọi hàm Update có sẵn trong DAL (cập nhật Status và Note)
+        OrderDAL.Update(order);
+
+        return Json(new { success = true, message = "Cập nhật trạng thái thành công!" });
+    }
+    catch (Exception ex)
+    {
+        return Json(new { success = false, message = "Lỗi: " + ex.Message });
+    }
+}
 }
