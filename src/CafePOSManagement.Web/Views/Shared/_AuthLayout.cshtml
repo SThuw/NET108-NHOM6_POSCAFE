@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#C54B1F" />
+    <title>@ViewData["Title"] · PolyCafe</title>
+    <link rel="icon" type="image/svg+xml" href="~/images/cafepos-mark.svg" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="auth-page">
+    <partial name="_PosIcons" />
+    <a class="skip-link" href="#main-content">Đến nội dung chính</a>
+    <div class="auth-shell">
+        <header class="auth-header">
+            <a class="brand" asp-controller="Pos" asp-action="Index" aria-label="PolyCafe">
+                <img src="~/images/cafepos-mark.svg" width="44" height="44" alt="" />
+                <span>Poly<span class="brand-accent">Cafe</span><small>CÀ PHÊ VIỆT NAM</small></span>
+            </a>
+        </header>
+        <main id="main-content" class="auth-main" tabindex="-1">
+            @RenderBody()
+        </main>
+        <footer class="auth-footer">
+            <p>Hệ thống Quản lý Bán hàng PolyCafe &copy; @DateTime.Now.Year</p>
+        </footer>
+    </div>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true" defer></script>
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

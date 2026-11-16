@@ -1,13 +1,53 @@
 @model LoginViewModel
-@{ ViewData["Title"] = "Đăng nhập"; }
-<div class="container py-5" style="max-width: 440px">
-    <h1 class="h3 mb-4">Đăng nhập PolyCafe</h1>
-    <form asp-action="Login" method="post">
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = "_AuthLayout";
+}
+
+<div class="auth-card">
+    <div class="auth-card-brand">
+        <span class="auth-badge">HỆ THỐNG NỘI BỘ</span>
+        <h1 class="auth-card-title">Đăng nhập tài khoản</h1>
+        <p class="auth-card-desc">Quản lý bán hàng quầy thu ngân &amp; thực đơn PolyCafe</p>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid && ViewData.ModelState[""]?.Errors.Count > 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            <svg class="icon me-2 flex-shrink-0"><use href="#i-note" /></svg>
+            <div>@Html.ValidationSummary(true, "", new { @class = "mb-0" })</div>
+        </div>
+    }
+
+    <form asp-action="Login" method="post" data-disable-on-submit class="auth-form">
         <input asp-for="ReturnUrl" type="hidden" />
-        <div class="mb-3"><label asp-for="Email" class="form-label">Email</label><input asp-for="Email" class="form-control" autocomplete="username" /><span asp-validation-for="Email" class="text-danger"></span></div>
-        <div class="mb-3"><label asp-for="Password" class="form-label">Mật khẩu</label><input asp-for="Password" type="password" class="form-control" autocomplete="current-password" /><span asp-validation-for="Password" class="text-danger"></span></div>
-        <div class="form-check mb-3"><input asp-for="RememberMe" class="form-check-input" /><label asp-for="RememberMe" class="form-check-label">Duy trì đăng nhập</label></div>
-        <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Email tài khoản <span class="text-danger" aria-hidden="true">*</span></label>
+            <input asp-for="Email" class="form-control" autocomplete="username" autofocus required placeholder="ten@polycafe.vn" />
+            <span asp-validation-for="Email" class="field-error"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label">Mật khẩu <span class="text-danger" aria-hidden="true">*</span></label>
+            <div class="password-input-group">
+                <input asp-for="Password" type="password" class="form-control" autocomplete="current-password" required placeholder="Nhập mật khẩu..." id="login-password" />
+                <button type="button" class="btn-password-toggle" data-password-toggle="#login-password" aria-label="Hiện mật khẩu" title="Hiện hoặc ẩn mật khẩu">
+                    <svg class="icon icon-eye"><use href="#i-eye" /></svg>
+                    <svg class="icon icon-eye-off" hidden><use href="#i-eye-off" /></svg>
+                </button>
+            </div>
+            <span asp-validation-for="Password" class="field-error"></span>
+        </div>
+
+        <div class="form-check mb-4">
+            <input asp-for="RememberMe" class="form-check-input" id="remember-me" />
+            <label asp-for="RememberMe" class="form-check-label" for="remember-me">Duy trì đăng nhập trên thiết bị này</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 auth-submit-btn" data-saving-label="Đang đăng nhập...">
+            <span>Đăng nhập hệ thống</span>
+            <svg class="icon"><use href="#i-arrow" /></svg>
+        </button>
     </form>
 </div>

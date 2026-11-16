@@ -21,7 +21,7 @@
             });
             if (categories.some(c => c.id === draft.category)) state.category = draft.category;
             if (typeof draft.search === "string") state.search = draft.search.slice(0, 100);
-            if (["pickup", "delivery", "dinein"].includes(draft.orderType)) state.orderType = draft.orderType;
+            if (["pickup", "dinein"].includes(draft.orderType)) state.orderType = draft.orderType;
             if (["cash", "card", "wallet"].includes(draft.payment)) state.payment = draft.payment;
             if (typeof draft.note === "string") state.note = draft.note.slice(0, 200);
             if (initial.discounts.some(d => d.code === draft.discountCode)) state.discountCode = draft.discountCode;
@@ -137,6 +137,8 @@
         $("#product-count").textContent = `${visible.length} món`;
         $("#menu-title").textContent = categories.find(category => category.id === state.category).name;
         $("#no-results").hidden = visible.length > 0;
+        const loadError = $("#load-error");
+        if (loadError) loadError.hidden = true;
         updateSelectedProducts();
     }
 
@@ -148,6 +150,8 @@
             card.querySelector(".product-add").textContent = quantity > 0 ? String(quantity) : "+";
         });
     }
+
+    let lastRenderedTotal = null;
 
     function renderCart() {
         const focused = document.activeElement;
@@ -178,17 +182,24 @@
         $("#cart-empty").hidden = amount.count > 0;
         $("#cart-count").textContent = String(amount.count);
         $("#subtotal").textContent = money.format(amount.subtotal);
+        const totalEl = $("#total");
+        if (lastRenderedTotal !== null && lastRenderedTotal !== amount.total && totalEl) {
+            totalEl.classList.remove("total-pulsing");
+            void totalEl.offsetWidth;
+            totalEl.classList.add("total-pulsing");
+        }
+        lastRenderedTotal = amount.total;
         $("#total").textContent = money.format(amount.total);
         $("#mobile-total").textContent = money.format(amount.total);
         $("#discount-row").hidden = !state.discount;
         $("#discount-label").textContent = `Giảm giá (${state.discount}%)`;
         $("#discount-amount").textContent = `−${money.format(amount.discount)}`;
         $("#tax-amount").textContent = money.format(amount.tax);
-        $("#checkout").disabled = checkingOut || previewing;
-        $("#checkout").textContent = checkingOut ? "Đang ghi nhận đơn..." : pendingCheckout ? "Thử xác nhận lại đơn" : "Thanh toán ngay";
+        $("#checkout").disabled = checkingOut || previewing || (!amount.count && !pendingCheckout);
+        $("#checkout").textContent = checkingOut ? "Đang ghi nhận đơn..." : pendingCheckout ? "Thử xác nhận lại đơn" : "Ghi nhận đơn";
         $("#print-receipt").disabled = Boolean(pendingCheckout) || previewing || (!amount.count && !lastReceipt);
         if ($("#clear-cart")) $("#clear-cart").disabled = Boolean(pendingCheckout) || previewing;
-        $("#pos-app").querySelectorAll("#order-types button, #discount, #tax-percent, #order-note, input[name=payment]").forEach(el => { el.disabled = Boolean(pendingCheckout) || previewing; });
+        $("#pos-app").querySelectorAll("#order-types button:not([data-not-integrated]), #discount, #tax-percent, #order-note, input[name=payment]:not([data-not-integrated])").forEach(el => { el.disabled = Boolean(pendingCheckout) || previewing; });
         updateSelectedProducts();
         if (focusedProduct && focusedAction) {
             const row = cartItems.querySelector(`[data-product="${focusedProduct}"]`);
@@ -215,6 +226,7 @@
         $("#category-list [data-category='all']").click();
         $("#product-search").focus();
     });
+    $("#retry-load")?.addEventListener("click", () => loadProducts(true));
     grid.addEventListener("click", event => {
         const card = event.target.closest("[data-product]");
         if (pendingCheckout || previewing || !card || !productById.get(card.dataset.product)?.isAvailable) return;
@@ -238,7 +250,7 @@
     });
     $("#order-types").addEventListener("click", event => {
         const button = event.target.closest("[data-order]");
-        if (!button) return;
+        if (!button || button.disabled) return;
         state.orderType = button.dataset.order;
         $("#order-types").querySelectorAll("button").forEach(item => {
             item.classList.toggle("active", item === button);
@@ -253,6 +265,7 @@
     $("#tax-percent").addEventListener("change", event => { state.tax = Number(event.target.value); renderCart(); });
     $("#order-note").addEventListener("input", event => { state.note = event.target.value.slice(0, 200); });
     $("#payment-options").addEventListener("change", event => {
+        if (event.target.disabled) return;
         if (["cash", "card", "wallet"].includes(event.target.value)) state.payment = event.target.value;
     });
     $("#clear-cart")?.addEventListener("click", () => bootstrap.Modal.getOrCreateInstance($("#clear-modal")).show());
@@ -269,7 +282,7 @@
         loggingOut = true;
         try { sessionStorage.removeItem(draftKey); } catch { /* Không có draft cần xóa. */ }
     });
-    document.querySelector("[data-manage-link]")?.addEventListener("click", event => {
+    document.querySelectorAll("[data-manage-link]").forEach(link => link.addEventListener("click", event => {
         if (pendingCheckout) { event.preventDefault(); notify("Đơn đang chờ xác nhận. Hãy hoàn tất hoặc thử lại trước khi chuyển trang."); return; }
         try {
             sessionStorage.setItem(draftKey, JSON.stringify({ ...state, cart: [...state.cart] }));
@@ -277,7 +290,7 @@
         } catch {
             if (state.cart.size) { event.preventDefault(); notify("Không thể giữ đơn đang lập khi chuyển trang. Hãy hoàn tất đơn trước."); }
         }
-    });
+    }));
 
     async function request(url, data, signal) {
         const controller = new AbortController();
@@ -315,6 +328,19 @@
         productAbort = new AbortController();
         grid.setAttribute("aria-busy", "true");
         $("#product-count").textContent = "Đang tải...";
+        const loadError = $("#load-error");
+        if (loadError) loadError.hidden = true;
+        if (refreshAll || !grid.children.length) {
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < 6; i++) {
+                const sk = document.createElement("div");
+                sk.className = "skeleton-card";
+                sk.setAttribute("aria-hidden", "true");
+                sk.innerHTML = '<div class="skeleton-image skeleton"></div><div class="skeleton-info"><div class="skeleton skeleton-text" style="width: 80%; height: 14px; margin-bottom: 8px;"></div><div class="skeleton skeleton-text" style="width: 45%; height: 16px;"></div></div>';
+                fragment.append(sk);
+            }
+            grid.replaceChildren(fragment);
+        }
         try {
             if (refreshAll) {
                 const all = await request(app.dataset.productsUrl, null, productAbort.signal);
@@ -330,19 +356,33 @@
             if (requestId !== productRequest) return;
             visibleProducts = found;
             found.forEach(p => productById.set(p.id, p));
+            if (loadError) loadError.hidden = true;
             renderProducts();
             renderCart();
         } catch (error) {
             if (error.name === "AbortError" || requestId !== productRequest) return;
             visibleProducts = [];
-            renderProducts();
-            $("#product-count").textContent = "Không tải được · Bấm Làm mới để thử lại";
+            grid.replaceChildren();
+            $("#no-results").hidden = true;
+            if (loadError) loadError.hidden = false;
+            $("#product-count").textContent = "Không tải được · Bấm Thử tải lại";
             notify(error.message);
         } finally { if (requestId === productRequest) grid.setAttribute("aria-busy", "false"); }
     }
 
+    function generateUuid() {
+        if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+            try { return crypto.randomUUID(); } catch { /* fallback bên dưới */ }
+        }
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+            const r = Math.random() * 16 | 0;
+            const v = c === "x" ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
     function orderPayload() {
-        return { requestId: crypto.randomUUID(), orderType: state.orderType, paymentMethod: state.payment,
+        return { requestId: generateUuid(), orderType: state.orderType, paymentMethod: state.payment,
             discountCode: state.discountCode || null, taxPercent: state.tax, note: state.note,
             items: [...state.cart].map(([productId, quantity]) => ({ productId, quantity })) };
     }

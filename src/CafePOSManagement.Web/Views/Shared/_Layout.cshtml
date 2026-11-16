@@ -3,44 +3,129 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#FF5722" />
+    <meta name="theme-color" content="#4E342E" />
     <title>@ViewData["Title"] · CafePOS Management</title>
     <link rel="icon" type="image/svg+xml" href="~/images/cafepos-mark.svg" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="@ViewData["PageClass"]">
-    @{ var currentController = ViewContext.RouteData.Values["controller"]?.ToString(); }
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+        var currentTab = ViewContext.HttpContext.Request.Query["tab"].ToString().ToLowerInvariant();
+        var isManager = User.IsInRole("Manager");
+        var isManagement = currentController is "Lab3" or "Products" or "Categories";
+        var isAuthenticated = User.Identity?.IsAuthenticated == true;
+        var displayName = User.Identity?.Name ?? "Người dùng";
+        var roleName = isManager ? "Quản lý" : "Nhân viên";
+        var pageTitle = currentController switch
+        {
+            "Pos" => "Bán hàng tại quầy",
+            "Products" => "Quản lý sản phẩm",
+            "Categories" => "Quản lý danh mục",
+            "Login" => "Thông tin tài khoản",
+            "Lab3" when currentTab == "cards" => "Bàn và thẻ định danh",
+            "Lab3" when currentTab == "users" => "Nhân sự và tài khoản",
+            "Lab3" when currentTab == "orders" => "Lịch sử hóa đơn",
+            "Lab3" => "Tổng quan vận hành",
+            _ => ViewData["Title"]?.ToString() ?? "CafePOS"
+        };
+    }
     <partial name="_PosIcons" />
     <a class="skip-link" href="#main-content">Đến nội dung chính</a>
-    <header class="app-header">
-        <div class="d-flex align-items-center gap-2">
-            <a class="brand" asp-controller="Pos" asp-action="Index" aria-label="CafePOS — Trang bán hàng">
-                <img src="~/images/cafepos-mark.svg" width="40" height="40" alt="" />
-                <span>Cafe<span class="brand-accent">POS</span><small>QUẢN LÝ BÁN HÀNG</small></span>
-            </a>
-            <nav class="nav-links ms-3 d-flex gap-2" aria-label="Điều hướng chính">
-                <a asp-controller="Pos" asp-action="Index" class="nav-action @(currentController == "Pos" ? "selected" : "")" aria-current="@(currentController == "Pos" ? "page" : null)">Bán hàng (POS)</a>
-                @if (User.IsInRole("Manager"))
-                {
-                    <a asp-controller="Products" asp-action="Index" data-manage-link class="nav-action @((currentController == "Products" || currentController == "Categories" || currentController == "Lab3") ? "selected" : "")" aria-current="@(currentController == "Products" ? "page" : null)">Quản lý hệ thống</a>
-                }
-            </nav>
-        </div>
-        @if (User.Identity?.IsAuthenticated == true)
-        {
-            <a asp-controller="Login" asp-action="Profile" class="account-link ms-auto"><strong>@User.Identity?.Name</strong><small>@(User.IsInRole("Manager") ? "Quản lý" : "Nhân viên") · Thông tin cá nhân</small></a>
-            @if (!IsSectionDefined("PosToolbar"))
+
+    <div class="app-shell">
+        <aside class="app-sidebar" id="app-sidebar" aria-label="Điều hướng chính">
+            <div class="sidebar-brand-row">
+                <a class="brand" asp-controller="Pos" asp-action="Index" aria-label="CafePOS — Trang bán hàng">
+                    <img src="~/images/cafepos-mark.svg" width="42" height="42" alt="" />
+                    <span>Cafe<span class="brand-accent">POS</span><small>QUẢN LÝ BÁN HÀNG</small></span>
+                </a>
+                <button class="sidebar-close icon-button" type="button" data-sidebar-close aria-label="Đóng menu">
+                    <svg class="icon"><use href="#i-close" /></svg>
+                </button>
+            </div>
+
+            @if (isAuthenticated)
             {
-                <form asp-controller="Login" asp-action="Logout" method="post"><button type="submit" class="btn btn-sm btn-outline-secondary">Đăng xuất</button></form>
+                <nav class="sidebar-nav">
+                    @if (currentController == "Pos" && IsSectionDefined("SidebarSalesCategories"))
+                    {
+                        <details class="sidebar-module sidebar-sales-module" open>
+                            <summary class="sidebar-primary-link active" aria-current="page">
+                                <svg class="icon"><use href="#i-cashier" /></svg><span>Bán hàng</span><svg class="icon module-chevron"><use href="#i-arrow" /></svg>
+                            </summary>
+                            <div class="sidebar-sales-categories">
+                                @await RenderSectionAsync("SidebarSalesCategories", required: false)
+                            </div>
+                        </details>
+                    }
+                    else
+                    {
+                        <a asp-controller="Pos" asp-action="Index" class="sidebar-primary-link">
+                            <svg class="icon"><use href="#i-cashier" /></svg><span>Bán hàng</span><svg class="icon module-chevron"><use href="#i-arrow" /></svg>
+                        </a>
+                    }
+                    @if (isManager)
+                    {
+                        <details class="sidebar-module sidebar-management-module" open="@(isManagement ? "open" : null)">
+                            <summary class="sidebar-primary-link @(isManagement ? "active" : "")">
+                                <svg class="icon"><use href="#i-grid" /></svg><span>Quản lý</span><svg class="icon module-chevron"><use href="#i-arrow" /></svg>
+                            </summary>
+                            <div class="sidebar-submenu">
+                                <a asp-controller="Lab3" asp-action="Index" data-manage-link class="sidebar-link @(currentController == "Lab3" && string.IsNullOrEmpty(currentTab) ? "active" : "")" aria-current="@(currentController == "Lab3" && string.IsNullOrEmpty(currentTab) ? "page" : null)">Tổng quan</a>
+                                <a asp-controller="Products" asp-action="Index" data-manage-link class="sidebar-link @(currentController == "Products" ? "active" : "")" aria-current="@(currentController == "Products" ? "page" : null)">Sản phẩm</a>
+                                <a asp-controller="Categories" asp-action="Index" data-manage-link class="sidebar-link @(currentController == "Categories" ? "active" : "")" aria-current="@(currentController == "Categories" ? "page" : null)">Danh mục</a>
+                                <a asp-controller="Lab3" asp-action="Index" asp-route-tab="cards" data-manage-link class="sidebar-link @(currentController == "Lab3" && currentTab == "cards" ? "active" : "")" aria-current="@(currentController == "Lab3" && currentTab == "cards" ? "page" : null)">Bàn / Thẻ</a>
+                                <a asp-controller="Lab3" asp-action="Index" asp-route-tab="users" data-manage-link class="sidebar-link @(currentController == "Lab3" && currentTab == "users" ? "active" : "")" aria-current="@(currentController == "Lab3" && currentTab == "users" ? "page" : null)">Nhân viên</a>
+                                <a asp-controller="Lab3" asp-action="Index" asp-route-tab="orders" data-manage-link class="sidebar-link @(currentController == "Lab3" && currentTab == "orders" ? "active" : "")" aria-current="@(currentController == "Lab3" && currentTab == "orders" ? "page" : null)">Hóa đơn</a>
+                            </div>
+                        </details>
+                    }
+                </nav>
+
+                <div class="sidebar-account">
+                    <a asp-controller="Login" asp-action="Profile" class="sidebar-user">
+                        <span class="user-avatar" aria-hidden="true"><svg class="icon"><use href="#i-user" /></svg></span>
+                        <span><strong>@displayName</strong><small>@roleName</small></span>
+                    </a>
+                    <form asp-controller="Login" asp-action="Logout" method="post" id="@(currentController == "Pos" ? "pos-logout" : null)">
+                        <button type="submit" class="sidebar-logout"><svg class="icon"><use href="#i-logout" /></svg><span>Đăng xuất</span></button>
+                    </form>
+                </div>
             }
-        }
-        @if (IsSectionDefined("PosToolbar"))
-        {
-            @await RenderSectionAsync("PosToolbar", required: false)
-        }
-    </header>
-    <main id="main-content" class="app-main" tabindex="-1">@RenderBody()</main>
+        </aside>
+
+        <button class="app-sidebar-backdrop" type="button" data-sidebar-close aria-label="Đóng menu điều hướng"></button>
+
+        <div class="app-frame">
+            <header class="app-header">
+                <button class="sidebar-toggle icon-button" type="button" data-sidebar-toggle aria-controls="app-sidebar" aria-expanded="false" aria-label="Mở menu">
+                    <svg class="icon"><use href="#i-menu" /></svg>
+                </button>
+                @if (currentController != "Pos")
+                {
+                    <div class="header-context">
+                        <span>PolyCafe / @roleName</span>
+                        <strong>@pageTitle</strong>
+                    </div>
+                }
+                @if (IsSectionDefined("PosToolbar"))
+                {
+                    <div class="header-toolbar">@await RenderSectionAsync("PosToolbar", required: false)</div>
+                }
+                @if (isAuthenticated && currentController != "Pos")
+                {
+                    <a asp-controller="Login" asp-action="Profile" class="account-link">
+                        <span class="user-avatar" aria-hidden="true"><svg class="icon"><use href="#i-user" /></svg></span>
+                        <span><strong>@displayName</strong><small>@roleName</small></span>
+                    </a>
+                }
+            </header>
+            <main id="main-content" class="app-main" tabindex="-1">@RenderBody()</main>
+        </div>
+    </div>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true" defer></script>
     <script src="~/js/site.js" asp-append-version="true" defer></script>
     @await RenderSectionAsync("Scripts", required: false)

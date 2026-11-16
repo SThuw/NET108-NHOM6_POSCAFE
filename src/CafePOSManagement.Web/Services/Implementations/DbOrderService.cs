@@ -72,44 +72,56 @@ public sealed class DbOrderService(CafePosDbContext db, IProductService products
                 ?? throw new ValidationException("Mã giảm giá không hợp lệ.");
         }
 
-        // Tạo số thứ tự đơn trong transaction; sử dụng sequence DB-side để tránh race condition.
-        using var transaction = db.Database.BeginTransaction(
-            System.Data.IsolationLevel.ReadCommitted);
-        try
+        // Tạo số thứ tự đơn trong transaction; sử dụng ExecutionStrategy vì DB có retry on failure.
+        var strategy = db.Database.CreateExecutionStrategy();
+        return strategy.Execute(() =>
         {
-            var lastNum = db.Orders
-                .OrderByDescending(o => o.Id)
-                .Select(o => o.OrderNumber)
-                .FirstOrDefault() ?? "#000";
-            var seq = int.TryParse(lastNum.TrimStart('#'), out var n) ? n + 1 : 4;
-            var orderNumber = $"#{seq:000}";
-
-            var entity = order with
-            {
-                OrderNumber = orderNumber,
-                DiscountId = discountId,
-                CreatedAt = clock.GetUtcNow()
-            };
-
-            db.Orders.Add(entity);
-            db.SaveChanges();
-            transaction.Commit();
-            return entity;
-        }
-        catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
-        {
-            // RequestId đã được lưu bởi request song song → trả đơn đó.
-            transaction.Rollback();
-            return db.Orders
+            var existingInRetry = db.Orders
                 .Include(o => o.Items)
                 .AsNoTracking()
-                .First(o => o.RequestId == input.RequestId);
-        }
-        catch
-        {
-            transaction.Rollback();
-            throw;
-        }
+                .FirstOrDefault(o => o.RequestId == input.RequestId);
+            if (existingInRetry is not null)
+                return existingInRetry;
+
+            using var transaction = db.Database.BeginTransaction(
+                System.Data.IsolationLevel.ReadCommitted);
+            try
+            {
+                var lastNum = db.Orders
+                    .OrderByDescending(o => o.Id)
+                    .Select(o => o.OrderNumber)
+                    .FirstOrDefault() ?? "#000";
+                var seq = int.TryParse(lastNum.TrimStart('#'), out var n) ? n + 1 : 4;
+                var orderNumber = $"#{seq:000}";
+
+                var entity = order with
+                {
+                    OrderNumber = orderNumber,
+                    DiscountId = discountId,
+                    CreatedAt = clock.GetUtcNow()
+                };
+
+                db.Orders.Add(entity);
+                db.SaveChanges();
+                transaction.Commit();
+                return entity;
+            }
+            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+            {
+                transaction.Rollback();
+                db.ChangeTracker.Clear();
+                return db.Orders
+                    .Include(o => o.Items)
+                    .AsNoTracking()
+                    .First(o => o.RequestId == input.RequestId);
+            }
+            catch
+            {
+                transaction.Rollback();
+                db.ChangeTracker.Clear();
+                throw;
+            }
+        });
     }
 
     // ── Nội bộ ──────────────────────────────────────────────────────────────

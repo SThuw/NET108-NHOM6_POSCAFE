@@ -1,16 +1,46 @@
 @model CafePOSManagement.Web.Models.Entities.Product
-@{ ViewData["Title"] = "Xóa món"; ViewData["PageClass"] = "management-page"; var returnUrl = (string)ViewBag.ReturnUrl; var hasOrders = (bool)ViewBag.HasOrders; }
-<div class="management-shell"><a href="@returnUrl">Về danh sách sản phẩm</a></div>
-<div class="modal fade" id="product-delete" tabindex="-1" aria-labelledby="product-delete-title" data-management-modal data-return-url="@returnUrl">
-    <div class="modal-dialog modal-dialog-centered"><div class="modal-content management-dialog">
-        <div class="modal-header"><div><p class="management-eyebrow">XÁC NHẬN THAO TÁC</p><h1 class="modal-title" id="product-delete-title">Xóa món</h1></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
-        <div class="modal-body">
-            <p>Bạn có chắc muốn xóa <strong>@Model.Name</strong>?</p>
-            <p>@(hasOrders ? "Món đã có trong hóa đơn: hệ thống sẽ chuyển sang Ngừng bán. Chi tiết và đơn giá hóa đơn cũ được giữ nguyên." : "Món chưa có trong hóa đơn: hệ thống sẽ xóa sản phẩm khỏi cơ sở dữ liệu.")</p>
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+@{
+    ViewData["Title"] = "Xóa món · " + Model.Name;
+    ViewData["PageClass"] = "management-page";
+    var returnUrl = (string)ViewBag.ReturnUrl;
+    var hasOrders = (bool)ViewBag.HasOrders;
+}
+<div class="management-shell">
+    <div class="management-heading">
+        <div>
+            <p class="management-eyebrow">XÁC NHẬN THAO TÁC</p>
+            <h1>Xóa món ăn / đồ uống</h1>
+            <p class="text-muted">Kiểm tra thông tin trước khi thực hiện xóa.</p>
         </div>
-        <form asp-action="Delete" asp-route-id="@Model.Id" asp-route-returnUrl="@returnUrl" method="post" data-disable-on-submit>
-            <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-danger" data-saving-label="Đang xử lý...">Xác nhận</button></div>
+        <a href="@returnUrl" class="btn btn-outline-secondary">
+            <svg class="icon"><use href="#i-arrow" /></svg>
+            <span>Về danh sách</span>
+        </a>
+    </div>
+
+    <div class="management-card form-shell mx-auto">
+        <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-3 bg-light border">
+            <img class="management-thumb" style="width: 64px; height: 64px;" src="@Model.ImageUrl" data-image-fallback alt="@Model.Name" />
+            <div>
+                <h2 class="h5 mb-1 text-dark">@Model.Name</h2>
+                <span class="text-muted small">Mã món: <code>@Model.Id</code> · Giá bán: <strong>@Model.Price.ToString("N0") ₫</strong></span>
+            </div>
+        </div>
+
+        <div class="alert @(hasOrders ? "alert-warning" : "alert-danger") mb-4" role="alert">
+            <strong>@(hasOrders ? "Lưu ý chuyển trạng thái:" : "Cảnh báo xóa vĩnh viễn:")</strong>
+            <p class="mb-0 mt-1">
+                @(hasOrders
+                    ? "Món này đã phát sinh trong các đơn hàng trước đây. Để đảm bảo tính toàn vẹn dữ liệu, hệ thống sẽ chuyển món sang trạng thái 'Ngừng bán' thay vì xóa hoàn toàn."
+                    : "Món này chưa có trong đơn hàng nào. Thao tác xác nhận sẽ xóa thông tin sản phẩm khỏi cơ sở dữ liệu.")
+            </p>
+        </div>
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="@(ViewData.ModelState.IsValid ? "display:none" : "")"></div>
+
+        <form asp-action="Delete" asp-route-id="@Model.Id" asp-route-returnUrl="@returnUrl" method="post" data-disable-on-submit class="d-flex gap-2 justify-content-end pt-3 border-top">
+            <a href="@returnUrl" class="btn btn-outline-secondary">Hủy bỏ</a>
+            <button type="submit" class="btn btn-danger" data-saving-label="Đang xử lý...">Xác nhận @(hasOrders ? "ngừng bán" : "xóa món")</button>
         </form>
-    </div></div>
+    </div>
 </div>

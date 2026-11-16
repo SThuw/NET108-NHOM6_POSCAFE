@@ -1,426 +1,497 @@
 @model CafePOSManagement.Web.Controllers.Lab3ViewModel
 @{
     ViewData["Title"] = "Quản lý Hệ thống · PolyCafe";
-    ViewData["PageClass"] = "bg-light";
+    ViewData["PageClass"] = "management-page";
+    var activeTab = ViewContext.HttpContext.Request.Query["tab"].ToString().ToLowerInvariant();
+    if (string.IsNullOrEmpty(activeTab) || (activeTab != "cards" && activeTab != "users" && activeTab != "orders" && activeTab != "ai" && activeTab != "dbutil"))
+    {
+        activeTab = "menu";
+    }
 }
 
-<div class="container-fluid px-4 py-4">
-    <!-- Tiêu đề trang & Thanh thao tác nhanh -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom gap-2">
+<div class="management-shell">
+    <!-- Tiêu đề trang & Thanh trạng thái kết nối -->
+    <div class="management-heading">
         <div>
-            <h3 class="fw-bold text-dark mb-1">Quản lý Hệ thống PolyCafe</h3>
-            <p class="text-muted mb-0 small">Hệ thống quản lý thực đơn, nhân sự, thẻ bàn, hóa đơn và trợ lý AI bán hàng</p>
+            <p class="management-eyebrow">TỔNG QUAN VẬN HÀNH</p>
+            <h1>Quản lý Hệ thống PolyCafe</h1>
+            <p class="text-muted">Trung tâm giám sát thực đơn, nhân sự, thẻ bàn, doanh thu và trợ lý AI bán hàng.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <a asp-controller="Pos" asp-action="Index" class="btn btn-primary btn-sm px-3 shadow-sm">
-                Quầy bán hàng (POS)
+            <a asp-controller="Pos" asp-action="Index" class="btn btn-primary">
+                <span>Quầy bán hàng (POS)</span>
+                <svg class="icon"><use href="#i-arrow" /></svg>
             </a>
-            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
-                SQL Server: Kết nối thành công
-            </span>
+            @if (ViewBag.DbError == null)
+            {
+                <span class="status-pill available" title="SQL Server LocalDB đang hoạt động">
+                    SQL Server: Kết nối tốt
+                </span>
+            }
+            else
+            {
+                <span class="status-pill stopped" title="Không kết nối được SQL Server">
+                    SQL Server: Chưa kết nối
+                </span>
+            }
         </div>
     </div>
 
     @if (ViewBag.DbError != null)
     {
-        <div class="alert alert-warning border-warning d-flex align-items-center mb-4" role="alert">
+        <div class="alert alert-warning mb-4" role="alert">
+            <svg class="icon me-2 flex-shrink-0"><use href="#i-note" /></svg>
             <div>
-                <strong>Lưu ý kết nối Cơ sở dữ liệu:</strong> Không thể kết nối tới SQL Server LocalDB.
-                <div class="small text-muted mt-1">Chi tiết: @ViewBag.DbError</div>
-                <div class="small mt-1">Gợi ý: Đảm bảo SQL Server đang chạy và chuỗi kết nối trong <code>appsettings.json</code> là chính xác.</div>
+                <strong>Lưu ý kết nối cơ sở dữ liệu:</strong> Hệ thống đang chạy trên dữ liệu mẫu nội bộ do không thể kết nối tới SQL Server LocalDB.
+                <div class="small mt-1 text-muted">Vui lòng kiểm tra dịch vụ SQL Server và chuỗi kết nối trong tệp cấu hình.</div>
             </div>
         </div>
     }
 
-    <!-- Thẻ thống kê tổng quan (Dashboard Summary Cards) -->
-    <div class="row g-3 mb-4">
-        <div class="col-xl col-md-4 col-sm-6">
-            <div class="card border-0 shadow-sm rounded-3 h-100">
-                <div class="card-body p-3">
-                    <span class="text-muted small fw-medium">Thực đơn</span>
-                    <h4 class="fw-bold text-dark mt-1 mb-1">@Model.Products.Count <small class="fs-6 text-muted font-monospace">món</small></h4>
-                    <span class="badge bg-light text-secondary border">@Model.Categories.Count danh mục</span>
-                </div>
-            </div>
+    <!-- Thẻ thống kê tổng quan (KPI Cards) -->
+    <div class="kpi-grid" aria-label="Chỉ số hoạt động chính">
+        <div class="kpi-card">
+            <span class="kpi-label">Thực đơn</span>
+            <div class="kpi-value">@Model.Products.Count <small>món</small></div>
+            <div class="kpi-meta">@Model.Categories.Count danh mục phục vụ</div>
         </div>
-        <div class="col-xl col-md-4 col-sm-6">
-            <div class="card border-0 shadow-sm rounded-3 h-100">
-                <div class="card-body p-3">
-                    <span class="text-muted small fw-medium">Thẻ bàn & Thẻ rung</span>
-                    <h4 class="fw-bold text-dark mt-1 mb-1">@Model.Cards.Count <small class="fs-6 text-muted font-monospace">thẻ</small></h4>
-                    <span class="badge bg-light text-secondary border">@Model.Cards.Count(c => !c.Status) thẻ trống</span>
-                </div>
-            </div>
+        <div class="kpi-card">
+            <span class="kpi-label">Bàn & Thẻ rung</span>
+            <div class="kpi-value">@Model.Cards.Count <small>thẻ</small></div>
+            <div class="kpi-meta">@Model.Cards.Count(c => !c.Status) thẻ đang sẵn sàng</div>
         </div>
-        <div class="col-xl col-md-4 col-sm-6">
-            <div class="card border-0 shadow-sm rounded-3 h-100">
-                <div class="card-body p-3">
-                    <span class="text-muted small fw-medium">Nhân sự</span>
-                    <h4 class="fw-bold text-dark mt-1 mb-1">@Model.Users.Count <small class="fs-6 text-muted font-monospace">tài khoản</small></h4>
-                    <span class="badge bg-light text-secondary border">@Model.Users.Count(u => u.Role) quản lý · @Model.Users.Count(u => !u.Role) nhân viên</span>
-                </div>
-            </div>
+        <div class="kpi-card">
+            <span class="kpi-label">Nhân sự</span>
+            <div class="kpi-value">@Model.Users.Count <small>tài khoản</small></div>
+            <div class="kpi-meta">@Model.Users.Count(u => u.Role) quản lý · @Model.Users.Count(u => !u.Role) thu ngân</div>
         </div>
-        <div class="col-xl col-md-4 col-sm-6">
-            <div class="card border-0 shadow-sm rounded-3 h-100">
-                <div class="card-body p-3">
-                    <span class="text-muted small fw-medium">Hóa đơn</span>
-                    <h4 class="fw-bold text-dark mt-1 mb-1">@Model.Orders.Count <small class="fs-6 text-muted font-monospace">đơn hàng</small></h4>
-                    <span class="badge bg-light text-secondary border">Tổng tiền: @Model.Orders.Sum(o => o.Total).ToString("N0") ₫</span>
-                </div>
-            </div>
+        <div class="kpi-card">
+            <span class="kpi-label">Hóa đơn</span>
+            <div class="kpi-value">@Model.Orders.Count <small>đơn</small></div>
+            <div class="kpi-meta">Doanh thu: <strong>@Model.Orders.Sum(o => o.Total).ToString("N0") ₫</strong></div>
         </div>
-        <div class="col-xl col-md-4 col-sm-6">
-            <div class="card border-0 shadow-sm rounded-3 h-100">
-                <div class="card-body p-3">
-                    <span class="text-muted small fw-medium">Trợ lý AI</span>
-                    <h4 class="fw-bold text-dark mt-1 mb-1">@Model.AiSessions.Count <small class="fs-6 text-muted font-monospace">phiên tư vấn</small></h4>
-                    <span class="badge bg-light text-secondary border">Gợi ý món & combo</span>
-                </div>
-            </div>
+        <div class="kpi-card">
+            <span class="kpi-label">Trợ lý AI</span>
+            <div class="kpi-value">@Model.AiSessions.Count <small>phiên</small></div>
+            <div class="kpi-meta">Tư vấn chọn món &amp; combo</div>
         </div>
     </div>
 
     <!-- Khung nội dung chính với các Tab phân hệ quản lý -->
-    <div class="card border-0 shadow-sm rounded-3">
-        <div class="card-header bg-white border-bottom p-3">
-            <ul class="nav nav-pills" id="adminTab" role="tablist">
+    <div class="management-card p-0 overflow-hidden">
+        <div class="p-3 border-bottom bg-light">
+            <ul class="nav nav-pills gap-2" id="adminTab" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active fw-medium" id="menu-tab" data-bs-toggle="tab" data-bs-target="#tab-menu" type="button" role="tab">
-                        Thực đơn & Danh mục
+                    <button class="nav-link @(activeTab == "menu" ? "active" : "")" id="menu-tab" data-bs-toggle="tab" data-bs-target="#tab-menu" type="button" role="tab" aria-controls="tab-menu" aria-selected="@(activeTab == "menu" ? "true" : "false")">
+                        Thực đơn &amp; Danh mục
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-medium" id="cards-tab" data-bs-toggle="tab" data-bs-target="#tab-cards" type="button" role="tab">
-                        Bàn & Thẻ định danh
+                    <button class="nav-link @(activeTab == "cards" ? "active" : "")" id="cards-tab" data-bs-toggle="tab" data-bs-target="#tab-cards" type="button" role="tab" aria-controls="tab-cards" aria-selected="@(activeTab == "cards" ? "true" : "false")">
+                        Bàn &amp; Thẻ định danh
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-medium" id="users-tab" data-bs-toggle="tab" data-bs-target="#tab-users" type="button" role="tab">
-                        Nhân sự & Tài khoản
+                    <button class="nav-link @(activeTab == "users" ? "active" : "")" id="users-tab" data-bs-toggle="tab" data-bs-target="#tab-users" type="button" role="tab" aria-controls="tab-users" aria-selected="@(activeTab == "users" ? "true" : "false")">
+                        Nhân sự &amp; Tài khoản
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-medium" id="orders-tab" data-bs-toggle="tab" data-bs-target="#tab-orders" type="button" role="tab">
+                    <button class="nav-link @(activeTab == "orders" ? "active" : "")" id="orders-tab" data-bs-toggle="tab" data-bs-target="#tab-orders" type="button" role="tab" aria-controls="tab-orders" aria-selected="@(activeTab == "orders" ? "true" : "false")">
                         Lịch sử Hóa đơn
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-medium" id="ai-tab" data-bs-toggle="tab" data-bs-target="#tab-ai" type="button" role="tab">
+                    <button class="nav-link @(activeTab == "ai" ? "active" : "")" id="ai-tab" data-bs-toggle="tab" data-bs-target="#tab-ai" type="button" role="tab" aria-controls="tab-ai" aria-selected="@(activeTab == "ai" ? "true" : "false")">
                         Trợ lý AI Bán hàng
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-medium" id="dbutil-tab" data-bs-toggle="tab" data-bs-target="#tab-dbutil" type="button" role="tab">
-                        Kiến trúc & CSDL
+                    <button class="nav-link @(activeTab == "dbutil" ? "active" : "")" id="dbutil-tab" data-bs-toggle="tab" data-bs-target="#tab-dbutil" type="button" role="tab" aria-controls="tab-dbutil" aria-selected="@(activeTab == "dbutil" ? "true" : "false")">
+                        Thông tin kỹ thuật (Giảng viên)
                     </button>
                 </li>
             </ul>
         </div>
 
-        <div class="card-body p-4">
+        <div class="p-4">
             <div class="tab-content" id="adminTabContent">
                 <!-- TAB 1: THỰC ĐƠN & DANH MỤC -->
-                <div class="tab-pane fade show active" id="tab-menu" role="tabpanel">
+                <div class="tab-pane fade @(activeTab == "menu" ? "show active" : "")" id="tab-menu" role="tabpanel" aria-labelledby="menu-tab">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold text-dark mb-0">1. Danh mục đồ uống</h6>
-                        <span class="text-muted small">CategoryDAL · Tổng cộng @Model.Categories.Count loại</span>
+                        <h2 class="h5 fw-bold text-dark mb-0">1. Danh mục đồ uống</h2>
+                        <span class="text-muted small">@Model.Categories.Count danh mục đang phục vụ</span>
                     </div>
-                    <div class="table-responsive mb-4">
-                        <table class="table table-hover table-bordered align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width: 120px;">Mã loại</th>
-                                    <th>Tên danh mục</th>
-                                    <th>Mã hiển thị</th>
-                                    <th class="text-center" style="width: 100px;">Thứ tự</th>
-                                    <th class="text-center" style="width: 130px;">Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var cat in Model.Categories)
-                                {
+                    @if (Model.Categories.Count == 0)
+                    {
+                        <div class="management-empty py-4">
+                            <p class="text-muted mb-0">Chưa có danh mục nào trong hệ thống.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive mb-4">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <td><code>@cat.Id</code></td>
-                                        <td class="fw-bold">@cat.Name</td>
-                                        <td><span class="badge bg-light text-dark border">@cat.Code</span></td>
-                                        <td class="text-center">@cat.DisplayOrder</td>
-                                        <td class="text-center"><span class="badge bg-success">Hoạt động</span></td>
+                                        <th scope="col" style="width: 140px;">Mã loại</th>
+                                        <th scope="col">Tên danh mục</th>
+                                        <th scope="col">Mã viết tắt</th>
+                                        <th scope="col" class="text-center" style="width: 100px;">Thứ tự</th>
+                                        <th scope="col" class="text-center" style="width: 130px;">Trạng thái</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    @foreach (var cat in Model.Categories)
+                                    {
+                                        <tr>
+                                            <td><code>@cat.Id</code></td>
+                                            <td class="fw-bold">@cat.Name</td>
+                                            <td><span class="badge bg-light text-secondary border">@cat.Code</span></td>
+                                            <td class="text-center">@cat.DisplayOrder</td>
+                                            <td class="text-center"><span class="status-pill available">Hoạt động</span></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
 
-                    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
-                        <h6 class="fw-bold text-dark mb-0">2. Danh sách món đồ uống</h6>
-                        <span class="text-muted small">ProductDAL · Tổng cộng @Model.Products.Count món</span>
+                    <div class="d-flex justify-content-between align-items-center mb-3 mt-4 pt-3 border-top">
+                        <h2 class="h5 fw-bold text-dark mb-0">2. Danh sách món đồ uống</h2>
+                        <span class="text-muted small">@Model.Products.Count món đang bán</span>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width: 80px;">Mã</th>
-                                    <th style="width: 60px;">Hình ảnh</th>
-                                    <th>Tên món</th>
-                                    <th>Danh mục</th>
-                                    <th class="text-end" style="width: 130px;">Giá bán</th>
-                                    <th>Mô tả</th>
-                                    <th class="text-center" style="width: 120px;">Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var p in Model.Products)
-                                {
+                    @if (Model.Products.Count == 0)
+                    {
+                        <div class="management-empty py-4">
+                            <p class="text-muted mb-0">Chưa có món nào trong thực đơn.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <td><code>@p.Id</code></td>
-                                        <td>
-                                            <img src="@p.ImageUrl" width="40" height="40" class="rounded object-fit-cover" alt="" onerror="this.src='/images/product-fallback.svg'" />
-                                        </td>
-                                        <td class="fw-bold text-primary">@p.Name</td>
-                                        <td><span class="badge bg-secondary-subtle text-secondary border">@p.CategoryName</span></td>
-                                        <td class="text-end fw-bold text-danger">@p.Price.ToString("N0") ₫</td>
-                                        <td><small class="text-muted">@p.Description</small></td>
-                                        <td class="text-center"><span class="badge bg-success">Đang phục vụ</span></td>
+                                        <th scope="col" style="width: 100px;">Mã</th>
+                                        <th scope="col" style="width: 60px;">Hình ảnh</th>
+                                        <th scope="col">Tên món</th>
+                                        <th scope="col">Danh mục</th>
+                                        <th scope="col" class="text-end" style="width: 140px;">Giá bán</th>
+                                        <th scope="col">Mô tả</th>
+                                        <th scope="col" class="text-center" style="width: 130px;">Trạng thái</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    @foreach (var p in Model.Products)
+                                    {
+                                        <tr>
+                                            <td><code>@p.Id</code></td>
+                                            <td>
+                                                <img src="@p.ImageUrl" width="40" height="40" class="rounded object-fit-cover" alt="" onerror="this.src='/images/product-fallback.svg'" />
+                                            </td>
+                                            <td class="fw-bold text-dark">@p.Name</td>
+                                            <td><span class="badge bg-light text-secondary border">@p.CategoryName</span></td>
+                                            <td class="text-end fw-bold price-cell">@p.Price.ToString("N0") ₫</td>
+                                            <td><small class="text-muted">@p.Description</small></td>
+                                            <td class="text-center"><span class="status-pill available">Đang phục vụ</span></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
 
                 <!-- TAB 2: QUẢN LÝ BÀN & THẺ ĐỊNH DANH -->
-                <div class="tab-pane fade" id="tab-cards" role="tabpanel">
+                <div class="tab-pane fade @(activeTab == "cards" ? "show active" : "")" id="tab-cards" role="tabpanel" aria-labelledby="cards-tab">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold text-dark mb-0">Danh sách Thẻ bàn và Thẻ rung định danh</h6>
-                        <span class="text-muted small">CardDAL · Quản lý trạng thái bàn & thẻ chờ</span>
+                        <h2 class="h5 fw-bold text-dark mb-0">Danh sách Thẻ bàn và Thẻ rung định danh</h2>
+                        <span class="text-muted small">@Model.Cards.Count thẻ trong hệ thống</span>
                     </div>
-                    <div class="row g-3">
-                        @foreach (var c in Model.Cards)
-                        {
-                            <div class="col-lg-3 col-md-4 col-sm-6">
-                                <div class="card h-100 border @(c.Status ? "border-warning bg-warning bg-opacity-10" : "border-success-subtle bg-white shadow-sm")">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h6 class="fw-bold mb-0 text-dark">@c.Name</h6>
-                                            <span class="badge @(c.Status ? "bg-warning text-dark" : "bg-success")">
-                                                @c.StatusText
-                                            </span>
-                                        </div>
-                                        <div class="text-muted small">
-                                            Mã nhận diện: <code>@c.Code</code>
+                    @if (Model.Cards.Count == 0)
+                    {
+                        <div class="management-empty py-4">
+                            <p class="text-muted mb-0">Chưa có thẻ định danh nào được tạo.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row g-3">
+                            @foreach (var c in Model.Cards)
+                            {
+                                <div class="col-lg-3 col-md-4 col-sm-6">
+                                    <div class="card h-100 border @(c.Status ? "border-warning bg-warning bg-opacity-10" : "border-success-subtle bg-white shadow-sm")">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <h3 class="h6 fw-bold mb-0 text-dark">@c.Name</h3>
+                                                <span class="status-pill @(c.Status ? "stopped" : "available")">
+                                                    @c.StatusText
+                                                </span>
+                                            </div>
+                                            <div class="text-muted small">
+                                                Mã nhận diện: <code>@c.Code</code>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        }
-                    </div>
+                            }
+                        </div>
+                    }
                 </div>
 
                 <!-- TAB 3: NHÂN SỰ & TÀI KHOẢN -->
-                <div class="tab-pane fade" id="tab-users" role="tabpanel">
+                <div class="tab-pane fade @(activeTab == "users" ? "show active" : "")" id="tab-users" role="tabpanel" aria-labelledby="users-tab">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold text-dark mb-0">Danh sách tài khoản nhân viên & phân quyền</h6>
-                        <span class="text-muted small">UserDAL · Quản lý tài khoản đăng nhập quầy POS</span>
+                        <h2 class="h5 fw-bold text-dark mb-0">Danh sách tài khoản nhân viên &amp; phân quyền</h2>
+                        <span class="text-muted small">@Model.Users.Count tài khoản nội bộ</span>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width: 100px;">Mã NV</th>
-                                    <th>Họ và tên</th>
-                                    <th>Email</th>
-                                    <th>Số điện thoại</th>
-                                    <th style="width: 130px;">Vai trò</th>
-                                    <th class="text-center" style="width: 140px;">Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var u in Model.Users)
-                                {
+                    @if (Model.Users.Count == 0)
+                    {
+                        <div class="management-empty py-4">
+                            <p class="text-muted mb-0">Chưa có tài khoản nhân sự nào.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <td><code>@u.Id</code></td>
-                                        <td class="fw-bold text-dark">@u.FullName</td>
-                                        <td>@u.Email</td>
-                                        <td>@u.Phone</td>
-                                        <td>
-                                            @if (u.Role)
-                                            {
-                                                <span class="badge bg-danger">Quản lý</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-primary">Thu ngân</span>
-                                            }
-                                        </td>
-                                        <td class="text-center"><span class="badge bg-success">Đang làm việc</span></td>
+                                        <th scope="col" style="width: 120px;">Mã NV</th>
+                                        <th scope="col">Họ và tên</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Số điện thoại</th>
+                                        <th scope="col" style="width: 130px;">Vai trò</th>
+                                        <th scope="col" class="text-center" style="width: 140px;">Trạng thái</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    @foreach (var u in Model.Users)
+                                    {
+                                        <tr>
+                                            <td><code>@u.Id</code></td>
+                                            <td class="fw-bold text-dark">@u.FullName</td>
+                                            <td>@u.Email</td>
+                                            <td>@u.Phone</td>
+                                            <td>
+                                                @if (u.Role)
+                                                {
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Quản lý</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary-subtle text-secondary border">Thu ngân</span>
+                                                }
+                                            </td>
+                                            <td class="text-center"><span class="status-pill available">Đang làm việc</span></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
 
                 <!-- TAB 4: LỊCH SỬ HÓA ĐƠN -->
-                <div class="tab-pane fade" id="tab-orders" role="tabpanel">
+                <div class="tab-pane fade @(activeTab == "orders" ? "show active" : "")" id="tab-orders" role="tabpanel" aria-labelledby="orders-tab">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold text-dark mb-0">Danh sách hóa đơn bán hàng</h6>
-                        <span class="text-muted small">OrderDAL & OrderItemDAL · Truy xuất từ cơ sở dữ liệu</span>
+                        <h2 class="h5 fw-bold text-dark mb-0">Danh sách hóa đơn bán hàng</h2>
+                        <span class="text-muted small">@Model.Orders.Count đơn đã lập</span>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Số hóa đơn</th>
-                                    <th>Loại đơn</th>
-                                    <th>Thời gian lập</th>
-                                    <th class="text-end">Tạm tính</th>
-                                    <th class="text-end">Giảm giá</th>
-                                    <th class="text-end">VAT</th>
-                                    <th class="text-end">Tổng thanh toán</th>
-                                    <th>Hình thức</th>
-                                    <th class="text-center">Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var o in Model.Orders)
-                                {
+                    @if (Model.Orders.Count == 0)
+                    {
+                        <div class="management-empty py-4">
+                            <p class="text-muted mb-0">Chưa phát sinh hóa đơn bán hàng nào.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <td class="fw-bold text-primary font-monospace">@o.Code</td>
-                                        <td><span class="badge bg-light text-dark border">@o.OrderType</span></td>
-                                        <td><small class="text-muted">@o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small></td>
-                                        <td class="text-end">@o.Subtotal.ToString("N0") ₫</td>
-                                        <td class="text-end text-success">-@o.DiscountAmount.ToString("N0") ₫</td>
-                                        <td class="text-end text-muted">+@o.TaxAmount.ToString("N0") ₫</td>
-                                        <td class="text-end fw-bold text-danger">@o.Total.ToString("N0") ₫</td>
-                                        <td><span class="badge bg-secondary-subtle text-secondary border">@o.PaymentMethod</span></td>
-                                        <td class="text-center"><span class="badge bg-success">@o.Status</span></td>
+                                        <th scope="col">Số hóa đơn</th>
+                                        <th scope="col">Loại đơn</th>
+                                        <th scope="col">Thời gian lập</th>
+                                        <th scope="col" class="text-end">Tạm tính</th>
+                                        <th scope="col" class="text-end">Giảm giá</th>
+                                        <th scope="col" class="text-end">VAT</th>
+                                        <th scope="col" class="text-end">Tổng thanh toán</th>
+                                        <th scope="col">Hình thức</th>
+                                        <th scope="col" class="text-center">Trạng thái</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    @foreach (var o in Model.Orders)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold text-dark font-monospace">@o.Code</td>
+                                            <td><span class="badge bg-light text-dark border">@o.OrderType</span></td>
+                                            <td><small class="text-muted">@o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small></td>
+                                            <td class="text-end">@o.Subtotal.ToString("N0") ₫</td>
+                                            <td class="text-end text-success">@(o.DiscountAmount > 0 ? $"-{o.DiscountAmount:N0} ₫" : "0 ₫")</td>
+                                            <td class="text-end text-muted">+@o.TaxAmount.ToString("N0") ₫</td>
+                                            <td class="text-end fw-bold price-cell">@o.Total.ToString("N0") ₫</td>
+                                            <td><span class="badge bg-secondary-subtle text-secondary border">@o.PaymentMethod</span></td>
+                                            <td class="text-center"><span class="status-pill available">@o.Status</span></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
 
                 <!-- TAB 5: TRỢ LÝ AI BÁN HÀNG -->
-                <div class="tab-pane fade" id="tab-ai" role="tabpanel">
+                <div class="tab-pane fade @(activeTab == "ai" ? "show active" : "")" id="tab-ai" role="tabpanel" aria-labelledby="ai-tab">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold text-dark mb-0">Phiên tư vấn & Gợi ý thực đơn của Trợ lý AI</h6>
-                        <span class="text-muted small">AiStateStoreDAL · Quản lý phiên, ngữ cảnh và lịch sử tư vấn</span>
+                        <h2 class="h5 fw-bold text-dark mb-0">Phiên tư vấn &amp; Gợi ý thực đơn của Trợ lý AI</h2>
+                        <span class="text-muted small">@Model.AiSessions.Count phiên đã ghi nhận</span>
                     </div>
 
-                    <div class="row g-4">
-                        @foreach (var sess in Model.AiSessions)
-                        {
-                            var messages = CafePOSManagement.Web.DAL.AiStateStoreDAL.GetMessages(sess.Id);
-                            var states = CafePOSManagement.Web.DAL.AiStateStoreDAL.GetStates(sess.Id);
+                    @if (Model.AiSessions.Count == 0)
+                    {
+                        <div class="management-empty py-4">
+                            <p class="text-muted mb-0">Chưa có phiên tư vấn AI nào được ghi nhận.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row g-4">
+                            @foreach (var sess in Model.AiSessions)
+                            {
+                                var messages = CafePOSManagement.Web.DAL.AiStateStoreDAL.GetMessages(sess.Id);
+                                var states = CafePOSManagement.Web.DAL.AiStateStoreDAL.GetStates(sess.Id);
 
-                            <div class="col-12">
-                                <div class="card border rounded-3 shadow-sm">
-                                    <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center py-2 px-3">
-                                        <div>
-                                            <span class="badge bg-dark me-2">Mã phiên: @sess.Id</span>
-                                            <strong class="text-dark">@sess.Title</strong>
-                                            @if (!string.IsNullOrEmpty(sess.Context))
-                                            {
-                                                <span class="text-muted ms-2 small">(@sess.Context)</span>
-                                            }
-                                        </div>
-                                        <div class="small text-muted">
-                                            <span>Nhân viên: <strong>@sess.UserFullName</strong></span>
-                                            <span class="mx-2">·</span>
-                                            <span>@sess.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-body p-3">
-                                        <div class="row g-3">
-                                            <!-- Khung hội thoại AI -->
-                                            <div class="col-md-7 border-end">
-                                                <div class="fw-medium text-secondary mb-2 small text-uppercase">Nội dung hội thoại</div>
-                                                <div class="d-flex flex-column gap-2">
-                                                    @foreach (var msg in messages)
-                                                    {
-                                                        if (msg.Role == "user")
-                                                        {
-                                                            <div class="p-2 bg-light rounded-2 border">
-                                                                <span class="badge bg-secondary me-1">Thu ngân</span>
-                                                                <span>@msg.Content</span>
-                                                            </div>
-                                                        }
-                                                        else
-                                                        {
-                                                            <div class="p-2 bg-primary-subtle text-primary-emphasis rounded-2 border border-primary-subtle">
-                                                                <span class="badge bg-primary me-1">Trợ lý AI</span>
-                                                                <span>@msg.Content</span>
-                                                            </div>
-                                                        }
-                                                    }
-                                                </div>
+                                <div class="col-12">
+                                    <div class="card border rounded-3 shadow-sm">
+                                        <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center py-2 px-3">
+                                            <div>
+                                                <span class="badge bg-dark me-2">Mã phiên: @sess.Id</span>
+                                                <strong class="text-dark">@sess.Title</strong>
+                                                @if (!string.IsNullOrEmpty(sess.Context))
+                                                {
+                                                    <span class="text-muted ms-2 small">(@sess.Context)</span>
+                                                }
                                             </div>
-
-                                            <!-- Trạng thái bộ nhớ ngữ cảnh -->
-                                            <div class="col-md-5">
-                                                <div class="fw-medium text-secondary mb-2 small text-uppercase">Trạng thái ngữ cảnh (State Store)</div>
-                                                <div class="table-responsive">
-                                                    <table class="table table-sm table-bordered mb-0">
-                                                        <thead class="table-light">
-                                                            <tr>
-                                                                <th>Khóa (Key)</th>
-                                                                <th>Giá trị (Value)</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach (var st in states)
+                                            <div class="small text-muted">
+                                                <span>Nhân viên: <strong>@sess.UserFullName</strong></span>
+                                                <span class="mx-2">·</span>
+                                                <span>@sess.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-3">
+                                            <div class="row g-3">
+                                                <!-- Khung hội thoại AI -->
+                                                <div class="col-md-7 border-end">
+                                                    <div class="fw-medium text-secondary mb-2 small text-uppercase">Nội dung hội thoại</div>
+                                                    <div class="d-flex flex-column gap-2">
+                                                        @foreach (var msg in messages)
+                                                        {
+                                                            if (msg.Role == "user")
                                                             {
-                                                                <tr>
-                                                                    <td><code>@st.StateKey</code></td>
-                                                                    <td><span class="text-break small">@st.StateValue</span></td>
-                                                                </tr>
+                                                                <div class="p-2 bg-light rounded-2 border">
+                                                                    <span class="badge bg-secondary me-1">Thu ngân</span>
+                                                                    <span>@msg.Content</span>
+                                                                </div>
                                                             }
-                                                        </tbody>
-                                                    </table>
+                                                            else
+                                                            {
+                                                                <div class="p-2 bg-primary-subtle text-primary-emphasis rounded-2 border border-primary-subtle">
+                                                                    <span class="badge bg-primary me-1">Trợ lý AI</span>
+                                                                    <span>@msg.Content</span>
+                                                                </div>
+                                                            }
+                                                        }
+                                                    </div>
+                                                </div>
+
+                                                <!-- Trạng thái bộ nhớ ngữ cảnh -->
+                                                <div class="col-md-5">
+                                                    <div class="fw-medium text-secondary mb-2 small text-uppercase">Trạng thái ngữ cảnh (State Store)</div>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm table-bordered mb-0">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th>Khóa (Key)</th>
+                                                                    <th>Giá trị (Value)</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach (var st in states)
+                                                                {
+                                                                    <tr>
+                                                                        <td><code>@st.StateKey</code></td>
+                                                                        <td><span class="text-break small">@st.StateValue</span></td>
+                                                                    </tr>
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        }
-                    </div>
+                            }
+                        </div>
+                    }
                 </div>
 
-                <!-- TAB 6: KIẾN TRÚC & CSDL (DBUtil) -->
-                <div class="tab-pane fade" id="tab-dbutil" role="tabpanel">
+                <!-- TAB 6: THÔNG TIN KỸ THUẬT / DÀNH CHO GIẢNG VIÊN -->
+                <div class="tab-pane fade @(activeTab == "dbutil" ? "show active" : "")" id="tab-dbutil" role="tabpanel" aria-labelledby="dbutil-tab">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold text-dark mb-0">Cấu hình kết nối và Tiện ích ADO.NET (DBUtil)</h6>
-                        <span class="text-muted small">Mô hình kiến trúc 3 Lớp</span>
+                        <h2 class="h5 fw-bold text-dark mb-0">Thông tin kỹ thuật kiến trúc &amp; CSDL</h2>
+                        <span class="badge bg-secondary-subtle text-secondary border">Dành cho Đánh giá Lab 3 / Giảng viên</span>
                     </div>
 
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="card h-100 border-0 bg-light p-3 rounded-3">
-                                <h6 class="fw-bold text-dark">Kiến trúc 3 Lớp của Dự án:</h6>
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <div class="card h-100 border bg-light p-3 rounded-3">
+                                <h3 class="h6 fw-bold text-dark mb-2">1. Mô hình Kiến trúc 3 Lớp</h3>
                                 <ul class="small mb-0 text-secondary">
-                                    <li class="mb-1"><strong>Presentation Layer:</strong> Controller (`PosController`, `Lab3Controller`) và View Razor UI.</li>
-                                    <li class="mb-1"><strong>Data Access Layer (DAL):</strong> Các lớp `CategoryDAL`, `ProductDAL`, `CardDAL`, `UserDAL`, `OrderDAL`, `OrderItemDAL`, `AiStateStoreDAL`.</li>
-                                    <li><strong>Data & Utilities:</strong> Lớp tiện ích `DBUtil` (ADO.NET) và `CafePosDbContext` (EF Core Code First).</li>
+                                    <li class="mb-2"><strong>Presentation Layer:</strong> Controller (<code>PosController</code>, <code>ProductsController</code>, <code>CategoriesController</code>, <code>Lab3Controller</code>, <code>LoginController</code>) và View Razor UI.</li>
+                                    <li class="mb-2"><strong>Data Access Layer (DAL):</strong> Các lớp truy xuất chuyên biệt phục vụ phân hệ bán hàng và quản trị:
+                                        <ul class="mt-1">
+                                            <li><code>CategoryDAL</code>: Quản lý danh mục thực đơn.</li>
+                                            <li><code>ProductDAL</code>: Lấy danh sách món, tìm kiếm, lọc theo loại.</li>
+                                            <li><code>CardDAL</code>: Quản lý trạng thái bàn &amp; thẻ rung phục vụ tại quầy.</li>
+                                            <li><code>UserDAL</code>: Tài khoản thu ngân/quản lý, tích hợp băm mật khẩu chuẩn ASP.NET Core Identity.</li>
+                                            <li><code>OrderDAL</code> &amp; <code>OrderItemDAL</code>: Lưu trữ đơn hàng, chi tiết món, thuế VAT, giảm giá.</li>
+                                            <li><code>AiStateStoreDAL</code>: Quản lý phiên hội thoại AI, trạng thái ngữ cảnh State Store.</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Data &amp; Utilities:</strong> Lớp tiện ích <code>DBUtil</code> (ADO.NET) và <code>CafePosDbContext</code> (EF Core Code First).</li>
                                 </ul>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card h-100 border-0 bg-light p-3 rounded-3">
-                                <h6 class="fw-bold text-dark">Các phương thức của DBUtil:</h6>
-                                <ul class="small mb-0 text-secondary">
-                                    <li class="mb-1"><code>DBUtil.queryDataTable(sql, parameters)</code>: Truy vấn SELECT trả về <code>DataTable</code> có hỗ trợ Unicode.</li>
-                                    <li class="mb-1"><code>DBUtil.executeScalar(sql, parameters)</code>: Thực thi câu lệnh SQL trả về một giá trị đơn lẻ.</li>
-                                    <li><code>DBUtil.executeNonQuery(sql, parameters)</code>: Thực thi thao tác INSERT, UPDATE, DELETE.</li>
+
+                        <div class="col-lg-6">
+                            <div class="card h-100 border bg-light p-3 rounded-3">
+                                <h3 class="h6 fw-bold text-dark mb-2">2. Lớp Tiện ích ADO.NET (DBUtil)</h3>
+                                <p class="small text-secondary mb-2">Lớp <code>DBUtil</code> đóng gói các thao tác ADO.NET cơ bản, hỗ trợ chuẩn Unicode Tiếng Việt và chống SQL Injection qua tham số SQL:</p>
+                                <ul class="small mb-3 text-secondary">
+                                    <li class="mb-2"><code>DBUtil.queryDataTable(sql, parameters)</code>: Thực thi câu lệnh <code>SELECT</code>, trả về <code>DataTable</code>.</li>
+                                    <li class="mb-2"><code>DBUtil.executeScalar(sql, parameters)</code>: Thực thi truy vấn trả về một giá trị đơn lẻ (COUNT, MAX).</li>
+                                    <li><code>DBUtil.executeNonQuery(sql, parameters)</code>: Thực thi các thao tác cập nhật dữ liệu <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>.</li>
                                 </ul>
+
+                                <h3 class="h6 fw-bold text-dark mb-2">3. Trạng thái Kết nối CSDL</h3>
+                                @if (ViewBag.DbError == null)
+                                {
+                                    <div class="alert alert-success py-2 px-3 mb-0 small" role="status">
+                                        <strong>SQL Server LocalDB:</strong> Kết nối thành công tới cơ sở dữ liệu <code>CafePOS</code>.
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-warning py-2 px-3 mb-0 small" role="alert">
+                                        <strong>SQL Server LocalDB:</strong> Chưa kết nối được. Vui lòng kiểm tra chuỗi kết nối và đảm bảo dịch vụ SQL Server đang chạy.
+                                    </div>
+                                }
                             </div>
                         </div>
-                    </div>
-
-                    <div class="alert alert-success mt-3 mb-0 small">
-                        <strong>Trạng thái kết nối cơ sở dữ liệu:</strong> SQL Server LocalDB (<code>Database=CafePOS</code>) đang hoạt động ổn định.
                     </div>
                 </div>
             </div>

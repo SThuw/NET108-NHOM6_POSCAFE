@@ -1,3 +1,40 @@
 @model CafePOSManagement.Web.Models.Entities.Category
-@{ ViewData["Title"] = "Chi tiết danh mục"; }
-<div class="container py-4"><h1 class="h3">@Model.Name</h1><dl class="row"><dt class="col-sm-3">Mã</dt><dd class="col-sm-9">@Model.Id</dd><dt class="col-sm-3">Mã hiển thị</dt><dd class="col-sm-9">@Model.Code</dd><dt class="col-sm-3">Thứ tự</dt><dd class="col-sm-9">@Model.DisplayOrder</dd></dl><a asp-action="Index">Trở về danh sách</a></div>
+@{
+    ViewData["Title"] = "Chi tiết danh mục · " + Model.Name;
+    ViewData["PageClass"] = "management-page";
+}
+<div class="management-shell">
+    <div class="management-heading">
+        <div>
+            <p class="management-eyebrow">CHI TIẾT DANH MỤC</p>
+            <h1>@Model.Name</h1>
+            <p class="text-muted">Mã danh mục: <code>@Model.Id</code></p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <svg class="icon"><use href="#i-arrow" /></svg>
+                <span>Về danh sách</span>
+            </a>
+            @if (User.IsInRole("Manager"))
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary" aria-label="Sửa danh mục @Model.Name">
+                    Sửa danh mục
+                </a>
+            }
+        </div>
+    </div>
+    <div class="management-card form-shell mx-auto">
+        <dl class="row mb-0">
+            <dt class="col-sm-4 py-2 text-muted fw-semibold">Mã định danh (ID)</dt>
+            <dd class="col-sm-8 py-2"><code>@Model.Id</code></dd>
+            <dt class="col-sm-4 py-2 text-muted fw-semibold">Tên danh mục</dt>
+            <dd class="col-sm-8 py-2"><strong>@Model.Name</strong></dd>
+            <dt class="col-sm-4 py-2 text-muted fw-semibold">Mã hiển thị viết tắt</dt>
+            <dd class="col-sm-8 py-2"><span class="badge bg-light text-secondary border">@Model.Code</span></dd>
+            <dt class="col-sm-4 py-2 text-muted fw-semibold">Thứ tự hiển thị</dt>
+            <dd class="col-sm-8 py-2">@Model.DisplayOrder</dd>
+            <dt class="col-sm-4 py-2 text-muted fw-semibold">Trạng thái phục vụ</dt>
+            <dd class="col-sm-8 py-2"><span class="status-pill available">Đang hoạt động</span></dd>
+        </dl>
+    </div>
+</div>

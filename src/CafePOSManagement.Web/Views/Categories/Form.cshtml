@@ -1,12 +1,57 @@
 @model CategoryForm
-@{ var editing = ViewContext.RouteData.Values["action"]?.ToString() == "Edit"; ViewData["Title"] = editing ? "Sửa danh mục" : "Thêm danh mục"; }
-<div class="container py-4" style="max-width: 640px"><h1 class="h3 mb-4">@ViewData["Title"]</h1>
-    <form asp-action="@(editing ? "Edit" : "Create")" asp-route-id="@(editing ? Model.Id : null)" method="post">
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
-        <div class="mb-3"><label asp-for="Id" class="form-label">Mã danh mục</label><input asp-for="Id" class="form-control" readonly="@editing" maxlength="40" /><span asp-validation-for="Id" class="text-danger"></span></div>
-        <div class="mb-3"><label asp-for="Name" class="form-label">Tên danh mục</label><input asp-for="Name" class="form-control" maxlength="100" /><span asp-validation-for="Name" class="text-danger"></span></div>
-        <div class="mb-3"><label asp-for="Code" class="form-label">Mã hiển thị</label><input asp-for="Code" class="form-control" maxlength="40" /><span asp-validation-for="Code" class="text-danger"></span></div>
-        <div class="mb-3"><label asp-for="DisplayOrder" class="form-label">Thứ tự</label><input asp-for="DisplayOrder" class="form-control" type="number" min="0" /><span asp-validation-for="DisplayOrder" class="text-danger"></span></div>
-        <button type="submit" class="btn btn-primary">Lưu</button> <a asp-action="Index" class="btn btn-outline-secondary">Hủy</a>
-    </form>
+@{
+    var editing = ViewContext.RouteData.Values["action"]?.ToString() == "Edit";
+    ViewData["Title"] = editing ? "Sửa danh mục" : "Thêm danh mục";
+    ViewData["PageClass"] = "management-page";
+}
+<div class="management-shell">
+    <div class="management-heading">
+        <div>
+            <p class="management-eyebrow">DANH MỤC THỰC ĐƠN</p>
+            <h1>@ViewData["Title"]</h1>
+            <p class="text-muted">@(editing ? "Cập nhật thông tin phân loại đồ uống / món ăn." : "Tạo danh mục mới để phân nhóm đồ uống trên quầy bán hàng.")</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <svg class="icon"><use href="#i-arrow" /></svg>
+            <span>Về danh sách</span>
+        </a>
+    </div>
+
+    <div class="management-card form-shell mx-auto">
+        <form asp-action="@(editing ? "Edit" : "Create")" asp-route-id="@(editing ? Model.Id : null)" method="post" data-disable-on-submit class="management-form">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="@(ViewData.ModelState.IsValid ? "display:none" : "")"></div>
+
+            <div class="form-grid">
+                <div>
+                    <label asp-for="Id" class="form-label">Mã danh mục <span class="text-danger" aria-hidden="true">*</span></label>
+                    <input asp-for="Id" class="form-control" readonly="@editing" maxlength="40" required placeholder="Ví dụ: ca-phe" />
+                    <span asp-validation-for="Id" class="field-error"></span>
+                    @if (editing)
+                    {
+                        <small class="form-text text-muted">Mã định danh không thể thay đổi sau khi tạo.</small>
+                    }
+                </div>
+                <div>
+                    <label asp-for="Name" class="form-label">Tên danh mục <span class="text-danger" aria-hidden="true">*</span></label>
+                    <input asp-for="Name" class="form-control" maxlength="100" required placeholder="Ví dụ: Cà phê Việt Nam" />
+                    <span asp-validation-for="Name" class="field-error"></span>
+                </div>
+                <div>
+                    <label asp-for="Code" class="form-label">Mã hiển thị ngắn <span class="text-danger" aria-hidden="true">*</span></label>
+                    <input asp-for="Code" class="form-control" maxlength="40" required placeholder="Ví dụ: CF" />
+                    <span asp-validation-for="Code" class="field-error"></span>
+                </div>
+                <div>
+                    <label asp-for="DisplayOrder" class="form-label">Thứ tự hiển thị</label>
+                    <input asp-for="DisplayOrder" class="form-control" type="number" min="0" placeholder="0" />
+                    <span asp-validation-for="DisplayOrder" class="field-error"></span>
+                </div>
+            </div>
+
+            <div class="form-actions mt-4 pt-3 border-top d-flex gap-2 justify-content-end">
+                <a asp-action="Index" class="btn btn-outline-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn btn-primary" data-saving-label="Đang lưu...">Lưu danh mục</button>
+            </div>
+        </form>
+    </div>
 </div>

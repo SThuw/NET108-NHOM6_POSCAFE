@@ -39,7 +39,7 @@
                     <td data-label="Danh mục">@product.Category?.Name</td>
                     <td data-label="Giá bán" class="text-end price-cell">@product.Price.ToString("N0") ₫</td>
                     <td data-label="Trạng thái"><span class="status-pill @(product.IsAvailable ? "available" : "stopped")">@(product.IsAvailable ? "Đang bán" : "Ngừng bán")</span></td>
-                    <td data-label="Thao tác"><div class="row-actions"><a asp-action="Details" asp-route-id="@product.Id" asp-route-returnUrl="@returnUrl">Xem</a><a asp-action="Edit" asp-route-id="@product.Id" asp-route-returnUrl="@returnUrl">Sửa</a><a class="delete-action" asp-action="Delete" asp-route-id="@product.Id" asp-route-returnUrl="@returnUrl">Xóa</a></div></td>
+                    <td data-label="Thao tác"><div class="row-actions"><a asp-action="Details" asp-route-id="@product.Id" asp-route-returnUrl="@returnUrl" aria-label="Xem chi tiết @product.Name">Xem</a><a asp-action="Edit" asp-route-id="@product.Id" asp-route-returnUrl="@returnUrl" aria-label="Sửa món @product.Name">Sửa</a><a class="delete-action" asp-action="Delete" asp-route-id="@product.Id" asp-route-returnUrl="@returnUrl" aria-label="Xóa món @product.Name">Xóa</a></div></td>
                 </tr>
             }
             </tbody></table></div>
