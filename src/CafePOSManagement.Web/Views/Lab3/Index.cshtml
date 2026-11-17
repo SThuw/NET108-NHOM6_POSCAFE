@@ -319,7 +319,7 @@
                                         <th scope="col" class="text-end">VAT</th>
                                         <th scope="col" class="text-end">Tổng thanh toán</th>
                                         <th scope="col">Hình thức</th>
-                                        <th scope="col" class="text-center">Trạng thái</th>
+                                        <th scope="col" class="text-center" style="width: 200px;">Trạng thái</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -334,7 +334,29 @@
                                             <td class="text-end text-muted">+@o.TaxAmount.ToString("N0") ₫</td>
                                             <td class="text-end fw-bold price-cell">@o.Total.ToString("N0") ₫</td>
                                             <td><span class="badge bg-secondary-subtle text-secondary border">@o.PaymentMethod</span></td>
-                                            <td class="text-center"><span class="status-pill available">@o.Status</span></td>
+                                            <td class="text-center align-middle">
+                                                <div class="d-flex justify-content-center align-items-center gap-2">
+                                                    @if (o.Status == "Đang chuẩn bị")
+                                                    {
+                                                        <span class="badge bg-warning text-dark rounded-pill">@o.Status</span>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" onclick="updateStatus(@o.Id, 'Chờ nhận món')">Chờ nhận</button>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 0.75rem;" onclick="updateStatus(@o.Id, 'Hủy đơn')">Hủy</button>
+                                                    }
+                                                    else if (o.Status == "Chờ nhận món")
+                                                    {
+                                                        <span class="badge bg-primary rounded-pill">@o.Status</span>
+                                                        <button type="button" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.75rem;" onclick="updateStatus(@o.Id, 'Hoàn thành')">Hoàn thành</button>
+                                                    }
+                                                    else if (o.Status == "Hoàn thành")
+                                                    {
+                                                        <span class="badge bg-success rounded-pill">@o.Status</span>
+                                                    }
+                                                    else if (o.Status == "Hủy đơn")
+                                                    {
+                                                        <span class="badge bg-danger rounded-pill">@o.Status</span>
+                                                    }
+                                                </div>
+                                            </td>
                                         </tr>
                                     }
                                 </tbody>
@@ -346,7 +368,31 @@
                 <!-- TAB 5: TRỢ LÝ AI BÁN HÀNG -->
                 <div class="tab-pane fade @(activeTab == "ai" ? "show active" : "")" id="tab-ai" role="tabpanel" aria-labelledby="ai-tab">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2 class="h5 fw-bold text-dark mb-0">Phiên tư vấn &amp; Gợi ý thực đơn của Trợ lý AI</h2>
+                        <div class="d-flex align-items-center gap-2">
+                            <h2 class="h5 fw-bold text-dark mb-0">Phiên tư vấn &amp; Gợi ý thực đơn của Trợ lý AI</h2>
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="clearChatBox()">
+                                <svg class="icon me-1" style="width: 14px; height: 14px;"><use href="#i-trash" /></svg> Xóa đoạn chat
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteAiHistory()">
+                                <svg class="icon me-1" style="width: 14px; height: 14px;"><use href="#i-trash" /></svg> Xóa lịch sử
+                            </button>
+                        </div>
+                        <!-- KHUNG CHAT AI MỚI -->
+                        <div class="card border-primary mb-4 shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <strong>Trò chuyện với Trợ lý AI</strong>
+                            </div>
+                            <div class="card-body">
+                                <div id="ai-chat-history" class="mb-3" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+                                    <!-- Lịch sử chat sẽ hiện ở đây -->
+                                    <div class="text-muted small fst-italic">Hãy nhập câu hỏi để AI tư vấn món...</div>
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" id="ai-message-input" class="form-control" placeholder="Ví dụ: Tư vấn món chua ngọt thanh mát..." />
+                                    <button class="btn btn-primary" type="button" onclick="sendAiMessage()">Gửi</button>
+                                </div>
+                            </div>
+                        </div>
                         <span class="text-muted small">@Model.AiSessions.Count phiên đã ghi nhận</span>
                     </div>
 
@@ -358,7 +404,7 @@
                     }
                     else
                     {
-                        <div class="row g-4">
+                        <div class="row g-4" id="ai-sessions-list">
                             @foreach (var sess in Model.AiSessions)
                             {
                                 var messages = CafePOSManagement.Web.DAL.AiStateStoreDAL.GetMessages(sess.Id);
@@ -435,6 +481,28 @@
                                     </div>
                                 </div>
                             }
+                            <!-- PHÂN TRANG AI -->
+                            @if (ViewBag.TotalAiPages > 1)
+                            {
+                                <div class="d-flex justify-content-center mt-4">
+                                    <nav aria-label="Page navigation">
+                                        <ul class="pagination mb-0">
+                                            <li class="page-item @(ViewBag.AiPage == 1 ? "disabled" : "")">
+                                                <a class="page-link" href="?tab=ai&aiPage=@(ViewBag.AiPage - 1)">Trước</a>
+                                            </li>
+                                            @for (int i = 1; i <= ViewBag.TotalAiPages; i++)
+                                            {
+                                                <li class="page-item @(i == ViewBag.AiPage ? "active" : "")">
+                                                    <a class="page-link" href="?tab=ai&aiPage=@i">@i</a>
+                                                </li>
+                                            }
+                                            <li class="page-item @(ViewBag.AiPage == ViewBag.TotalAiPages ? "disabled" : "")">
+                                                <a class="page-link" href="?tab=ai&aiPage=@(ViewBag.AiPage + 1)">Sau</a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            }
                         </div>
                     }
                 </div>
@@ -506,3 +574,130 @@
         </p>
     </footer>
 </div>
+
+@section Scripts {
+    <script>
+        // Hàm lưu nháp chat vào bộ nhớ trình duyệt (để khi chuyển trang quay lại vẫn còn)
+        function saveChatDraft() {
+            const history = document.getElementById('ai-chat-history');
+            if(history) sessionStorage.setItem('ai-chat-draft', history.innerHTML);
+        }
+
+        // Hàm tải nháp chat khi vừa vào trang
+        function loadChatDraft() {
+            const history = document.getElementById('ai-chat-history');
+            const draft = sessionStorage.getItem('ai-chat-draft');
+            if(history && draft) history.innerHTML = draft;
+        }
+
+        // Hàm gửi tin nhắn
+        function sendAiMessage() {
+            const input = document.getElementById('ai-message-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const history = document.getElementById('ai-chat-history');
+            if(history.querySelector('.fst-italic')) history.innerHTML = '';
+
+            // Hiển thị tin nhắn của Bạn
+            history.innerHTML += `<div class="p-2 bg-light rounded-2 border align-self-end" style="max-width: 80%;"><span class="badge bg-secondary me-1">Bạn</span> ${message}</div>`;
+            input.value = '';
+            history.scrollTop = history.scrollHeight;
+
+            const token = document.cookie.split('; ').find(row => row.startsWith('.AspNetCore.Antiforgery.'))?.split('=')[1];
+            
+            fetch('/Lab3/SendAiMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': token || '' },
+                body: `message=${encodeURIComponent(message)}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Hiển thị tin nhắn của AI
+                    history.innerHTML += `<div class="p-2 bg-primary-subtle text-primary-emphasis rounded-2 border border-primary-subtle" style="max-width: 80%;"><span class="badge bg-primary me-1">Trợ lý AI</span> <div style="white-space: pre-wrap;">${data.reply}</div></div>`;
+                    history.scrollTop = history.scrollHeight;
+
+                    // Lưu nháp chat
+                    saveChatDraft();
+
+                    // TẢI LẠI PHẦN LỊCH SỬ BÊN DƯỚI BẰNG AJAX (KHÔNG F5)
+                    fetch('/Lab3?tab=ai')
+                        .then(res => res.text())
+                        .then(html => {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const newList = doc.getElementById('ai-sessions-list');
+                            const oldList = document.getElementById('ai-sessions-list');
+                            if (newList && oldList) {
+                                oldList.innerHTML = newList.innerHTML;
+                            }
+                        });
+                } else {
+                    history.innerHTML += `<div class="text-danger small">Lỗi: ${data.message}</div>`;
+                }
+            })
+            .catch(err => alert('Lỗi kết nối đến AI.'));
+        }
+
+        // Nút Xóa đoạn chat (Chỉ xóa khung chat, KHÔNG xóa DB)
+        function clearChatBox() {
+            const history = document.getElementById('ai-chat-history');
+            history.innerHTML = `<div class="text-muted small fst-italic">Hãy nhập câu hỏi để AI tư vấn món...</div>`;
+            sessionStorage.removeItem('ai-chat-draft'); // Xóa nháp
+        }
+
+        // Nút Xóa lịch sử (Xóa DB + Xóa khung chat)
+        function deleteAiHistory() {
+            if (!confirm("Bạn có chắc chắn muốn xóa TOÀN BỘ lịch sử trò chuyện AI không?")) return;
+
+            const token = document.cookie.split('; ').find(row => row.startsWith('.AspNetCore.Antiforgery.'))?.split('=')[1];
+            
+            fetch('/Lab3/DeleteAiHistory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': token || '' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    sessionStorage.removeItem('ai-chat-draft');
+                    window.location.href = '/Lab3?tab=ai&t=' + new Date().getTime(); 
+                } else {
+                    alert("Lỗi: " + data.message);
+                }
+            })
+            .catch(err => alert("Lỗi kết nối khi xóa lịch sử."));
+        }
+
+        // Hàm updateStatus cũ (giữ nguyên nếu mày có dùng)
+        function updateStatus(orderId, newStatus) {
+            const token = document.cookie.split('; ').find(row => row.startsWith('.AspNetCore.Antiforgery.'))?.split('=')[1];
+            fetch('/Lab3/UpdateOrderStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': token || '' },
+                body: `id=${orderId}&newStatus=${encodeURIComponent(newStatus)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) window.location.reload();
+                else alert(data.message);
+            })
+            .catch(error => alert('Lỗi cập nhật trạng thái.'));
+        }
+
+        // Khởi tạo khi trang tải xong
+        document.addEventListener("DOMContentLoaded", function() {
+            loadChatDraft(); // Tải lại nháp chat
+
+            const input = document.getElementById('ai-message-input');
+            if(input) {
+                input.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        sendAiMessage();
+                    }
+                });
+            }
+        });
+    </script>
+}

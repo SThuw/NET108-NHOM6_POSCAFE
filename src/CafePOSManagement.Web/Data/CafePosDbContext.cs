@@ -66,7 +66,7 @@ public sealed class CafePosDbContext(DbContextOptions<CafePosDbContext> options)
         {
             table.HasCheckConstraint("CK_Orders_Percent", "[DiscountPercent] BETWEEN 0 AND 100 AND [TaxPercent] BETWEEN 0 AND 100");
             table.HasCheckConstraint("CK_Orders_Amounts", "[Subtotal] >= 0 AND [DiscountAmount] >= 0 AND [DiscountAmount] <= [Subtotal] AND [TaxAmount] >= 0 AND [TotalAmount] = [Subtotal] - [DiscountAmount] + [TaxAmount]");
-            table.HasCheckConstraint("CK_Orders_Status", "[Status] IN (N'Hoàn thành', N'Đã hủy')");
+            table.HasCheckConstraint("CK_Orders_Status", "Status IN (N'Đang chuẩn bị', N'Chờ nhận món', N'Hoàn thành', N'Hủy đơn')");
             table.HasCheckConstraint("CK_Orders_OrderType", "[OrderType] IN (N'Mang đi', N'Giao hàng', N'Tại bàn')");
             table.HasCheckConstraint("CK_Orders_PaymentMethod", "[PaymentMethod] IN (N'Tiền mặt', N'Thẻ ngân hàng', N'Ví điện tử')");
             table.HasCheckConstraint("CK_Orders_RequestId", "[RequestId] <> '00000000-0000-0000-0000-000000000000'");
