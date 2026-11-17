@@ -34,6 +34,11 @@ public sealed class PosController(IPosService posService, IProductService produc
     public IActionResult Checkout([FromBody] CheckoutOrderDto input) => Execute(() =>
         new { order = orders.Checkout(input), nextOrderNumber = orders.GetNextOrderNumber() });
 
+    // Cập nhật đơn vừa tạo: giữ nguyên Id/OrderNumber, chỉ thay thông tin và chi tiết món.
+    [HttpPut, RequestSizeLimit(32768)]
+    public IActionResult UpdateOrder(long id, [FromBody] CheckoutOrderDto input) => Execute(() =>
+        new { order = orders.Update(id, input), nextOrderNumber = orders.GetNextOrderNumber() });
+
     private IActionResult Execute<T>(Func<T> action)
     {
         if (!ModelState.IsValid)

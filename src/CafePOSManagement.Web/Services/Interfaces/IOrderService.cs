@@ -10,4 +10,5 @@ public interface IOrderService
     string GetNextOrderNumber();
     Order Preview(CheckoutOrderDto input);
     Order Checkout(CheckoutOrderDto input);
+    Order Update(long orderId, CheckoutOrderDto input);
 }
