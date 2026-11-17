@@ -32,6 +32,11 @@
                 <span asp-validation-for="Password" class="field-error"></span>
             </div>
             <div class="full">
+                <label asp-for="Phone" class="form-label">Số điện thoại</label>
+                <input asp-for="Phone" class="form-control" type="tel" autocomplete="tel" />
+                <span asp-validation-for="Phone" class="field-error"></span>
+            </div>
+            <div class="full">
                 <label asp-for="IsManager" class="form-label">Vai trò</label>
                 <select asp-for="IsManager" class="form-select">
                     <option value="false">Employee - Nhân viên</option>

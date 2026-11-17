@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using CafePOSManagement.Web.DAL;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +56,19 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("EmployeeOrManager", policy => policy.RequireRole("Employee", "Manager"));
     options.AddPolicy("ManagerOnly", policy => policy.RequireRole("Manager"));
 });
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("PasswordReset", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(10),
+            QueueLimit = 0,
+            AutoReplenishment = true
+        }));
+});
 
 builder.Services.AddDbContext<CafePosDbContext>(options =>
 {
@@ -90,6 +105,7 @@ if (!app.Environment.IsDevelopment())
 app.UseRequestLocalization();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.Use(async (context, next) =>
 {

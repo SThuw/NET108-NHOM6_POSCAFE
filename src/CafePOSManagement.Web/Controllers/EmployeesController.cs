@@ -24,6 +24,7 @@ public sealed class EmployeesController(CafePosDbContext db) : Controller
                 user.Id,
                 user.FullName,
                 user.Email,
+                user.Phone,
                 user.Role,
                 user.IsActive,
                 user.CreatedAt))
@@ -52,7 +53,7 @@ public sealed class EmployeesController(CafePosDbContext db) : Controller
             form.Email,
             "",
             form.FullName,
-            "",
+            form.Phone,
             form.IsManager,
             true);
         account = account with { Password = PasswordHasher.HashPassword(account, form.Password) };
@@ -84,6 +85,7 @@ public sealed class EmployeesController(CafePosDbContext db) : Controller
                 Id = account.Id,
                 Email = account.Email,
                 FullName = account.FullName,
+                Phone = account.Phone,
                 IsManager = account.Role,
                 IsActive = account.IsActive
             });
@@ -96,9 +98,14 @@ public sealed class EmployeesController(CafePosDbContext db) : Controller
         var account = await db.Users.FirstOrDefaultAsync(user => user.Id == id);
         if (account is null) return NotFound();
 
-        form.Email = account.Email;
         Normalize(form);
         if (!ModelState.IsValid) return View(form);
+
+        if (await db.Users.AnyAsync(user => user.Id != id && user.Email == form.Email))
+        {
+            ModelState.AddModelError(nameof(form.Email), "Email này đã được sử dụng.");
+            return View(form);
+        }
 
         if (!CanChangeAccess(account, form.IsManager, form.IsActive, out var error))
         {
@@ -115,11 +122,21 @@ public sealed class EmployeesController(CafePosDbContext db) : Controller
 
         db.Entry(account).CurrentValues.SetValues(account with
         {
+            Email = form.Email,
             FullName = form.FullName,
+            Phone = form.Phone,
             Role = form.IsManager,
             IsActive = form.IsActive
         });
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            ModelState.AddModelError("", "Không thể cập nhật nhân viên. Hãy kiểm tra email và thử lại.");
+            return View(form);
+        }
 
         TempData["EmployeesMessage"] = $"Đã cập nhật tài khoản {account.Email}.";
         return RedirectToAction(nameof(Index));
@@ -172,6 +189,7 @@ public sealed class EmployeesController(CafePosDbContext db) : Controller
     {
         form.FullName = form.FullName?.Trim() ?? "";
         form.Email = form.Email?.Trim().ToLowerInvariant() ?? "";
+        form.Phone = form.Phone?.Trim() ?? "";
         ModelState.Clear();
         TryValidateModel(form);
     }
@@ -179,6 +197,8 @@ public sealed class EmployeesController(CafePosDbContext db) : Controller
     private void Normalize(EditEmployeeViewModel form)
     {
         form.FullName = form.FullName?.Trim() ?? "";
+        form.Email = form.Email?.Trim().ToLowerInvariant() ?? "";
+        form.Phone = form.Phone?.Trim() ?? "";
         ModelState.Clear();
         TryValidateModel(form);
     }

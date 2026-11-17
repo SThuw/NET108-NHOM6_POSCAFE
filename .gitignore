@@ -4,7 +4,9 @@
 .idea/
 .tools/
 .playwright-cli/
-artifacts/
+artifacts/*
+!artifacts/asm1-duc-auth/
+!artifacts/asm1-duc-auth/*.png
 *.user
 *.suo
 .env
