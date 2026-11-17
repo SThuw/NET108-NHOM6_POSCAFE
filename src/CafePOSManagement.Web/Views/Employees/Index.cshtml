@@ -51,6 +51,7 @@
                             <th scope="col">Mã</th>
                             <th scope="col">Họ và tên</th>
                             <th scope="col">Email</th>
+                            <th scope="col">Số điện thoại</th>
                             <th scope="col">Vai trò</th>
                             <th scope="col">Trạng thái</th>
                             <th scope="col">Ngày tạo</th>
@@ -64,6 +65,7 @@
                             <td data-label="Mã"><code>@employee.Id</code></td>
                             <td data-label="Họ và tên"><strong>@employee.FullName</strong></td>
                             <td data-label="Email">@employee.Email</td>
+                            <td data-label="Số điện thoại">@(string.IsNullOrWhiteSpace(employee.Phone) ? "Chưa cập nhật" : employee.Phone)</td>
                             <td data-label="Vai trò">@(employee.IsManager ? "Manager - Quản lý" : "Employee - Nhân viên")</td>
                             <td data-label="Trạng thái">
                                 <span class="status-pill @(employee.IsActive ? "available" : "stopped")">

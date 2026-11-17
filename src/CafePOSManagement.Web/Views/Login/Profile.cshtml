@@ -17,6 +17,10 @@
     </div>
 
     <div class="management-card form-shell mx-auto">
+        @if (TempData["ProfileMessage"] is string message)
+        {
+            <div class="alert alert-success" role="status">@message</div>
+        }
         <dl class="row mb-4">
             <dt class="col-sm-4 py-2 text-muted fw-semibold">Mã nhân viên</dt>
             <dd class="col-sm-8 py-2"><code>@Model.Id</code></dd>
@@ -32,6 +36,7 @@
 
         <div class="d-flex gap-2 justify-content-end pt-3 border-top">
             <a asp-controller="Pos" asp-action="Index" class="btn btn-outline-secondary">Về quầy POS</a>
+            <a asp-action="ChangePassword" class="btn btn-outline-secondary">Đổi mật khẩu</a>
             <form asp-action="Logout" method="post" class="d-inline">
                 <button type="submit" class="btn btn-primary">Đăng xuất</button>
             </form>

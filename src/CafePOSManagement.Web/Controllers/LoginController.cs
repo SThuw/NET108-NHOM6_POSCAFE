@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace CafePOSManagement.Web.Controllers;
 
@@ -63,7 +64,7 @@ public sealed class LoginController(
     [HttpGet, AllowAnonymous, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public IActionResult ForgotPassword() => View(new ForgotPasswordViewModel());
 
-    [HttpPost, AllowAnonymous, ValidateAntiForgeryToken, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [HttpPost, AllowAnonymous, ValidateAntiForgeryToken, EnableRateLimiting("PasswordReset"), ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
     {
         model.Email = model.Email?.Trim().ToLowerInvariant() ?? "";
@@ -85,8 +86,8 @@ public sealed class LoginController(
         }
 
         var originalPasswordHash = account.Password;
-        // shortcut: Mật khẩu tạm 4 chữ số theo LAB 5; dùng reset token có hạn trước khi triển khai thật.
-        var newPassword = $"Poly@{RandomNumberGenerator.GetInt32(0, 10_000):D4}";
+        // shortcut: LAB 5 gửi mật khẩu tạm qua email; hệ thống thật nên dùng reset token một lần có hạn.
+        var newPassword = $"Poly@{Convert.ToHexString(RandomNumberGenerator.GetBytes(6))}";
         var newPasswordHash = PasswordHasher.HashPassword(account, newPassword);
         db.Entry(account).CurrentValues.SetValues(account with { Password = newPasswordHash });
 
@@ -130,6 +131,49 @@ public sealed class LoginController(
             account.Role ? "Quản lý" : "Nhân viên"));
     }
 
+    [HttpGet, Authorize, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public IActionResult ChangePassword() => View(new ChangePasswordViewModel());
+
+    [HttpPost, Authorize, ValidateAntiForgeryToken, ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+    {
+        if (!ModelState.IsValid) return View(model);
+
+        var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var account = string.IsNullOrWhiteSpace(id)
+            ? null
+            : await db.Users.FirstOrDefaultAsync(user => user.Id == id && user.IsActive);
+        if (account is null)
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction(nameof(Login));
+        }
+
+        if (PasswordHasher.VerifyHashedPassword(account, account.Password, model.CurrentPassword) == PasswordVerificationResult.Failed)
+        {
+            ModelState.AddModelError(nameof(model.CurrentPassword), "Mật khẩu hiện tại không đúng.");
+            return View(model);
+        }
+
+        if (model.CurrentPassword == model.NewPassword)
+        {
+            ModelState.AddModelError(nameof(model.NewPassword), "Mật khẩu mới phải khác mật khẩu hiện tại.");
+            return View(model);
+        }
+
+        db.Entry(account).CurrentValues.SetValues(account with
+        {
+            Password = PasswordHasher.HashPassword(account, model.NewPassword)
+        });
+        await db.SaveChangesAsync();
+        TempData["ProfileMessage"] = "Đã đổi mật khẩu thành công.";
+        return RedirectToAction(nameof(Profile));
+    }
+
     [HttpGet]
-    public IActionResult Denied() => View();
+    public IActionResult Denied()
+    {
+        Response.StatusCode = StatusCodes.Status403Forbidden;
+        return View();
+    }
 }
