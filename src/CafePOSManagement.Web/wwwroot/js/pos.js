@@ -36,6 +36,7 @@
     let productAbort;
     let searchTimer;
     let lastReceipt = null;
+    let editingOrderId = null;
     const money = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 });
     const $ = selector => document.querySelector(selector);
     const grid = $("#product-grid");
@@ -196,7 +197,8 @@
         $("#discount-amount").textContent = `−${money.format(amount.discount)}`;
         $("#tax-amount").textContent = money.format(amount.tax);
         $("#checkout").disabled = checkingOut || previewing || (!amount.count && !pendingCheckout);
-        $("#checkout").textContent = checkingOut ? "Đang ghi nhận đơn..." : pendingCheckout ? "Thử xác nhận lại đơn" : "Ghi nhận đơn";
+        $("#checkout").textContent = checkingOut ? (editingOrderId ? "Đang cập nhật đơn..." : "Đang ghi nhận đơn...")
+            : pendingCheckout ? "Thử xác nhận lại" : editingOrderId ? `Cập nhật đơn ${lastReceipt?.orderNumber || ""}` : "Ghi nhận đơn";
         $("#print-receipt").disabled = Boolean(pendingCheckout) || previewing || (!amount.count && !lastReceipt);
         if ($("#clear-cart")) $("#clear-cart").disabled = Boolean(pendingCheckout) || previewing;
         $("#pos-app").querySelectorAll("#order-types button:not([data-not-integrated]), #discount, #tax-percent, #order-note, input[name=payment]:not([data-not-integrated])").forEach(el => { el.disabled = Boolean(pendingCheckout) || previewing; });
@@ -292,14 +294,14 @@
         }
     }));
 
-    async function request(url, data, signal) {
+    async function request(url, data, signal, method = (data ? "POST" : "GET")) {
         const controller = new AbortController();
         const abort = () => controller.abort();
         signal?.addEventListener("abort", abort, { once: true });
         if (signal?.aborted) abort();
         const timeoutId = window.setTimeout(abort, 20000);
         try {
-            const response = await fetch(url, { method: data ? "POST" : "GET", signal: controller.signal,
+            const response = await fetch(url, { method, signal: controller.signal,
                 headers: data ? { "Content-Type": "application/json", "X-CSRF-TOKEN": $("input[name=__RequestVerificationToken]").value } : {},
                 body: data ? JSON.stringify(data) : undefined });
             const result = await response.json().catch(() => null);
@@ -389,6 +391,7 @@
 
     function resetOrder() {
         state.cart.clear();
+        editingOrderId = null;
         state.discount = 0; state.discountCode = ""; state.tax = 0; state.note = "";
         state.orderType = "pickup"; state.payment = "cash";
         $("#discount").value = ""; $("#tax-percent").value = "0"; $("#order-note").value = "";
@@ -440,14 +443,17 @@
         pendingCheckout ||= orderPayload();
         checkingOut = true; renderCart();
         try {
-            const result = await request(app.dataset.checkoutUrl, pendingCheckout);
+            const result = editingOrderId
+                ? await request(`${app.dataset.updateUrl}?id=${editingOrderId}`, pendingCheckout, undefined, "PUT")
+                : await request(app.dataset.checkoutUrl, pendingCheckout);
+            const wasEditing = Boolean(editingOrderId);
             lastReceipt = result.order;
             orderNumber = result.nextOrderNumber;
             $("#order-number").textContent = `Đơn ${orderNumber}`;
             pendingCheckout = null;
             resetOrder();
             showReceipt(lastReceipt, true);
-            notify(`Đã ghi nhận đơn ${lastReceipt.orderNumber}.`);
+            notify(wasEditing ? `Đã cập nhật đơn ${lastReceipt.orderNumber}.` : `Đã ghi nhận đơn ${lastReceipt.orderNumber}.`);
         } catch (error) {
             if (error.rejected) pendingCheckout = null;
             notify(pendingCheckout ? "Chưa xác nhận được kết quả. Giữ nguyên trang và bấm Thử xác nhận lại đơn để tránh tạo trùng." : error.message);
@@ -498,68 +504,42 @@
         const result = { add: () => first + second, subtract: () => first - second, multiply: () => first * second, divide: () => first / second }[operation]?.();
         output.textContent = Number.isFinite(result) ? `Kết quả: ${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 8 }).format(result)}` : "Không thể tính kết quả.";
     });
-    // === XỬ LÝ KHÁCH ĐỔI Ý: Load lại đơn vừa ghi nhận vào giỏ hàng ===
+    // === SỬA / BỔ SUNG MÓN CHO ĐƠN VỪA GHI NHẬN ===
     const editLastOrderBtn = $("#edit-last-order");
     if (editLastOrderBtn) {
         editLastOrderBtn.addEventListener("click", () => {
-            if (!lastReceipt || !lastReceipt.items || !lastReceipt.items.length) {
+            if (!lastReceipt?.id || !Array.isArray(lastReceipt.items) || !lastReceipt.items.length) {
                 notify("Không tìm thấy đơn hàng vừa ghi nhận.");
                 return;
             }
-
-            // Xóa giỏ hàng hiện tại trước khi load lại
             state.cart.clear();
-
-            // Load tất cả món từ đơn vừa ghi nhận vào giỏ hàng
+            let skipped = 0;
             lastReceipt.items.forEach(item => {
-                // Thử match bằng productId trước, nếu không có thì match bằng tên
-                let matchedId = item.productId;
-                if (!matchedId) {
-                    for (const [id, product] of productById) {
-                        if (product.name === item.productName) {
-                            matchedId = id;
-                            break;
-                        }
-                    }
-                }
-                if (matchedId) {
-                    const product = productById.get(matchedId);
-                    if (product && product.isAvailable) {
-                        state.cart.set(matchedId, item.quantity);
-                    }
-                }
+                const product = productById.get(item.productId);
+                if (product?.isAvailable && Number.isInteger(item.quantity) && item.quantity > 0 && item.quantity <= 99)
+                    state.cart.set(item.productId, item.quantity);
+                else skipped++;
             });
-
-            // Khôi phục loại đơn hàng
-            if (lastReceipt.orderType) {
-                state.orderType = lastReceipt.orderType;
-                $("#order-types")?.querySelectorAll("button").forEach(button => {
-                    button.classList.toggle("active", button.dataset.order === state.orderType);
-                    button.setAttribute("aria-pressed", String(button.dataset.order === state.orderType));
-                });
-            }
-
-            // Khôi phục phương thức thanh toán
-            if (lastReceipt.paymentMethod) {
-                state.payment = lastReceipt.paymentMethod;
-                const paymentInput = $(`input[name=payment][value=${state.payment}]`);
-                if (paymentInput) paymentInput.checked = true;
-            }
-
-            // Khôi phục ghi chú
-            if (lastReceipt.note) {
-                state.note = lastReceipt.note;
-                const noteInput = $("#order-note");
-                if (noteInput) noteInput.value = state.note;
-            }
-
-            // Render lại giỏ hàng
+            editingOrderId = lastReceipt.id;
+            $("#order-number").textContent = `Đang sửa ${lastReceipt.orderNumber}`;
+            state.orderType = lastReceipt.orderType || "pickup";
+            state.payment = lastReceipt.paymentMethod || "cash";
+            state.note = lastReceipt.note || "";
+            state.tax = Number(lastReceipt.taxPercent || 0);
+            state.discount = Number(lastReceipt.discountPercent || 0);
+            state.discountCode = initial.discounts.find(d => Number(d.percent) === state.discount)?.code || "";
+            $("#discount").value = state.discountCode;
+            $("#tax-percent").value = String(state.tax);
+            $("#order-note").value = state.note;
+            $("input[name=payment][value=" + state.payment + "]").checked = true;
+            $("#order-types").querySelectorAll("button").forEach(button => {
+                button.classList.toggle("active", button.dataset.order === state.orderType);
+                button.setAttribute("aria-pressed", String(button.dataset.order === state.orderType));
+            });
             renderCart();
-
-            // Đóng modal
             bootstrap.Modal.getInstance($("#receipt-modal"))?.hide();
-
-            notify("Đã nạp lại đơn " + lastReceipt.orderNumber + " vào giỏ hàng. Thêm/sửa món rồi bấm Ghi nhận đơn.");
+            notify(skipped ? `Đã nạp đơn ${lastReceipt.orderNumber}; bỏ qua ${skipped} món không còn kinh doanh.`
+                : `Đang chỉnh sửa đơn ${lastReceipt.orderNumber}. Bấm Cập nhật đơn để lưu thay đổi.`);
         });
     }
     renderCategories();

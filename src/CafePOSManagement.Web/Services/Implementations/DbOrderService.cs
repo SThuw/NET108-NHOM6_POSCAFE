@@ -124,6 +124,71 @@ public sealed class DbOrderService(CafePosDbContext db, IProductService products
         });
     }
 
+    public Order Update(long orderId, CheckoutOrderDto input)
+    {
+        Validate(input);
+        var strategy = db.Database.CreateExecutionStrategy();
+        return strategy.Execute(() =>
+        {
+            using var transaction = db.Database.BeginTransaction(System.Data.IsolationLevel.ReadCommitted);
+            try
+            {
+                var order = db.Orders.Include(o => o.Items).FirstOrDefault(o => o.Id == orderId)
+                    ?? throw new ValidationException("Không tìm thấy đơn hàng cần cập nhật.");
+
+                // RequestId mới là khóa idempotency cho lần cập nhật. Nếu request được gửi lại,
+                // đơn đích đã mang RequestId đó và trả lại kết quả hiện tại thay vì cập nhật lần nữa.
+                if (order.RequestId == input.RequestId)
+                {
+                    transaction.Commit();
+                    return db.Orders.Include(o => o.Items).AsNoTracking().First(o => o.Id == orderId);
+                }
+                if (db.Orders.Any(o => o.RequestId == input.RequestId))
+                    throw new ValidationException("Mã yêu cầu đã được sử dụng cho một đơn hàng khác.");
+                if (order.Status == "Đã hủy")
+                    throw new ValidationException("Không thể chỉnh sửa đơn hàng đã hủy.");
+
+                var calculated = Calculate(input);
+                int? discountId = null;
+                if (!string.IsNullOrWhiteSpace(input.DiscountCode))
+                {
+                    discountId = db.Discounts.Where(d => d.Code == input.DiscountCode && d.IsActive)
+                        .Select(d => (int?)d.Id).FirstOrDefault()
+                        ?? throw new ValidationException("Mã giảm giá không hợp lệ.");
+                }
+
+                db.OrderItems.RemoveRange(order.Items);
+                db.Entry(order).CurrentValues.SetValues(new
+                {
+                    RequestId = input.RequestId,
+                    OrderType = calculated.OrderType,
+                    PaymentMethod = calculated.PaymentMethod,
+                    DiscountId = discountId,
+                    DiscountPercent = calculated.DiscountPercent,
+                    TaxPercent = calculated.TaxPercent,
+                    Note = calculated.Note,
+                    Subtotal = calculated.Subtotal,
+                    DiscountAmount = calculated.DiscountAmount,
+                    TaxAmount = calculated.TaxAmount,
+                    Total = calculated.Total
+                });
+                foreach (var item in calculated.Items)
+                    db.OrderItems.Add(new OrderItem(item.ProductId, item.ProductName, item.UnitPrice, item.Quantity)
+                    { OrderId = order.Id });
+
+                db.SaveChanges();
+                transaction.Commit();
+                return db.Orders.Include(o => o.Items).AsNoTracking().First(o => o.Id == orderId);
+            }
+            catch
+            {
+                transaction.Rollback();
+                db.ChangeTracker.Clear();
+                throw;
+            }
+        });
+    }
+
     // ── Nội bộ ──────────────────────────────────────────────────────────────
 
     private void Validate(CheckoutOrderDto input)

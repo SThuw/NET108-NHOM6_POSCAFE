@@ -24,7 +24,7 @@
 }
 @Html.AntiForgeryToken()
 <script id="pos-data" type="application/json">@Json.Serialize(Model)</script>
-<div class="pos-workspace" id="pos-app" data-user-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" data-products-url="@Url.Action("Products", "Pos")" data-create-url="@Url.Action("CreateProduct", "Pos")" data-checkout-url="@Url.Action("Checkout", "Pos")" data-preview-url="@Url.Action("Preview", "Pos")" data-image-root="@Url.Content("~/images/menu/")" data-fallback-image="@Url.Content("~/images/product-fallback.svg")">
+<div class="pos-workspace" id="pos-app" data-user-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" data-products-url="@Url.Action("Products", "Pos")" data-create-url="@Url.Action("CreateProduct", "Pos")" data-checkout-url="@Url.Action("Checkout", "Pos")" data-update-url="@Url.Action("UpdateOrder", "Pos")" data-preview-url="@Url.Action("Preview", "Pos")" data-image-root="@Url.Content("~/images/menu/")" data-fallback-image="@Url.Content("~/images/product-fallback.svg")">
     <section class="menu-panel" aria-labelledby="menu-title">
         <div class="menu-heading"><div><h2 id="menu-title">Tất cả món</h2><span id="product-count">Đang tải thực đơn...</span></div><span class="menu-tip"><svg class="icon"><use href="#i-bag" /></svg>Chọn món để thêm vào giỏ</span></div>
         <div id="product-scroll" class="product-scroll" tabindex="0" aria-label="Danh sách món, có thể cuộn">

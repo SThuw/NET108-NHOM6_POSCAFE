@@ -38,9 +38,30 @@ public sealed class OrderService(IProductService products, TimeProvider clock) :
                     throw new ValidationException("Mã yêu cầu đã được dùng cho một nội dung đơn khác. Vui lòng tạo đơn mới.");
                 return previous.Order;
             }
-            var order = Calculate(input) with { OrderNumber = $"#{++sequence:000}" };
+            var order = Calculate(input) with { Id = ++sequence, OrderNumber = $"#{sequence:000}" };
             Orders.Add((order, fingerprint));
             return order;
+        }
+    }
+
+    public Order Update(long orderId, CheckoutOrderDto input)
+    {
+        Validate(input);
+        lock (Gate)
+        {
+            var index = Orders.FindIndex(entry => entry.Order.Id == orderId || entry.Order.RequestId == input.RequestId);
+            if (index < 0) throw new ValidationException("Không tìm thấy đơn hàng cần cập nhật.");
+            var current = Orders[index].Order;
+            if (current.RequestId == input.RequestId) return current;
+            if (Orders.Any(entry => entry.Order.RequestId == input.RequestId))
+                throw new ValidationException("Mã yêu cầu đã được sử dụng cho một đơn hàng khác.");
+            var updated = Calculate(input) with
+            {
+                Id = current.Id, RequestId = input.RequestId, OrderNumber = current.OrderNumber,
+                CreatedAt = current.CreatedAt, Status = current.Status
+            };
+            Orders[index] = (updated, JsonSerializer.Serialize(input));
+            return updated;
         }
     }
 
