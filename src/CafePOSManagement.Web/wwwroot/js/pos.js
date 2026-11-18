@@ -10,6 +10,25 @@
     const productById = new Map(products.map(product => [product.id, product]));
     const state = { category: "all", search: "", discount: 0, discountCode: "", tax: 0,
         orderType: "pickup", payment: "cash", note: "", cart: new Map() };
+
+    // Hỗ trợ chế độ Kiosk tự gọi món
+    const urlParams = new URLSearchParams(window.location.search);
+    const isKioskMode = urlParams.get("kiosk") === "1" || !app.dataset.userId;
+    const initialMode = urlParams.get("mode");
+    const initialPhone = urlParams.get("phone");
+
+    if (initialMode === "dinein" || initialMode === "pickup") {
+        state.orderType = initialMode;
+    }
+    if (initialPhone) {
+        state.note = `[Kiosk - SĐT: ${initialPhone.trim()}]`;
+        if (initialPhone.endsWith("88") || initialPhone.endsWith("99")) {
+            state.discountCode = "SALE20";
+        } else if (initialPhone.endsWith("68") || initialPhone.endsWith("79") || initialPhone.length >= 10) {
+            state.discountCode = "SALE10";
+        }
+    }
+
     const draftKey = `cafepos.pos-draft.${app.dataset.userId}`;
     try {
         const draft = JSON.parse(sessionStorage.getItem(draftKey) || "null");
@@ -21,10 +40,10 @@
             });
             if (categories.some(c => c.id === draft.category)) state.category = draft.category;
             if (typeof draft.search === "string") state.search = draft.search.slice(0, 100);
-            if (["pickup", "dinein"].includes(draft.orderType)) state.orderType = draft.orderType;
+            if (!initialMode && ["pickup", "dinein"].includes(draft.orderType)) state.orderType = draft.orderType;
             if (["cash", "card", "wallet"].includes(draft.payment)) state.payment = draft.payment;
-            if (typeof draft.note === "string") state.note = draft.note.slice(0, 200);
-            if (initial.discounts.some(d => d.code === draft.discountCode)) state.discountCode = draft.discountCode;
+            if (!initialPhone && typeof draft.note === "string") state.note = draft.note.slice(0, 200);
+            if (!initialPhone && initial.discounts.some(d => d.code === draft.discountCode)) state.discountCode = draft.discountCode;
             if (initial.taxRates.includes(draft.tax)) state.tax = draft.tax;
         }
     } catch { /* Trình duyệt chặn sessionStorage: tiếp tục với đơn trống. */ }
@@ -52,6 +71,10 @@
         button.classList.toggle("active", button.dataset.order === state.orderType);
         button.setAttribute("aria-pressed", String(button.dataset.order === state.orderType));
     });
+    const backKioskBtn = $("#btn-back-kiosk-toolbar");
+    if (backKioskBtn && !isKioskMode) {
+        backKioskBtn.style.display = "none";
+    }
     let notificationTimer;
 
     function notify(message) {
@@ -433,6 +456,25 @@
         const editBtn = $("#edit-last-order");
         if (editBtn) {
             editBtn.style.display = committed ? "" : "none";
+        }
+        const kioskReturnBtn = $("#kiosk-modal-return-btn");
+        if (kioskReturnBtn) {
+            if (isKioskMode && committed) {
+                kioskReturnBtn.style.display = "";
+                let countdown = 12;
+                const cdSpan = $("#kiosk-countdown");
+                if (cdSpan) cdSpan.textContent = String(countdown);
+                const timer = setInterval(() => {
+                    countdown--;
+                    if (cdSpan) cdSpan.textContent = String(countdown);
+                    if (countdown <= 0) {
+                        clearInterval(timer);
+                        window.location.href = "/Kiosk";
+                    }
+                }, 1000);
+            } else {
+                kioskReturnBtn.style.display = "none";
+            }
         }
         bootstrap.Modal.getOrCreateInstance($("#receipt-modal")).show();
     }

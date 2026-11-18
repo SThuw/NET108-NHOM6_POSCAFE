@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    POLYKAFE KIOSK SYSTEM STYLESHEET
    Full Screen, Touch-optimized, 16:9 Landscape & Responsive
    Author: Nguyen Kim Song Thu (Leader - Nhom 6)
@@ -42,348 +42,214 @@ body.kiosk-body {
 
 /* ==========================================================================
    HEADER / NAVBAR
+/* ==========================================================================
+   FLOATING TOP BAR (LOGO TO TÁCH NỀN & QUẦY THU NGÂN TRỰC TIẾP TRÊN BANNER)
    ========================================================================== */
-.kiosk-navbar {
-    height: 74px;
-    background: var(--kiosk-surface);
-    border-bottom: 2px solid var(--kiosk-border);
+.kiosk-floating-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 32px;
-    flex-shrink: 0;
-    z-index: 100;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    padding: 24px 40px;
+    pointer-events: none;
 }
 
-.kiosk-brand {
-    display: flex;
+.kiosk-brand-floating {
+    display: inline-flex;
     align-items: center;
-    gap: 14px;
+    pointer-events: auto;
     text-decoration: none;
+    transition: transform 0.25s ease;
 }
 
-.kiosk-brand img {
-    height: 52px;
-    max-width: 220px;
+.kiosk-brand-floating:hover {
+    transform: scale(1.04);
+}
+
+.kiosk-logo-huge {
+    height: 85px;
+    max-height: 90px;
+    width: auto;
     object-fit: contain;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
 }
 
-.kiosk-brand-text {
-    display: flex;
-    flex-direction: column;
-}
-
-.kiosk-brand-text strong {
-    font-size: 20px;
-    font-weight: 900;
-    color: var(--kiosk-primary);
-    line-height: 1.1;
-    letter-spacing: -0.5px;
-}
-
-.kiosk-brand-text small {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--kiosk-text-muted);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-}
-
-.kiosk-nav-actions {
-    display: flex;
+.kiosk-admin-floating-btn {
+    pointer-events: auto;
+    display: inline-flex;
     align-items: center;
-    gap: 16px;
-}
-
-.kiosk-clock-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--kiosk-primary-light);
-    color: var(--kiosk-primary);
-    font-weight: 800;
-    font-size: 14px;
-    padding: 8px 16px;
-    border-radius: 30px;
-}
-
-.kiosk-admin-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #FAF7F4;
-    border: 1.5px solid var(--kiosk-border);
-    color: var(--kiosk-text);
-    padding: 8px 18px;
-    border-radius: 30px;
-    font-size: 13px;
+    gap: 10px;
+    background: rgba(22, 16, 13, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    color: #FFFFFF !important;
+    padding: 12px 24px;
+    border-radius: 40px;
+    font-size: 15px;
     font-weight: 800;
     text-decoration: none;
-    transition: all 0.2s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.kiosk-admin-link:hover {
+.kiosk-admin-floating-btn:hover {
     background: var(--kiosk-primary);
-    border-color: var(--kiosk-primary);
-    color: #fff;
-    transform: translateY(-1px);
+    border-color: #fff;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 25px rgba(197, 75, 31, 0.5);
 }
 
 /* ==========================================================================
-   FULL-SCREEN HERO CAROUSEL (3 BANNERS)
+   FULL-SCREEN BANNER (100% KHUNG HÌNH, THẤY TRỌN VẸN 100% GÓC TRÊN ĐẾN ĐÁY)
    ========================================================================== */
-.kiosk-welcome-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 20px 32px 24px;
-    gap: 18px;
-    max-width: 1600px;
-    margin: 0 auto;
-    width: 100%;
+.kiosk-fullscreen-banner {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
     overflow: hidden;
+    cursor: pointer;
+    background: #1B120C;
+    display: block;
 }
 
-.kiosk-carousel-card {
-    flex: 1;
-    position: relative;
-    border-radius: var(--kiosk-radius);
-    overflow: hidden;
-    box-shadow: var(--kiosk-shadow);
-    border: 3px solid var(--kiosk-border);
-    background: #2D231E;
-    min-height: 380px;
-}
-
-.kiosk-carousel-track {
-    position: relative;
+.kiosk-banner-slider {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
 }
 
-.kiosk-carousel-slide {
+.kiosk-slide {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
     display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1B120C;
 }
 
-.kiosk-carousel-slide.active {
+.kiosk-slide.active {
     opacity: 1;
     visibility: visible;
     z-index: 2;
 }
 
-.kiosk-slide-img {
+.kiosk-slide img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center;
+    object-fit: contain;
+    object-position: center center;
+    display: block;
 }
 
-.kiosk-slide-overlay {
+/* Chấm chỉ thị slide */
+.kiosk-dots {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, rgba(20, 15, 12, 0.82) 0%, rgba(20, 15, 12, 0.45) 50%, rgba(20, 15, 12, 0.15) 100%);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 40px 60px;
-    color: #fff;
-    z-index: 3;
-}
-
-.kiosk-slide-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--kiosk-primary);
-    color: #fff;
-    font-size: 13px;
-    font-weight: 800;
-    padding: 6px 14px;
-    border-radius: 20px;
-    width: fit-content;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 14px;
-}
-
-.kiosk-slide-title {
-    font-size: 40px;
-    font-weight: 950;
-    line-height: 1.15;
-    margin-bottom: 12px;
-    max-width: 650px;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
-}
-
-.kiosk-slide-desc {
-    font-size: 17px;
-    color: #F3E8E2;
-    max-width: 580px;
-    line-height: 1.45;
-    margin-bottom: 22px;
-}
-
-.kiosk-slide-price-box {
-    display: flex;
-    align-items: baseline;
-    gap: 14px;
-    margin-bottom: 24px;
-}
-
-.kiosk-slide-price {
-    font-size: 34px;
-    font-weight: 950;
-    color: #FFD23F;
-}
-
-.kiosk-slide-oldprice {
-    font-size: 20px;
-    color: #C7B5A9;
-    text-decoration: line-through;
-}
-
-/* CAROUSEL CONTROLS */
-.kiosk-carousel-indicators {
-    position: absolute;
-    bottom: 20px;
+    bottom: 110px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 10px;
-    z-index: 10;
+    gap: 12px;
+    z-index: 20;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 8px 16px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
 }
 
-.kiosk-indicator-dot {
+.kiosk-dot {
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.45);
-    border: 2px solid rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.5);
+    border: 1.5px solid rgba(0, 0, 0, 0.25);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.kiosk-indicator-dot.active {
-    width: 38px;
+.kiosk-dot.active {
+    width: 40px;
     border-radius: 10px;
-    background: var(--kiosk-primary);
+    background: #FF5722;
     border-color: #fff;
+    box-shadow: 0 0 10px rgba(255, 87, 34, 0.7);
 }
 
-.kiosk-carousel-btn {
+/* Nút duy nhất: CHẠM ĐỂ GỌI MÓN NGAY */
+.kiosk-cta-wrapper {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.85);
-    border: none;
-    color: var(--kiosk-text);
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 25;
+    width: auto;
+    max-width: 90vw;
+}
+
+.kiosk-cta-huge-btn {
+    background: linear-gradient(135deg, #FF6F00 0%, #E65100 45%, #C54B1F 100%);
+    color: #FFFFFF !important;
     font-size: 24px;
     font-weight: 900;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    letter-spacing: 0.5px;
+    padding: 18px 48px;
+    border-radius: 50px;
+    border: 3.5px solid #FFFFFF;
+    box-shadow: 0 12px 35px rgba(230, 81, 0, 0.55), 0 0 0 6px rgba(255, 111, 0, 0.3);
     cursor: pointer;
-    z-index: 10;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-    transition: all 0.2s ease;
-}
-
-.kiosk-carousel-btn:hover {
-    background: var(--kiosk-primary);
-    color: #fff;
-    transform: translateY(-50%) scale(1.1);
-}
-
-.kiosk-carousel-btn.prev { left: 20px; }
-.kiosk-carousel-btn.next { right: 20px; }
-
-/* ==========================================================================
-   BOTTOM ACTION BAR (CHẠM ĐỂ GỌI MÓN)
-   ========================================================================== */
-.kiosk-bottom-action-bar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    flex-shrink: 0;
-}
-
-.kiosk-action-tile {
-    background: var(--kiosk-surface);
-    border: 3px solid var(--kiosk-border);
-    border-radius: var(--kiosk-radius);
-    padding: 20px 28px;
     display: flex;
     align-items: center;
-    gap: 20px;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+    gap: 16px;
+    text-transform: uppercase;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: kioskCtaPulse 2.2s infinite;
 }
 
-.kiosk-action-tile:hover {
-    border-color: var(--kiosk-primary);
-    transform: translateY(-4px);
-    box-shadow: var(--kiosk-shadow-hover);
+.kiosk-cta-huge-btn:hover {
+    transform: translateY(-4px) scale(1.04);
+    box-shadow: 0 16px 42px rgba(230, 81, 0, 0.7), 0 0 0 8px rgba(255, 111, 0, 0.4);
+    background: linear-gradient(135deg, #FF8F00 0%, #EF6C00 45%, #D84315 100%);
 }
 
-.kiosk-action-tile.primary-call {
-    background: linear-gradient(135deg, var(--kiosk-primary) 0%, #A63812 100%);
-    color: #fff;
-    border-color: #8E2B09;
-}
-
-.kiosk-tile-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
-    background: var(--kiosk-primary-light);
-    color: var(--kiosk-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.kiosk-action-tile.primary-call .kiosk-tile-icon {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
-}
-
-.kiosk-tile-text {
-    flex: 1;
-}
-
-.kiosk-tile-text h2 {
-    font-size: 22px;
-    font-weight: 900;
-    margin-bottom: 4px;
-}
-
-.kiosk-tile-text p {
-    font-size: 14px;
-    opacity: 0.85;
-    line-height: 1.3;
-}
-
-.kiosk-tile-arrow {
+.kiosk-cta-huge-btn .pulse-icon {
     font-size: 28px;
-    font-weight: 900;
+    animation: handPoint 1.2s infinite alternate ease-in-out;
+}
+
+.kiosk-cta-huge-btn .cta-arrow {
+    font-size: 26px;
     transition: transform 0.2s ease;
 }
 
-.kiosk-action-tile:hover .kiosk-tile-arrow {
+.kiosk-cta-huge-btn:hover .cta-arrow {
     transform: translateX(6px);
+}
+
+@keyframes kioskCtaPulse {
+    0% {
+        box-shadow: 0 12px 35px rgba(230, 81, 0, 0.55), 0 0 0 0 rgba(255, 111, 0, 0.5);
+    }
+    70% {
+        box-shadow: 0 12px 35px rgba(230, 81, 0, 0.55), 0 0 0 14px rgba(255, 111, 0, 0);
+    }
+    100% {
+        box-shadow: 0 12px 35px rgba(230, 81, 0, 0.55), 0 0 0 0 rgba(255, 111, 0, 0);
+    }
+}
+
+@keyframes handPoint {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(6px); }
 }
 
 /* ==========================================================================

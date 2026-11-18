@@ -68,35 +68,10 @@ public sealed class KioskController(CafePosDbContext db, IOrderService orders) :
     }
 
     [HttpGet]
-    public async Task<IActionResult> Order(string mode = "dinein", string? phone = null)
+    public IActionResult Order(string mode = "dinein", string? phone = null)
     {
         mode = mode is "pickup" ? "pickup" : "dinein";
-        phone = phone?.Trim();
-
-        var (tier, discount, discountCode, memberName) = ResolveMembership(phone);
-
-        var categories = await db.Categories.AsNoTracking()
-            .Where(c => c.IsActive)
-            .OrderBy(c => c.DisplayOrder)
-            .ToListAsync();
-
-        var products = await db.Products.AsNoTracking()
-            .Include(p => p.Category)
-            .Where(p => p.IsAvailable)
-            .OrderBy(p => p.Name)
-            .ToListAsync();
-
-        return View(new KioskOrderViewModel
-        {
-            OrderType = mode,
-            Phone = phone,
-            MemberName = memberName,
-            MemberTier = tier,
-            DiscountPercent = discount,
-            DiscountCode = discountCode,
-            Categories = categories,
-            Products = products
-        });
+        return RedirectToAction("Index", "Pos", new { kiosk = 1, mode, phone = phone?.Trim() });
     }
 
     [HttpGet]

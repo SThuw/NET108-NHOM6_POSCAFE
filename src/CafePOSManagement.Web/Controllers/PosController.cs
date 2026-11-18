@@ -10,12 +10,14 @@ namespace CafePOSManagement.Web.Controllers;
 public sealed class PosController(IPosService posService, IProductService products, IOrderService orders) : Controller
 {
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult Index()
     {
         return View(posService.GetOverview());
     }
 
     [HttpGet]
+    [AllowAnonymous]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public IActionResult Products(string? categoryId, string? search)
     {
@@ -27,15 +29,15 @@ public sealed class PosController(IPosService posService, IProductService produc
     [HttpPost, Authorize(Policy = "ManagerOnly"), RequestSizeLimit(32768)]
     public IActionResult CreateProduct([FromBody] CreateProductDto input) => Execute(() => products.Create(input));
 
-    [HttpPost, RequestSizeLimit(32768)]
+    [HttpPost, AllowAnonymous, RequestSizeLimit(32768)]
     public IActionResult Preview([FromBody] CheckoutOrderDto input) => Execute(() => orders.Preview(input));
 
-    [HttpPost, RequestSizeLimit(32768)]
+    [HttpPost, AllowAnonymous, RequestSizeLimit(32768)]
     public IActionResult Checkout([FromBody] CheckoutOrderDto input) => Execute(() =>
         new { order = orders.Checkout(input), nextOrderNumber = orders.GetNextOrderNumber() });
 
     // Cập nhật đơn vừa tạo: giữ nguyên Id/OrderNumber, chỉ thay thông tin và chi tiết món.
-    [HttpPut, RequestSizeLimit(32768)]
+    [HttpPut, AllowAnonymous, RequestSizeLimit(32768)]
     public IActionResult UpdateOrder(long id, [FromBody] CheckoutOrderDto input) => Execute(() =>
         new { order = orders.Update(id, input), nextOrderNumber = orders.GetNextOrderNumber() });
 
