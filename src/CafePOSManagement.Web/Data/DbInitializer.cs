@@ -14,12 +14,50 @@ public static class DbInitializer
             new Category("traditional", "Cà phê truyền thống"), new Category("snack", "Đồ ăn nhẹ"),
             new Category("sandwich", "Bánh mì & Sandwich"), new Category("coldbrew", "Cold Brew đặc biệt"),
             new Category("espresso", "Cà phê Ý (Espresso)"), new Category("seasonal", "Đồ uống theo mùa"),
+<<<<<<< HEAD
+            new Category("tea", "Trà trái cây"),
+            new Category("matcha", "Matcha & Đá xay"),
+            new Category("milktea", "Trà sữa"),
+            new Category("combo", "Combo Tiết Kiệm (Deal Hời)")
+=======
             new Category("tea", "Trà trái cây"), new Category("matcha", "Matcha & Đá xay"),
             new Category("milktea", "Trà sữa"), new Category("combo", "Combo Tiết Kiệm (Deal Hời)")
+>>>>>>> 48779edfc17a1c651a8355236f50c80077731d73
         };
         modelBuilder.Entity<Category>().HasData(categories.Select((c, i) => new
         { c.Id, c.Name, c.Code, DisplayOrder = i + 1, IsActive = true, CreatedAt = created }));
 
+<<<<<<< HEAD
+        Product[] products =
+        [
+            new("p1", "Cà phê sữa đá", "traditional", 55000, 45000, "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=800&q=85"),
+            new("p2", "Cappuccino", "espresso", 65000, 55000, "https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=800&q=85"),
+            new("p3", "Bánh Croissant bơ", "snack", 50000, 45000, "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=85"),
+            new("p4", "Americano nóng", "espresso", 45000, 40000, "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=85"),
+            new("p5", "Bạc xỉu đá", "traditional", null, 39000, "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=800&q=85"),
+            new("p6", "Sandwich nướng", "sandwich", 75000, 65000, "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=85"),
+            new("p7", "Cold Brew sữa tươi", "coldbrew", 60000, 55000, "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=800&q=85"),
+            new("p8", "Trà chanh thanh mát", "tea", null, 45000, "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=800&q=85"),
+            new("p9", "Latte kem sữa", "espresso", 65000, 59000, "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=85"),
+            new("p10", "Cà phê sữa mùa đông", "seasonal", null, 49000, "https://images.unsplash.com/photo-1512568400610-62da28bc8a13?auto=format&fit=crop&w=800&q=85"),
+            new("p11", "Cold Brew đá", "coldbrew", 55000, 49000, "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=800&q=85"),
+            new("p12", "Bánh quy bơ", "snack", 35000, 29000, "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=800&q=85"),
+            new("p13", "Cà phê bọt biển Whipped Coffee", "seasonal", 65000, 45000, "https://images.unsplash.com/photo-1589396575653-c09c794ff6a6?auto=format&fit=crop&w=800&q=85"),
+            new("p14", "Cà phê phin Filter Coffee", "traditional", null, 22000, "https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=800&q=85"),
+            new("p15", "Latte nghệ thuật", "espresso", null, 60000, "https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=800&q=85"),
+            new("p16", "Cold Brew cam sả", "coldbrew", null, 45000, "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=85"),
+            // Non-Coffee: Matcha & Đá xay
+            new("p17", "Matcha Latte", "matcha", 65000, 55000, "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=800&q=85"),
+            new("p18", "Matcha Freeze", "matcha", 69000, 59000, "https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&w=800&q=85"),
+            new("p19", "Cacao sữa", "matcha", null, 49000, "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=800&q=85"),
+            // Non-Coffee: Trà sữa
+            new("p20", "Trà sữa Oolong nướng", "milktea", 55000, 48000, "https://images.unsplash.com/photo-1558857563-b371f31ca90c?auto=format&fit=crop&w=800&q=85"),
+            new("p21", "Hồng trà Macchiato", "milktea", 52000, 45000, "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=85"),
+            new("p22", "Trà sữa lài", "milktea", null, 42000, "https://images.unsplash.com/photo-1525385133512-2f3bdd039054?auto=format&fit=crop&w=800&q=85"),
+            // Non-Coffee: Combo Tiết Kiệm (Deal Hời)
+            new("p23", "Combo Sáng: Cà phê + Bánh croissant", "combo", 95000, 75000, "https://images.unsplash.com/photo-1525610553991-2bede1a236e2?auto=format&fit=crop&w=800&q=85"),
+            new("p24", "Combo Trà chiều: Trà đào + Bánh", "combo", 85000, 69000, "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=85")
+=======
         const string p1Image = "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=85";
         const string p2Image = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=85";
         const string p3Image = "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=85";
@@ -71,6 +109,7 @@ public static class DbInitializer
             new("p22", "Trà sữa lài", "milktea", 60000, 55000, jasmineMilkTea),
             new("p23", "Combo Sáng: Cà phê + Bánh croissant", "combo", 95000, 79000, morningCombo),
             new("p24", "Combo Trà chiều: Trà đào + Bánh", "combo", 95000, 79000, afternoonCombo)
+>>>>>>> 48779edfc17a1c651a8355236f50c80077731d73
         ];
         modelBuilder.Entity<Product>().HasData(products.Select(p => new
         {
