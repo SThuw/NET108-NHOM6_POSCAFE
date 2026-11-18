@@ -14,7 +14,11 @@ public static class DbInitializer
             new Category("traditional", "Cà phê truyền thống"), new Category("snack", "Đồ ăn nhẹ"),
             new Category("sandwich", "Bánh mì & Sandwich"), new Category("coldbrew", "Cold Brew đặc biệt"),
             new Category("espresso", "Cà phê Ý (Espresso)"), new Category("seasonal", "Đồ uống theo mùa"),
-            new Category("tea", "Trà trái cây")
+            new Category("tea", "Trà trái cây"),
+            // Phân hệ Menu Combo của Kha
+            new Category("matcha", "Matcha & Đá xay"),
+            new Category("milktea", "Trà sữa"),
+            new Category("combo", "Combo Tiết Kiệm (Deal Hời)")
         };
         modelBuilder.Entity<Category>().HasData(categories.Select((c, i) => new
         { c.Id, c.Name, c.Code, DisplayOrder = i + 1, IsActive = true, CreatedAt = created }));
@@ -44,12 +48,21 @@ public static class DbInitializer
             new("p13", "Cà phê bọt biển Whipped Coffee", "seasonal", 65000, 45000, latte),
             new("p14", "Cà phê phin Filter Coffee", "traditional", null, 22000, espresso),
             new("p15", "Latte nghệ thuật", "espresso", null, 60000, coffee),
-            new("p16", "Cold Brew cam sả", "coldbrew", null, 45000, fruitTea)
+            new("p16", "Cold Brew cam sả", "coldbrew", null, 45000, fruitTea),
+            // Các món mới của Kha (Matcha, Trà sữa, Combo)
+            new("p17", "Matcha Latte", "matcha", 65000, 59000, "https://images.unsplash.com/photo-1576092762791-dd9e2220e561?auto=format&fit=crop&w=800&q=85"),
+            new("p18", "Matcha Freeze", "matcha", 75000, 69000, "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=85"),
+            new("p19", "Cacao sữa", "matcha", 60000, 55000, "https://images.unsplash.com/photo-1542990253-a781e04c0082?auto=format&fit=crop&w=800&q=85"),
+            new("p20", "Trà sữa Oolong nướng", "milktea", 65000, 59000, "https://images.unsplash.com/photo-1558857563-b371033fe7cf?auto=format&fit=crop&w=800&q=85"),
+            new("p21", "Hồng trà Macchiato", "milktea", 70000, 65000, "https://images.unsplash.com/photo-1576092762791-dd9e2220e561?auto=format&fit=crop&w=800&q=85&sat=-10"),
+            new("p22", "Trà sữa lài", "milktea", 60000, 55000, "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=800&q=85&sat=-15"),
+            new("p23", "Combo Sáng: Cà phê + Bánh croissant", "combo", 95000, 79000, "https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&w=800&q=85"),
+            new("p24", "Combo Trà chiều: Trà đào + Bánh", "combo", 95000, 79000, "https://images.unsplash.com/photo-1507133750040-4a8f57021571?auto=format&fit=crop&w=800&q=85")
         ];
         modelBuilder.Entity<Product>().HasData(products.Select(p => new
         {
             p.Id, p.Name, p.CategoryId, p.OriginalPrice, p.Price, p.ImageUrl, IsAvailable = true,
-            Description = $"{p.Name} — món mẫu của CafePOS.", CreatedAt = created
+            Description = $"{p.Name} — món đặc sắc của CafePOS.", CreatedAt = created
         }));
         modelBuilder.Entity<Discount>().HasData(
             new Discount { Id = 1, Code = "NONE", Name = "Không giảm", DiscountPercent = 0 },
