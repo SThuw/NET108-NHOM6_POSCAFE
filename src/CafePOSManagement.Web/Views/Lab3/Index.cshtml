@@ -207,7 +207,9 @@
                 <div class="tab-pane fade @(activeTab == "cards" ? "show active" : "")" id="tab-cards" role="tabpanel" aria-labelledby="cards-tab">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h2 class="h5 fw-bold text-dark mb-0">Danh sách Thẻ bàn và Thẻ rung định danh</h2>
-                        <span class="text-muted small">@Model.Cards.Count thẻ trong hệ thống</span>
+                        <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="showAddCardModal()">
+                            <svg class="icon me-1" style="width: 16px; height: 16px;"><use href="#i-plus" /></svg> Thêm thẻ mới
+                        </button>
                     </div>
                     @if (Model.Cards.Count == 0)
                     {
@@ -219,18 +221,22 @@
                     {
                         <div class="row g-3">
                             @foreach (var c in Model.Cards)
-                            {
+{
                                 <div class="col-lg-3 col-md-4 col-sm-6">
-                                    <div class="card h-100 border @(c.Status ? "border-warning bg-warning bg-opacity-10" : "border-success-subtle bg-white shadow-sm")">
+                                    <div class="card h-100 border-0 shadow-sm rounded-4 @(c.Status ? "bg-warning bg-opacity-10" : "bg-white")">
                                         <div class="card-body">
                                             <div class="d-flex justify-content-between align-items-center mb-2">
                                                 <h3 class="h6 fw-bold mb-0 text-dark">@c.Name</h3>
-                                                <span class="status-pill @(c.Status ? "stopped" : "available")">
+                                                <span class="status-pill @(c.Status ? "stopped" : "available") rounded-pill">
                                                     @c.StatusText
                                                 </span>
                                             </div>
-                                            <div class="text-muted small">
+                                            <div class="text-muted small mb-3">
                                                 Mã nhận diện: <code>@c.Code</code>
+                                            </div>
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="showEditCardModal('@c.Id', '@c.Code', '@c.Name', @(c.Status ? "true" : "false"))">Sửa</button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="deleteCard('@c.Id')">Xóa</button>
                                             </div>
                                         </div>
                                     </div>
@@ -293,69 +299,112 @@
                     }
                 </div>
 
-                <!-- TAB 4: LỊCH SỬ HÓA ĐƠN -->
+                                <!-- TAB 4: LỊCH SỬ HÓA ĐƠN -->
                 <div class="tab-pane fade @(activeTab == "orders" ? "show active" : "")" id="tab-orders" role="tabpanel" aria-labelledby="orders-tab">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2 class="h5 fw-bold text-dark mb-0">Danh sách hóa đơn bán hàng</h2>
-                        <span class="text-muted small">@Model.Orders.Count đơn đã lập</span>
+                    <!-- Thanh tiêu đề & Bộ lọc thông minh -->
+                    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-light">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <div>
+                                <h2 class="h5 fw-bold text-dark mb-1">Lịch sử Đơn hàng &amp; Doanh thu</h2>
+                                <span class="text-muted small">Tổng cộng <strong class="text-primary">@Model.Orders.Count</strong> hóa đơn đã phát sinh trong hệ thống</span>
+                            </div>
+                            
+                            <!-- BỘ LỌC TÌM KIẾM MÃ & NGÀY -->
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <div class="input-group input-group-sm" style="width: 220px;">
+                                    <span class="input-group-text bg-white border-end-0 rounded-start-pill">🔍</span>
+                                    <input type="text" id="search-order" class="form-control border-start-0 rounded-end-pill" placeholder="Tìm theo mã (#001)..." onkeyup="filterOrders()" />
+                                </div>
+                                <div class="d-flex align-items-center gap-1">
+                                    <span class="small text-muted fw-medium">Từ:</span>
+                                    <input type="date" id="filter-from-date" class="form-control form-control-sm rounded-3" onchange="filterOrders()" />
+                                </div>
+                                <div class="d-flex align-items-center gap-1">
+                                    <span class="small text-muted fw-medium">Đến:</span>
+                                    <input type="date" id="filter-to-date" class="form-control form-control-sm rounded-3" onchange="filterOrders()" />
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-none" onclick="resetOrderFilter()" title="Xóa bộ lọc">
+                                    Đặt lại
+                                </button>
+                            </div>
+                        </div>
                     </div>
+
                     @if (Model.Orders.Count == 0)
                     {
-                        <div class="management-empty py-4">
-                            <p class="text-muted mb-0">Chưa phát sinh hóa đơn bán hàng nào.</p>
+                        <div class="management-empty py-5 text-center bg-light rounded-4 border">
+                            <p class="text-muted mb-0">Chưa phát sinh hóa đơn bán hàng nào trong hệ thống.</p>
                         </div>
                     }
                     else
                     {
-                        <div class="table-responsive">
+                        <div class="table-responsive rounded-4 shadow-sm border bg-white">
                             <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
+                                <thead class="table-light text-secondary small text-uppercase fw-semibold">
                                     <tr>
-                                        <th scope="col">Số hóa đơn</th>
+                                        <th scope="col" class="ps-3">Số hóa đơn</th>
                                         <th scope="col">Loại đơn</th>
                                         <th scope="col">Thời gian lập</th>
                                         <th scope="col" class="text-end">Tạm tính</th>
                                         <th scope="col" class="text-end">Giảm giá</th>
                                         <th scope="col" class="text-end">VAT</th>
                                         <th scope="col" class="text-end">Tổng thanh toán</th>
-                                        <th scope="col">Hình thức</th>
-                                        <th scope="col" class="text-center" style="width: 200px;">Trạng thái</th>
+                                        <th scope="col" class="text-center">Hình thức</th>
+                                        <th scope="col" class="text-center" style="width: 210px;">Trạng thái</th>
+                                        <th scope="col" class="text-center pe-3" style="width: 100px;">Thao tác</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="orders-tbody">
                                     @foreach (var o in Model.Orders)
                                     {
-                                        <tr>
-                                            <td class="fw-bold text-dark font-monospace">@o.Code</td>
-                                            <td><span class="badge bg-light text-dark border">@o.OrderType</span></td>
-                                            <td><small class="text-muted">@o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small></td>
-                                            <td class="text-end">@o.Subtotal.ToString("N0") ₫</td>
-                                            <td class="text-end text-success">@(o.DiscountAmount > 0 ? $"-{o.DiscountAmount:N0} ₫" : "0 ₫")</td>
-                                            <td class="text-end text-muted">+@o.TaxAmount.ToString("N0") ₫</td>
-                                            <td class="text-end fw-bold price-cell">@o.Total.ToString("N0") ₫</td>
-                                            <td><span class="badge bg-secondary-subtle text-secondary border">@o.PaymentMethod</span></td>
+                                        <tr data-code="@o.Code.ToLower()" data-date="@o.CreatedAt.ToString("yyyy-MM-dd")">
+                                            <td class="ps-3">
+                                                <span class="fw-bold font-monospace text-primary">@o.Code</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-light text-dark border rounded-pill px-2">@o.OrderType</span>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted fw-medium">@o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                            </td>
+                                            <td class="text-end text-secondary small">@o.Subtotal.ToString("N0") ₫</td>
+                                            <td class="text-end text-success small">@(o.DiscountAmount > 0 ? $"-{o.DiscountAmount:N0} ₫" : "0 ₫")</td>
+                                            <td class="text-end text-muted small">+@o.TaxAmount.ToString("N0") ₫</td>
+                                            <td class="text-end fw-bold text-dark">@o.Total.ToString("N0") ₫</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-secondary-subtle text-secondary border rounded-pill">@o.PaymentMethod</span>
+                                            </td>
                                             <td class="text-center align-middle">
-                                                <div class="d-flex justify-content-center align-items-center gap-2">
+                                                <div class="d-flex justify-content-center align-items-center gap-1">
                                                     @if (o.Status == "Đang chuẩn bị")
                                                     {
-                                                        <span class="badge bg-warning text-dark rounded-pill">@o.Status</span>
-                                                        <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" onclick="updateStatus(@o.Id, 'Chờ nhận món')">Chờ nhận</button>
-                                                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 0.75rem;" onclick="updateStatus(@o.Id, 'Hủy đơn')">Hủy</button>
+                                                        <span class="badge bg-warning text-dark rounded-pill px-2 py-1">@o.Status</span>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-0 px-2 shadow-none" style="font-size: 0.75rem;" onclick="updateStatus(@o.Id, 'Chờ nhận món')">Chờ nhận</button>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill py-0 px-2 shadow-none" style="font-size: 0.75rem;" onclick="updateStatus(@o.Id, 'Hủy đơn')">Hủy</button>
                                                     }
                                                     else if (o.Status == "Chờ nhận món")
                                                     {
-                                                        <span class="badge bg-primary rounded-pill">@o.Status</span>
-                                                        <button type="button" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.75rem;" onclick="updateStatus(@o.Id, 'Hoàn thành')">Hoàn thành</button>
+                                                        <span class="badge bg-primary rounded-pill px-2 py-1">@o.Status</span>
+                                                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill py-0 px-2 shadow-none" style="font-size: 0.75rem;" onclick="updateStatus(@o.Id, 'Hoàn thành')">Hoàn thành</button>
                                                     }
                                                     else if (o.Status == "Hoàn thành")
                                                     {
-                                                        <span class="badge bg-success rounded-pill">@o.Status</span>
+                                                        <span class="badge bg-success rounded-pill px-2 py-1">@o.Status</span>
                                                     }
                                                     else if (o.Status == "Hủy đơn")
                                                     {
-                                                        <span class="badge bg-danger rounded-pill">@o.Status</span>
+                                                        <span class="badge bg-danger rounded-pill px-2 py-1">@o.Status</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary rounded-pill px-2 py-1">@o.Status</span>
                                                     }
                                                 </div>
+                                            </td>
+                                            <td class="text-center pe-3">
+                                                <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3 shadow-none d-inline-flex align-items-center gap-1" onclick="viewOrderDetail(@o.Id)">
+                                                    <span>Chi tiết</span>
+                                                </button>
                                             </td>
                                         </tr>
                                     }
@@ -367,7 +416,8 @@
 
                 <!-- TAB 5: TRỢ LÝ AI BÁN HÀNG -->
                 <div class="tab-pane fade @(activeTab == "ai" ? "show active" : "")" id="tab-ai" role="tabpanel" aria-labelledby="ai-tab">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <!-- 1. Thanh tiêu đề và các nút thao tác -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
                         <div class="d-flex align-items-center gap-2">
                             <h2 class="h5 fw-bold text-dark mb-0">Phiên tư vấn &amp; Gợi ý thực đơn của Trợ lý AI</h2>
                             <button type="button" class="btn btn-sm btn-outline-warning" onclick="clearChatBox()">
@@ -377,28 +427,32 @@
                                 <svg class="icon me-1" style="width: 14px; height: 14px;"><use href="#i-trash" /></svg> Xóa lịch sử
                             </button>
                         </div>
-                        <!-- KHUNG CHAT AI MỚI -->
-                        <div class="card border-primary mb-4 shadow-sm">
-                            <div class="card-header bg-primary text-white">
-                                <strong>Trò chuyện với Trợ lý AI</strong>
-                            </div>
-                            <div class="card-body">
-                                <div id="ai-chat-history" class="mb-3" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
-                                    <!-- Lịch sử chat sẽ hiện ở đây -->
-                                    <div class="text-muted small fst-italic">Hãy nhập câu hỏi để AI tư vấn món...</div>
-                                </div>
-                                <div class="input-group">
-                                    <input type="text" id="ai-message-input" class="form-control" placeholder="Ví dụ: Tư vấn món chua ngọt thanh mát..." />
-                                    <button class="btn btn-primary" type="button" onclick="sendAiMessage()">Gửi</button>
-                                </div>
-                            </div>
-                        </div>
                         <span class="text-muted small">@Model.AiSessions.Count phiên đã ghi nhận</span>
                     </div>
 
+                    <!-- 2. Khung Chat AI nằm độc lập, rộng rãi -->
+                    <div class="card border-primary mb-4 shadow-sm">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2">
+                            <strong>Trò chuyện với Trợ lý AI</strong>
+                            <span class="badge bg-light text-primary">Tự động gợi ý món</span>
+                        </div>
+                        <div class="card-body">
+                            <div id="ai-chat-history" class="mb-3 p-3 bg-light rounded-3 border" style="max-height: 320px; min-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+                                <!-- Lịch sử chat sẽ hiển thị ở đây -->
+                                <div class="text-muted small fst-italic">Hãy nhập câu hỏi để AI tư vấn món (Ví dụ: "Tư vấn món chua ngọt thanh mát", "Cà phê đậm đà", "Combo tiết kiệm")...</div>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" id="ai-message-input" class="form-control" placeholder="Nhập câu hỏi tại đây rồi nhấn Enter hoặc bấm Gửi..." />
+                                <button class="btn btn-primary px-4" type="button" onclick="sendAiMessage()">Gửi</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Lịch sử các phiên tư vấn đã lưu trong CSDL -->
+                    <h3 class="h6 fw-bold text-dark mb-3">Lịch sử các phiên tư vấn đã lưu</h3>
                     @if (Model.AiSessions.Count == 0)
                     {
-                        <div class="management-empty py-4">
+                        <div class="management-empty py-4 text-center border rounded-3 bg-light">
                             <p class="text-muted mb-0">Chưa có phiên tư vấn AI nào được ghi nhận.</p>
                         </div>
                     }
@@ -481,6 +535,7 @@
                                     </div>
                                 </div>
                             }
+
                             <!-- PHÂN TRANG AI -->
                             @if (ViewBag.TotalAiPages > 1)
                             {
@@ -573,6 +628,133 @@
             Nhóm 6 · Nguyễn Kim Song Thư (Nhóm trưởng) · Ninh Văn Đức · Trần Thị Tuyết Kha · Nguyễn Trí Nguyễn · Nguyễn Lâm Chí Tâm
         </p>
     </footer>
+</div>
+
+<!-- Modal Thêm/Sửa Card -->
+<div class="modal fade" id="cardModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="cardModalTitle">Thêm thẻ mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="card-id" />
+                <div class="mb-3">
+                    <label class="form-label fw-medium small text-muted">Mã thẻ (Code)</label>
+                    <input type="text" id="card-code" class="form-control rounded-3" placeholder="VD: TB04, TR03..." required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-medium small text-muted">Tên thẻ (Name)</label>
+                    <input type="text" id="card-name" class="form-control rounded-3" placeholder="VD: Thẻ Bàn 04..." required />
+                </div>
+                <div class="form-check mb-3" id="card-status-container" style="display:none;">
+                    <input class="form-check-input" type="checkbox" id="card-status" />
+                    <label class="form-check-label" for="card-status">Đang phục vụ</label>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="saveCard()">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chi tiết Hóa đơn phong cách POS -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+            <!-- Header Modal -->
+            <div class="modal-header bg-dark text-white px-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary rounded-pill fs-6 px-3" id="modal-order-code">#000</span>
+                    <h5 class="modal-title fw-bold mb-0">Chi tiết Hóa đơn Bán hàng</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-4 bg-light">
+                <!-- Thông tin tóm tắt đơn -->
+                <div class="card border-0 rounded-4 shadow-sm p-3 mb-3 bg-white">
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-md-3">
+                            <span class="text-muted small d-block">Thời gian tạo:</span>
+                            <strong class="text-dark small" id="modal-order-date">--</strong>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <span class="text-muted small d-block">Hình thức dùng:</span>
+                            <span class="badge bg-light text-dark border rounded-pill px-2 mt-1" id="modal-order-type">--</span>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <span class="text-muted small d-block">Thanh toán:</span>
+                            <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2 mt-1" id="modal-order-payment">--</span>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <span class="text-muted small d-block">Trạng thái:</span>
+                            <span class="badge bg-success rounded-pill px-2 mt-1" id="modal-order-status">--</span>
+                        </div>
+                        <div class="col-12 border-top pt-2 mt-2">
+                            <span class="text-muted small">Ghi chú đơn hàng: </span>
+                            <span class="fst-italic text-dark small" id="modal-order-note">Không có</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danh sách món đồ uống trong hóa đơn -->
+                <div class="card border-0 rounded-4 shadow-sm overflow-hidden bg-white mb-3">
+                    <div class="card-header bg-white border-bottom py-2 px-3 fw-bold text-secondary small text-uppercase">
+                        Danh sách món đã gọi
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th class="ps-3">Tên món đồ uống</th>
+                                    <th class="text-center" style="width: 100px;">Đơn giá</th>
+                                    <th class="text-center" style="width: 90px;">Số lượng</th>
+                                    <th class="text-end pe-3" style="width: 130px;">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal-items-tbody">
+                                <!-- Render danh sách món tại đây -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tổng kết thanh toán tài chính -->
+                <div class="card border-0 rounded-4 shadow-sm p-3 bg-white">
+                    <div class="d-flex justify-content-between mb-1 small text-muted">
+                        <span>Tạm tính tiền món:</span>
+                        <strong class="text-dark" id="modal-subtotal">0 ₫</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1 small text-success">
+                        <span>Giảm giá khuyến mãi:</span>
+                        <strong id="modal-discount">0 ₫</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small text-muted">
+                        <span>Thuế VAT:</span>
+                        <strong id="modal-tax">0 ₫</strong>
+                    </div>
+                    <div class="d-flex justify-content-between border-top pt-2 fs-5 fw-bold text-primary">
+                        <span>Tổng thanh toán:</span>
+                        <span id="modal-total">0 ₫</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="modal-footer bg-white border-top-0 px-4 py-3 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4 shadow-none" onclick="window.print()">
+                    🖨️ In hóa đơn
+                </button>
+                <button type="button" class="btn btn-dark rounded-pill px-4 shadow-sm" data-bs-dismiss="modal">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -683,6 +865,170 @@
                 else alert(data.message);
             })
             .catch(error => alert('Lỗi cập nhật trạng thái.'));
+        }
+
+                // --- LOGIC CRUD CARDS ---
+        function showAddCardModal() {
+            document.getElementById('cardModalTitle').innerText = 'Thêm thẻ mới';
+            document.getElementById('card-id').value = '';
+            document.getElementById('card-code').value = '';
+            document.getElementById('card-name').value = '';
+            document.getElementById('card-status-container').style.display = 'none';
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('cardModal')).show();
+        }
+
+        function showEditCardModal(id, code, name, status) {
+            document.getElementById('cardModalTitle').innerText = 'Sửa thẻ';
+            document.getElementById('card-id').value = id;
+            document.getElementById('card-code').value = code;
+            document.getElementById('card-name').value = name;
+            document.getElementById('card-status').checked = status;
+            document.getElementById('card-status-container').style.display = 'block';
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('cardModal')).show();
+        }
+
+                function saveCard() {
+            const id = document.getElementById('card-id').value;
+            const code = document.getElementById('card-code').value.trim();
+            const name = document.getElementById('card-name').value.trim();
+            const status = document.getElementById('card-status').checked;
+            if(!code || !name) { alert('Vui lòng nhập đủ Mã và Tên thẻ.'); return; }
+
+            const token = document.cookie.split('; ').find(row => row.startsWith('.AspNetCore.Antiforgery.'))?.split('=')[1];
+            const isEdit = id !== '';
+            const url = isEdit ? '/Cards/Update' : '/Cards/Create';
+            
+            let body = `code=${encodeURIComponent(code)}&name=${encodeURIComponent(name)}`;
+            if(isEdit) {
+                body += `&id=${encodeURIComponent(id)}&status=${status}`;
+            }
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': token || '' },
+                body: body
+            })
+            .then(async res => {
+                const data = await res.json();
+                if (res.ok && data.success) { 
+                    window.location.reload(); 
+                } else { 
+                    alert(data.message || 'Thao tác không thành công.'); 
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Lỗi khi gửi dữ liệu lên server.');
+            });
+        }
+
+        function deleteCard(id) {
+            if (!confirm('Bạn có chắc muốn xóa thẻ này?')) return;
+            const token = document.cookie.split('; ').find(row => row.startsWith('.AspNetCore.Antiforgery.'))?.split('=')[1];
+            
+            fetch('/Cards/Delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': token || '' },
+                body: `id=${encodeURIComponent(id)}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) { window.location.reload(); }
+                else { alert(data.message); }
+            })
+            .catch(err => alert('Lỗi kết nối.'));
+        }
+
+                // BỘ LỌC TỔNG HỢP: THEO MÃ HÓA ĐƠN VÀ KHOẢNG NGÀY
+        function filterOrders() {
+            const codeInput = document.getElementById('search-order').value.trim().toLowerCase();
+            const fromDate = document.getElementById('filter-from-date').value;
+            const toDate = document.getElementById('filter-to-date').value;
+            
+            const rows = document.querySelectorAll('#orders-tbody tr');
+
+            rows.forEach(row => {
+                const rowCode = row.getAttribute('data-code') || '';
+                const rowDate = row.getAttribute('data-date') || ''; // yyyy-MM-dd
+
+                let matchCode = !codeInput || rowCode.includes(codeInput);
+                let matchDate = true;
+
+                if (fromDate && rowDate < fromDate) matchDate = false;
+                if (toDate && rowDate > toDate) matchDate = false;
+
+                if (matchCode && matchDate) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // NÚT ĐẶT LẠI BỘ LỌC
+        function resetOrderFilter() {
+            document.getElementById('search-order').value = '';
+            document.getElementById('filter-from-date').value = '';
+            document.getElementById('filter-to-date').value = '';
+            filterOrders();
+        }
+
+        // HÀM XEM CHI TIẾT HÓA ĐƠN
+        function viewOrderDetail(orderId) {
+            fetch(`/Lab3/GetOrderDetail?id=${orderId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert(data.message || 'Không thể tải chi tiết đơn hàng.');
+                        return;
+                    }
+
+                    const o = data.order;
+                    document.getElementById('modal-order-code').innerText = o.code;
+                    document.getElementById('modal-order-date').innerText = o.createdAt;
+                    document.getElementById('modal-order-type').innerText = o.orderType;
+                    document.getElementById('modal-order-payment').innerText = o.paymentMethod;
+                    document.getElementById('modal-order-status').innerText = o.status;
+                    document.getElementById('modal-order-note').innerText = o.note;
+
+                    document.getElementById('modal-subtotal').innerText = o.subtotal.toLocaleString('vi-VN') + ' ₫';
+                    document.getElementById('modal-discount').innerText = (o.discountAmount > 0 ? '-' : '') + o.discountAmount.toLocaleString('vi-VN') + ' ₫';
+                    document.getElementById('modal-tax').innerText = '+' + o.taxAmount.toLocaleString('vi-VN') + ' ₫';
+                    document.getElementById('modal-total').innerText = o.total.toLocaleString('vi-VN') + ' ₫';
+
+                    // Đổi màu badge trạng thái trong modal
+                    const statusBadge = document.getElementById('modal-order-status');
+                    statusBadge.className = 'badge rounded-pill px-2 mt-1 ' + 
+                        (o.status === 'Hoàn thành' ? 'bg-success' : 
+                         o.status === 'Đang chuẩn bị' ? 'bg-warning text-dark' : 
+                         o.status === 'Chờ nhận món' ? 'bg-primary' : 'bg-danger');
+
+                    // Hiển thị danh sách món
+                    const tbody = document.getElementById('modal-items-tbody');
+                    tbody.innerHTML = '';
+                    if (data.items.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Không có chi tiết món ăn.</td></tr>`;
+                    } else {
+                        data.items.forEach(item => {
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td class="ps-3 fw-bold text-dark">${item.productName}</td>
+                                    <td class="text-center text-muted small">${item.unitPrice.toLocaleString('vi-VN')} ₫</td>
+                                    <td class="text-center"><span class="badge bg-light text-dark border px-2">${item.quantity}</span></td>
+                                    <td class="text-end pe-3 fw-bold text-dark">${item.lineTotal.toLocaleString('vi-VN')} ₫</td>
+                                </tr>
+                            `;
+                        });
+                    }
+
+                    // Bật modal
+                    const modal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
+                    modal.show();
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Lỗi kết nối khi tải chi tiết đơn hàng.');
+                });
         }
 
         // Khởi tạo khi trang tải xong

@@ -187,4 +187,48 @@ public IActionResult DeleteAiHistory()
         return Json(new { success = false, message = "Lỗi khi xóa: " + ex.Message });
     }
 }
+    [HttpGet]
+    public IActionResult GetOrderDetail(long id)
+    {
+        try
+        {
+            var order = OrderDAL.GetById(id);
+            if (order == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy hóa đơn." });
+            }
+
+            var items = OrderItemDAL.GetByOrderId(id);
+
+            return Json(new
+            {
+                success = true,
+                order = new
+                {
+                    id = order.Id,
+                    code = order.Code,
+                    orderType = order.OrderType,
+                    createdAt = order.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss"),
+                    paymentMethod = order.PaymentMethod,
+                    status = order.Status,
+                    note = string.IsNullOrEmpty(order.Note) ? "Không có" : order.Note,
+                    subtotal = order.Subtotal,
+                    discountAmount = order.DiscountAmount,
+                    taxAmount = order.TaxAmount,
+                    total = order.Total
+                },
+                items = items.Select(i => new
+                {
+                    productName = i.ProductName,
+                    unitPrice = i.UnitPrice,
+                    quantity = i.Quantity,
+                    lineTotal = i.LineTotal
+                })
+            });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { success = false, message = "Lỗi khi lấy chi tiết: " + ex.Message });
+        }
+    }
 }
