@@ -575,7 +575,7 @@ namespace CafePOSManagement.Web.Data.Migrations
 
                             t.HasCheckConstraint("CK_Orders_RequestId", "[RequestId] <> '00000000-0000-0000-0000-000000000000'");
 
-                            t.HasCheckConstraint("CK_Orders_Status", "[Status] IN (N'Hoàn thành', N'Đã hủy')");
+                            t.HasCheckConstraint("CK_Orders_Status", "Status IN (N'Đang chuẩn bị', N'Chờ nhận món', N'Hoàn thành', N'Hủy đơn')");
                         });
 
                     b.HasData(
