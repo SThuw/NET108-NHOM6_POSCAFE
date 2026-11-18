@@ -1,0 +1,203 @@
+@model CafePOSManagement.Web.Models.ViewModels.KioskIndexViewModel
+@{
+    Layout = null; // Kiosk sử dụng giao diện toàn màn hình riêng biệt
+    ViewData["Title"] = "Tự gọi món Kiosk";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>PolyKaFé · Máy Kiosk Tự Phục Vụ Khách Hàng</title>
+    <link rel="icon" type="image/svg+xml" href="~/images/polykafe-logo.svg" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/kiosk.css" asp-append-version="true" />
+</head>
+<body class="kiosk-body">
+    <!-- THANH ĐIỀU HƯỚNG TRÊN CÙNG -->
+    <header class="kiosk-navbar">
+        <a class="kiosk-brand" href="/Kiosk">
+            <img src="~/images/kiosk/logo.png" style="height: 50px; max-width: 200px; object-fit: contain;" alt="PolyKaFé Logo" />
+            <div class="kiosk-brand-text">
+                <strong style="font-size: 20px; font-weight: 900; color: var(--kiosk-primary);">PolyKaFé</strong>
+                <small style="font-size: 11px; font-weight: 700; color: var(--kiosk-text-muted); letter-spacing: 1px;">KIOSK TỰ PHỤC VỤ</small>
+            </div>
+        </a>
+
+        <div class="kiosk-nav-actions" style="display: flex; align-items: center; gap: 16px;">
+            <div class="kiosk-clock-badge">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/>
+                </svg>
+                <span id="kiosk-live-clock">--:--:--</span>
+            </div>
+
+            <!-- Nút dành riêng cho Giảng viên / Thu ngân đăng nhập chấm bài & bán hàng -->
+            <a class="kiosk-admin-link" asp-controller="Pos" asp-action="Index" title="Quay về Quầy Thu ngân & Hệ thống Quản trị">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                </svg>
+                <span>👔 Quầy Thu Ngân &amp; Quản Lý</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- KHU VỰC TRÌNH CHIẾU BANNER TO FULL MÀN HÌNH (3 BANNERS) -->
+    <main class="kiosk-welcome-wrapper">
+        <div class="kiosk-carousel-card">
+            <!-- Nút điều hướng Slide Trái / Phải -->
+            <button type="button" class="kiosk-carousel-btn prev" id="carousel-btn-prev" aria-label="Banner trước">❮</button>
+            <button type="button" class="kiosk-carousel-btn next" id="carousel-btn-next" aria-label="Banner kế tiếp">❯</button>
+
+            <!-- Vùng chứa 3 Banner xoay vòng -->
+            <div class="kiosk-carousel-track" id="kiosk-carousel-track">
+                @{
+                    var banners = Model.Banners;
+                }
+                @for (int i = 0; i < banners.Count; i++)
+                {
+                    var b = banners[i];
+                    <div class="kiosk-carousel-slide @(i == 0 ? "active" : "")">
+                        <img class="kiosk-slide-img" src="@b.ImageUrl" alt="@b.Title" />
+                        <div class="kiosk-slide-overlay">
+                            <span class="kiosk-slide-tag">● @b.Tag · @b.Badge</span>
+                            <h1 class="kiosk-slide-title">@b.Title</h1>
+                            <p class="kiosk-slide-desc">@b.Subtitle</p>
+
+                            <div class="kiosk-slide-price-box">
+                                <span class="kiosk-slide-price">@b.Price.ToString("N0") ₫</span>
+                                @if (b.OriginalPrice.HasValue)
+                                {
+                                    <span class="kiosk-slide-oldprice">@b.OriginalPrice.Value.ToString("N0") ₫</span>
+                                }
+                            </div>
+
+                            <div>
+                                <button type="button" class="btn btn-warning px-4 py-3 fw-bold rounded-pill shadow" onclick="openModeModal()" style="font-size: 16px;">
+                                    👉 CHẠM ĐỂ GỌI MÓN NGAY
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Các chấm chỉ thị Banner (Indicators) -->
+            <div class="kiosk-carousel-indicators">
+                @for (int i = 0; i < Model.Banners.Count; i++)
+                {
+                    <div class="kiosk-indicator-dot @(i == 0 ? "active" : "")" data-index="@i"></div>
+                }
+            </div>
+        </div>
+
+        <!-- KHU VỰC NÚT BẤM CHẠM GỌI MÓN (BOTTOM ACTION TILES) -->
+        <div class="kiosk-bottom-action-bar">
+            <!-- DÙNG TẠI QUÁN -->
+            <div class="kiosk-action-tile primary-call" onclick="selectAndProceed('dinein')">
+                <div class="kiosk-tile-icon">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M4 18v3h3v-3h10v3h3v-3h1a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h1zm2-8h12v6H6v-6zM3 4h18v2H3z"/>
+                    </svg>
+                </div>
+                <div class="kiosk-tile-text">
+                    <h2>DÙNG TẠI QUÁN (DINE-IN)</h2>
+                    <p>Thưởng thức không gian quán &amp; nhận thẻ bàn phục vụ tận chỗ</p>
+                </div>
+                <div class="kiosk-tile-arrow">➔</div>
+            </div>
+
+            <!-- MANG ĐI (TAKE AWAY) -->
+            <div class="kiosk-action-tile" onclick="selectAndProceed('pickup')">
+                <div class="kiosk-tile-icon">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z"/>
+                    </svg>
+                </div>
+                <div class="kiosk-tile-text">
+                    <h2>MANG ĐI (TAKEAWAY)</h2>
+                    <p>Đóng gói ly giấy tiện lợi, nhận món nhanh tại quầy xuất thức uống</p>
+                </div>
+                <div class="kiosk-tile-arrow">➔</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL POPUP: CHỌN DÙNG TẠI BÀN / MANG ĐI & NHẬP SĐT TÍCH ĐIỂM -->
+    <div class="kiosk-modal-backdrop" id="kiosk-mode-modal" style="display: none;">
+        <div class="kiosk-mode-card">
+            <h2 class="kiosk-mode-title">Chào mừng bạn đến với PolyKaFé!</h2>
+            <p class="kiosk-mode-sub">Vui lòng chọn hình thức dùng món hôm nay</p>
+
+            <div class="kiosk-mode-buttons">
+                <button type="button" class="kiosk-mode-btn active" id="btn-mode-dinein" onclick="selectMode('dinein')">
+                    <svg viewBox="0 0 24 24"><path d="M4 18v3h3v-3h10v3h3v-3h1a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h1zm2-8h12v6H6v-6zM3 4h18v2H3z"/></svg>
+                    <strong>DÙNG TẠI BÀN</strong>
+                    <small class="text-muted">Phục vụ tại chỗ với thẻ rung</small>
+                </button>
+                <button type="button" class="kiosk-mode-btn" id="btn-mode-pickup" onclick="selectMode('pickup')">
+                    <svg viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z"/></svg>
+                    <strong>MANG ĐI (TAKE AWAY)</strong>
+                    <small class="text-muted">Đóng gói ly mang đi tiện lợi</small>
+                </button>
+            </div>
+
+            <!-- NHẬP SĐT TÍCH ĐIỂM VIP (CÓ NÚT BỎ QUA) -->
+            <div class="kiosk-phone-box">
+                <div class="kiosk-phone-label">
+                    <span>📱 Số điện thoại tích điểm &amp; Ưu đãi VIP</span>
+                    <span class="badge bg-warning text-dark">Tùy chọn</span>
+                </div>
+                <input type="tel" id="kiosk-customer-phone" class="kiosk-phone-input" placeholder="09xx xxx xxx" maxlength="11" />
+                <div class="kiosk-phone-hint" id="phone-feedback">
+                    Nhập SĐT để nhận diện hạng VVIP/VIP giảm 10% - 15% hoặc tích điểm đổi quà
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-center">
+                <button type="button" class="btn btn-outline-secondary px-4 py-3 fw-bold rounded-3" onclick="closeModeModal()">
+                    Đóng
+                </button>
+                <button type="button" class="btn btn-outline-primary px-4 py-3 fw-bold rounded-3" onclick="proceedOrder(false)">
+                    Bỏ qua SĐT &amp; Đặt ngay
+                </button>
+                <button type="button" class="btn btn-primary px-5 py-3 fw-bold rounded-3" style="background: var(--kiosk-primary); border: none;" onclick="proceedOrder(true)">
+                    Xác nhận &amp; Xem thực đơn ➔
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedMode = 'dinein';
+
+        function openModeModal() {
+            document.getElementById('kiosk-mode-modal').style.display = 'flex';
+        }
+
+        function closeModeModal() {
+            document.getElementById('kiosk-mode-modal').style.display = 'none';
+        }
+
+        function selectMode(mode) {
+            selectedMode = mode;
+            document.getElementById('btn-mode-dinein').classList.toggle('active', mode === 'dinein');
+            document.getElementById('btn-mode-pickup').classList.toggle('active', mode === 'pickup');
+        }
+
+        function proceedOrder(withPhone) {
+            const phone = withPhone ? document.getElementById('kiosk-customer-phone').value.trim() : '';
+            window.location.href = `/Kiosk/Order?mode=${selectedMode}&phone=${encodeURIComponent(phone)}`;
+        }
+
+        function selectAndProceed(mode) {
+            selectMode(mode);
+            openModeModal();
+        }
+
+        document.getElementById('btn-start-order')?.addEventListener('click', openModeModal);
+    </script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    <script src="~/js/kiosk.js" asp-append-version="true"></script>
+</body>
+</html>

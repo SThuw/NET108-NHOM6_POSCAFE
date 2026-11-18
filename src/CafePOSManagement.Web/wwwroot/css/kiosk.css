@@ -1,0 +1,845 @@
+﻿/* ==========================================================================
+   POLYKAFE KIOSK SYSTEM STYLESHEET
+   Full Screen, Touch-optimized, 16:9 Landscape & Responsive
+   Author: Nguyen Kim Song Thu (Leader - Nhom 6)
+   ========================================================================== */
+
+:root {
+    --kiosk-primary: #C54B1F;
+    --kiosk-primary-hover: #9E3814;
+    --kiosk-primary-light: #FDF2EC;
+    --kiosk-accent: #D97706;
+    --kiosk-bg: #F8F5F1;
+    --kiosk-surface: #FFFFFF;
+    --kiosk-border: #E8DFD8;
+    --kiosk-text: #1F2937;
+    --kiosk-text-muted: #6B7280;
+    --kiosk-radius: 18px;
+    --kiosk-radius-sm: 10px;
+    --kiosk-shadow: 0 10px 30px rgba(78, 52, 46, 0.08);
+    --kiosk-shadow-hover: 0 16px 36px rgba(197, 75, 31, 0.16);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.kiosk-body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--kiosk-bg);
+    color: var(--kiosk-text);
+    height: 100vh;
+    width: 100vw;
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==========================================================================
+   HEADER / NAVBAR
+   ========================================================================== */
+.kiosk-navbar {
+    height: 74px;
+    background: var(--kiosk-surface);
+    border-bottom: 2px solid var(--kiosk-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    flex-shrink: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.kiosk-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+}
+
+.kiosk-brand img {
+    height: 52px;
+    max-width: 220px;
+    object-fit: contain;
+}
+
+.kiosk-brand-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.kiosk-brand-text strong {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--kiosk-primary);
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+}
+
+.kiosk-brand-text small {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--kiosk-text-muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.kiosk-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.kiosk-clock-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--kiosk-primary-light);
+    color: var(--kiosk-primary);
+    font-weight: 800;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 30px;
+}
+
+.kiosk-admin-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #FAF7F4;
+    border: 1.5px solid var(--kiosk-border);
+    color: var(--kiosk-text);
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.kiosk-admin-link:hover {
+    background: var(--kiosk-primary);
+    border-color: var(--kiosk-primary);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   FULL-SCREEN HERO CAROUSEL (3 BANNERS)
+   ========================================================================== */
+.kiosk-welcome-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 32px 24px;
+    gap: 18px;
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+    overflow: hidden;
+}
+
+.kiosk-carousel-card {
+    flex: 1;
+    position: relative;
+    border-radius: var(--kiosk-radius);
+    overflow: hidden;
+    box-shadow: var(--kiosk-shadow);
+    border: 3px solid var(--kiosk-border);
+    background: #2D231E;
+    min-height: 380px;
+}
+
+.kiosk-carousel-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.kiosk-carousel-slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s;
+    display: flex;
+}
+
+.kiosk-carousel-slide.active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+}
+
+.kiosk-slide-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.kiosk-slide-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(20, 15, 12, 0.82) 0%, rgba(20, 15, 12, 0.45) 50%, rgba(20, 15, 12, 0.15) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 60px;
+    color: #fff;
+    z-index: 3;
+}
+
+.kiosk-slide-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--kiosk-primary);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 20px;
+    width: fit-content;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 14px;
+}
+
+.kiosk-slide-title {
+    font-size: 40px;
+    font-weight: 950;
+    line-height: 1.15;
+    margin-bottom: 12px;
+    max-width: 650px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.kiosk-slide-desc {
+    font-size: 17px;
+    color: #F3E8E2;
+    max-width: 580px;
+    line-height: 1.45;
+    margin-bottom: 22px;
+}
+
+.kiosk-slide-price-box {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.kiosk-slide-price {
+    font-size: 34px;
+    font-weight: 950;
+    color: #FFD23F;
+}
+
+.kiosk-slide-oldprice {
+    font-size: 20px;
+    color: #C7B5A9;
+    text-decoration: line-through;
+}
+
+/* CAROUSEL CONTROLS */
+.kiosk-carousel-indicators {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.kiosk-indicator-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.45);
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.kiosk-indicator-dot.active {
+    width: 38px;
+    border-radius: 10px;
+    background: var(--kiosk-primary);
+    border-color: #fff;
+}
+
+.kiosk-carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    border: none;
+    color: var(--kiosk-text);
+    font-size: 24px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    transition: all 0.2s ease;
+}
+
+.kiosk-carousel-btn:hover {
+    background: var(--kiosk-primary);
+    color: #fff;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.kiosk-carousel-btn.prev { left: 20px; }
+.kiosk-carousel-btn.next { right: 20px; }
+
+/* ==========================================================================
+   BOTTOM ACTION BAR (CHẠM ĐỂ GỌI MÓN)
+   ========================================================================== */
+.kiosk-bottom-action-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    flex-shrink: 0;
+}
+
+.kiosk-action-tile {
+    background: var(--kiosk-surface);
+    border: 3px solid var(--kiosk-border);
+    border-radius: var(--kiosk-radius);
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+.kiosk-action-tile:hover {
+    border-color: var(--kiosk-primary);
+    transform: translateY(-4px);
+    box-shadow: var(--kiosk-shadow-hover);
+}
+
+.kiosk-action-tile.primary-call {
+    background: linear-gradient(135deg, var(--kiosk-primary) 0%, #A63812 100%);
+    color: #fff;
+    border-color: #8E2B09;
+}
+
+.kiosk-tile-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: var(--kiosk-primary-light);
+    color: var(--kiosk-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.kiosk-action-tile.primary-call .kiosk-tile-icon {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.kiosk-tile-text {
+    flex: 1;
+}
+
+.kiosk-tile-text h2 {
+    font-size: 22px;
+    font-weight: 900;
+    margin-bottom: 4px;
+}
+
+.kiosk-tile-text p {
+    font-size: 14px;
+    opacity: 0.85;
+    line-height: 1.3;
+}
+
+.kiosk-tile-arrow {
+    font-size: 28px;
+    font-weight: 900;
+    transition: transform 0.2s ease;
+}
+
+.kiosk-action-tile:hover .kiosk-tile-arrow {
+    transform: translateX(6px);
+}
+
+/* ==========================================================================
+   MODAL POPUP CHỌN HÌNH THỨC & SĐT TÍCH ĐIỂM
+   ========================================================================== */
+.kiosk-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 12, 10, 0.75);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.kiosk-modal-card {
+    background: var(--kiosk-surface);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 680px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+    padding: 36px 40px;
+    text-align: center;
+    animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.92) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.kiosk-modal-title {
+    font-size: 28px;
+    font-weight: 950;
+    color: var(--kiosk-text);
+    margin-bottom: 6px;
+}
+
+.kiosk-modal-sub {
+    font-size: 15px;
+    color: var(--kiosk-text-muted);
+    margin-bottom: 28px;
+}
+
+.kiosk-mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 26px;
+}
+
+.kiosk-mode-btn {
+    background: #FAF7F4;
+    border: 3px solid var(--kiosk-border);
+    border-radius: var(--kiosk-radius);
+    padding: 22px 18px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.kiosk-mode-btn.active, .kiosk-mode-btn:hover {
+    background: var(--kiosk-primary-light);
+    border-color: var(--kiosk-primary);
+}
+
+.kiosk-mode-btn svg {
+    width: 44px;
+    height: 44px;
+    fill: var(--kiosk-primary);
+}
+
+.kiosk-mode-btn strong {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--kiosk-text);
+}
+
+.kiosk-phone-section {
+    background: #FAF7F4;
+    border: 2px dashed var(--kiosk-border);
+    border-radius: var(--kiosk-radius);
+    padding: 20px;
+    margin-bottom: 28px;
+    text-align: left;
+}
+
+.kiosk-phone-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--kiosk-primary);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.kiosk-phone-input {
+    width: 100%;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    padding: 12px 16px;
+    border: 2px solid var(--kiosk-border);
+    border-radius: var(--kiosk-radius-sm);
+    text-align: center;
+    background: #fff;
+    color: var(--kiosk-text);
+}
+
+.kiosk-phone-input:focus {
+    border-color: var(--kiosk-primary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(197, 75, 31, 0.15);
+}
+
+/* ==========================================================================
+   ORDER SCREEN (MENU & CART) - 16:9 LANDSCAPE
+   ========================================================================== */
+.kiosk-order-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 440px;
+    height: calc(100vh - 74px);
+    overflow: hidden;
+}
+
+.kiosk-menu-pane {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: var(--kiosk-bg);
+    border-right: 2px solid var(--kiosk-border);
+}
+
+.kiosk-category-bar {
+    background: var(--kiosk-surface);
+    border-bottom: 2px solid var(--kiosk-border);
+    padding: 12px 28px;
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-shrink: 0;
+}
+
+.kiosk-category-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.kiosk-cat-pill {
+    border: 2px solid var(--kiosk-border);
+    background: #FAF7F4;
+    border-radius: 40px;
+    padding: 10px 22px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--kiosk-text);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.kiosk-cat-pill.active, .kiosk-cat-pill:hover {
+    background: var(--kiosk-primary);
+    border-color: var(--kiosk-primary);
+    color: #fff;
+}
+
+.kiosk-products-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px;
+}
+
+.kiosk-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 20px;
+}
+
+.kiosk-product-card {
+    background: var(--kiosk-surface);
+    border: 2px solid var(--kiosk-border);
+    border-radius: var(--kiosk-radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.kiosk-product-card:hover {
+    border-color: var(--kiosk-primary);
+    transform: translateY(-4px);
+    box-shadow: var(--kiosk-shadow-hover);
+}
+
+.kiosk-card-img-wrap {
+    height: 170px;
+    width: 100%;
+    overflow: hidden;
+    background: #EFE4DC;
+    position: relative;
+}
+
+.kiosk-card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.kiosk-card-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.kiosk-card-name {
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1.3;
+    margin-bottom: 6px;
+    color: var(--kiosk-text);
+}
+
+.kiosk-card-desc {
+    font-size: 13px;
+    color: var(--kiosk-text-muted);
+    line-height: 1.35;
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.kiosk-card-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.kiosk-card-price {
+    font-size: 18px;
+    font-weight: 950;
+    color: var(--kiosk-primary);
+}
+
+.kiosk-card-add-btn {
+    background: var(--kiosk-primary);
+    color: #fff;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 900;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(197, 75, 31, 0.3);
+    transition: transform 0.15s ease;
+}
+
+.kiosk-card-add-btn:active {
+    transform: scale(0.9);
+}
+
+/* ==========================================================================
+   CART PANE
+   ========================================================================== */
+.kiosk-cart-pane {
+    background: var(--kiosk-surface);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-left: 2px solid var(--kiosk-border);
+}
+
+.kiosk-cart-header {
+    padding: 18px 24px;
+    border-bottom: 2px solid var(--kiosk-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.kiosk-cart-header h2 {
+    font-size: 20px;
+    font-weight: 950;
+    margin: 0;
+}
+
+.kiosk-member-badge {
+    background: #FFFBEB;
+    border: 1px solid #FCD34D;
+    color: #92400E;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.kiosk-cart-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 24px;
+}
+
+.kiosk-cart-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--kiosk-border);
+}
+
+.kiosk-item-info {
+    flex: 1;
+}
+
+.kiosk-item-title {
+    font-weight: 800;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.kiosk-item-price {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--kiosk-primary);
+}
+
+.kiosk-qty-group {
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--kiosk-border);
+    border-radius: var(--kiosk-radius-sm);
+    overflow: hidden;
+}
+
+.kiosk-qty-btn {
+    width: 36px;
+    height: 36px;
+    background: #FAF7F4;
+    border: none;
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+    color: var(--kiosk-text);
+}
+
+.kiosk-qty-val {
+    width: 38px;
+    text-align: center;
+    font-weight: 900;
+    font-size: 15px;
+}
+
+.kiosk-cart-footer {
+    border-top: 2px solid var(--kiosk-border);
+    padding: 18px 24px;
+    background: #FAF7F4;
+}
+
+.kiosk-summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: var(--kiosk-text-muted);
+}
+
+.kiosk-summary-row.total {
+    font-size: 22px;
+    font-weight: 950;
+    color: var(--kiosk-text);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px dashed var(--kiosk-border);
+}
+
+.kiosk-summary-row.total strong {
+    color: var(--kiosk-primary);
+}
+
+.kiosk-checkout-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 18px;
+    border-radius: var(--kiosk-radius);
+    background: var(--kiosk-primary);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 950;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(197, 75, 31, 0.35);
+    transition: all 0.2s ease;
+}
+
+.kiosk-checkout-btn:hover {
+    background: var(--kiosk-primary-hover);
+    transform: translateY(-2px);
+}
+
+.kiosk-checkout-btn:disabled {
+    background: #D1C7C1;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* ==========================================================================
+   TICKET SCREEN
+   ========================================================================== */
+.kiosk-ticket-container {
+    max-width: 540px;
+    margin: 36px auto;
+    background: #fff;
+    border: 2px solid var(--kiosk-border);
+    border-radius: var(--kiosk-radius);
+    padding: 36px 32px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.kiosk-ticket-number {
+    font-size: 64px;
+    font-weight: 950;
+    color: var(--kiosk-primary);
+    line-height: 1;
+    margin: 14px 0;
+    letter-spacing: -2px;
+}
+
+@media (max-width: 992px) {
+    .kiosk-order-shell {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+    .kiosk-cart-pane {
+        border-left: none;
+        border-top: 2px solid var(--kiosk-border);
+    }
+}

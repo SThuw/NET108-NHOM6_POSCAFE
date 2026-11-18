@@ -1,0 +1,148 @@
+@model CafePOSManagement.Web.Models.ViewModels.KioskOrderViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Thực đơn Kiosk · PolyKaFé";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Thực đơn Kiosk · PolyKaFé</title>
+    <link rel="icon" type="image/svg+xml" href="~/images/polykafe-logo.svg" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/kiosk.css" asp-append-version="true" />
+</head>
+<body class="kiosk-body" 
+      data-order-type="@Model.OrderType" 
+      data-customer-phone="@Model.Phone" 
+      data-discount-percent="@Model.DiscountPercent">
+
+    <!-- THANH HEADER KIOSK -->
+    <header class="kiosk-navbar">
+        <div class="d-flex align-items-center gap-3">
+            <a href="/" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;" title="Về trang chủ">
+                <span style="font-size: 20px; font-weight: 900;">✕</span>
+            </a>
+            <a class="kiosk-brand" href="/Kiosk">
+                <img src="~/images/kiosk/logo.png" style="height: 44px; max-width: 160px; object-fit: contain;" alt="PolyKaFé Logo" />
+            </a>
+            <span class="badge rounded-pill px-3 py-2 fw-bold" style="background: var(--kiosk-primary); color: #fff; font-size: 13px;">
+                @(Model.OrderType == "pickup" ? "📦 MANG ĐI (TAKE AWAY)" : "🪑 DÙNG TẠI BÀN")
+            </span>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            @if (!string.IsNullOrWhiteSpace(Model.Phone))
+            {
+                <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3" style="background: #FFFBEB; border: 1px solid #FCD34D;">
+                    <span style="font-size: 18px;">👑</span>
+                    <div>
+                        <strong style="color: #92400E; font-size: 13px; display: block;">@Model.MemberTier: @Model.Phone</strong>
+                        <small style="color: #B45309; font-size: 11px;">Ưu đãi giảm: @Model.DiscountPercent%</small>
+                    </div>
+                </div>
+            }
+            <a class="kiosk-admin-link" asp-controller="Login" asp-action="Login">
+                <span>Quầy Thu Ngân 🔒</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- THÂN GIAO DIỆN GỌI MÓN (MENU TRÁI + GIỎ HÀNG PHẢI) -->
+    <div class="kiosk-order-shell">
+        <!-- CỘT TRÁI: THỰC ĐƠN CẢM ỨNG -->
+        <main class="kiosk-menu-pane">
+            <!-- THANH CHỌN DANH MỤC NGANG -->
+            <nav class="kiosk-cat-bar" aria-label="Danh mục món">
+                <button type="button" class="kiosk-cat-btn active" data-category="all">
+                    ☕ Tất cả món (@Model.Products.Count)
+                </button>
+                @foreach (var cat in Model.Categories)
+                {
+                    <button type="button" class="kiosk-cat-btn" data-category="@cat.Id">
+                        @cat.Name
+                    </button>
+                }
+            </nav>
+
+            <!-- LƯỚI DANH SÁCH MÓN ĂN ĐỒ UỐNG -->
+            <div class="kiosk-products-scroll">
+                <div class="kiosk-product-grid">
+                    @foreach (var p in Model.Products)
+                    {
+                        <div class="kiosk-pcard" 
+                             data-id="@p.Id" 
+                             data-name="@p.Name" 
+                             data-price="@p.Price" 
+                             data-category="@p.CategoryId">
+                            <div class="kiosk-pcard-img-wrap">
+                                <img src="@p.ImageUrl" alt="@p.Name" loading="lazy" onerror="this.src='/images/product-fallback.svg'" />
+                            </div>
+                            <div class="kiosk-pcard-body">
+                                <div class="kiosk-pcard-name">@p.Name</div>
+                                <div class="kiosk-pcard-desc">@(string.IsNullOrWhiteSpace(p.Description) ? "Món ngon đặc sản của PolyKaFé" : p.Description)</div>
+                                <div class="kiosk-pcard-foot">
+                                    <span class="kiosk-pcard-price">@p.Price.ToString("N0") ₫</span>
+                                    <button type="button" class="kiosk-pcard-add kiosk-add-btn" data-id="@p.Id" data-name="@p.Name" data-price="@p.Price">
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </main>
+
+        <!-- CỘT PHẢI: GIỎ HÀNG KIOSK CẢM ỨNG -->
+        <aside class="kiosk-cart-pane">
+            <div class="kiosk-cart-head">
+                <h2>Giỏ hàng (<span id="kiosk-cart-count">0</span>)</h2>
+                <small class="text-muted">Chạm + / − để chỉnh</small>
+            </div>
+
+            @if (Model.DiscountPercent > 0)
+            {
+                <div class="kiosk-vip-banner">
+                    <span>✨ Ưu đãi thành viên @Model.MemberTier</span>
+                    <strong>-@Model.DiscountPercent%</strong>
+                </div>
+            }
+
+            <!-- DANH SÁCH MÓN ĐÃ CHỌN -->
+            <div class="kiosk-cart-items" id="kiosk-cart-items">
+                <!-- Nội dung tự sinh bởi kiosk.js -->
+            </div>
+
+            <!-- CHÂN GIỎ HÀNG & NÚT ĐẶT MÓN -->
+            <div class="kiosk-cart-foot">
+                <div class="mb-3">
+                    <input type="text" id="kiosk-order-note" class="form-control form-control-sm" placeholder="Ghi chú (ít đá, ít ngọt...)" maxlength="150" />
+                </div>
+                <div class="kiosk-summary-row">
+                    <span>Tạm tính</span>
+                    <span id="kiosk-subtotal" class="fw-bold">0 ₫</span>
+                </div>
+                @if (Model.DiscountPercent > 0)
+                {
+                    <div class="kiosk-summary-row text-success">
+                        <span>Giảm giá (@Model.DiscountPercent%)</span>
+                        <span id="kiosk-discount" class="fw-bold">0 ₫</span>
+                    </div>
+                }
+                <div class="kiosk-summary-row total">
+                    <span>Tổng thanh toán</span>
+                    <strong id="kiosk-total">0 ₫</strong>
+                </div>
+
+                <button type="button" class="kiosk-checkout-btn" id="kiosk-checkout-btn" disabled>
+                    XÁC NHẬN ĐẶT MÓN
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <script src="~/js/kiosk.js" asp-append-version="true"></script>
+</body>
+</html>
