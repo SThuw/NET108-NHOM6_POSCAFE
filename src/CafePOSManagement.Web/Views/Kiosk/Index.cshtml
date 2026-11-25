@@ -1,0 +1,199 @@
+@model CafePOSManagement.Web.Models.ViewModels.KioskIndexViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "PolyKaFé · Kiosk Tự Phục Vụ";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>PolyKaFé · Kiosk Tự Phục Vụ</title>
+    <link rel="icon" type="image/png" href="~/images/kiosk/logo.png" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/kiosk.css" asp-append-version="true" />
+</head>
+<body class="kiosk-body">
+    <!-- BANNER TO HẾT CẢ KHUNG HÌNH (100% VIEWPORT), KHÔNG CÓ HEADER TRẮNG LẠC LÕNG -->
+    <main class="kiosk-fullscreen-banner" id="kiosk-banner-screen" onclick="openOrderModal()">
+        <!-- LOGO & QUẦY THU NGÂN NỔI TRỰC TIẾP TRÊN BANNER -->
+        <div class="kiosk-floating-top" onclick="event.stopPropagation()">
+            <a class="kiosk-brand-floating" href="/Kiosk" title="PolyKaFé">
+                <img src="~/images/kiosk/logo.png" class="kiosk-logo-huge" alt="PolyKaFé" asp-append-version="true" />
+            </a>
+
+            <a class="kiosk-admin-floating-btn" asp-controller="Login" asp-action="Login" title="Đăng nhập Quản lý & Thu ngân">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                </svg>
+                <span>Quầy Thu Ngân &amp; Quản Lý</span>
+            </a>
+        </div>
+        <!-- 3 BANNER TỰ ĐỘNG CHUYỂN 2.5 GIÂY - KHÔNG CÓ CHỮ HTML ĐÈ LÊN -->
+        <div class="kiosk-banner-slider" id="kiosk-slider">
+            <div class="kiosk-slide active">
+                <img src="~/images/kiosk/banner1.png" alt="Combo 1" asp-append-version="true" />
+            </div>
+            <div class="kiosk-slide">
+                <img src="~/images/kiosk/banner2.png" alt="Combo 2" asp-append-version="true" />
+            </div>
+            <div class="kiosk-slide">
+                <img src="~/images/kiosk/banner3.png" alt="Combo 3" asp-append-version="true" />
+            </div>
+        </div>
+
+        <!-- CÁC CHẤM CHỈ THỊ SLIDE -->
+        <div class="kiosk-dots" onclick="event.stopPropagation()">
+            <span class="kiosk-dot active" onclick="gotoSlide(0)"></span>
+            <span class="kiosk-dot" onclick="gotoSlide(1)"></span>
+            <span class="kiosk-dot" onclick="gotoSlide(2)"></span>
+        </div>
+
+        <!-- CHỈ ĐỂ 1 NÚT DUY NHẤT: CHẠM ĐỂ GỌI MÓN NGAY -->
+        <div class="kiosk-cta-wrapper" onclick="event.stopPropagation()">
+            <button type="button" class="kiosk-cta-huge-btn" onclick="openOrderModal()">
+                <span>CHẠM ĐỂ GỌI MÓN NGAY</span>
+                <span class="cta-arrow">➔</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- MODAL POPUP: CHỈ HIỆN KHI BẤM "CHẠM ĐỂ GỌI MÓN NGAY" -->
+    <div class="kiosk-modal-backdrop" id="kiosk-order-modal" style="display: none;">
+        <div class="kiosk-modal-card">
+            <h2 class="kiosk-modal-title">Chào mừng bạn đến với PolyKaFé!</h2>
+            <p class="kiosk-modal-sub">Vui lòng chọn hình thức dùng món hôm nay</p>
+
+            <div class="kiosk-mode-grid">
+                <button type="button" class="kiosk-mode-btn active" id="btn-mode-dinein" onclick="selectOrderMode('dinein')">
+                    <svg viewBox="0 0 24 24"><path d="M4 18v3h3v-3h10v3h3v-3h1a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h1zm2-8h12v6H6v-6zM3 4h18v2H3z"/></svg>
+                    <strong>DÙNG TẠI BÀN</strong>
+                    <small class="text-muted">Phục vụ tại quán &amp; thẻ rung</small>
+                </button>
+                <button type="button" class="kiosk-mode-btn" id="btn-mode-pickup" onclick="selectOrderMode('pickup')">
+                    <svg viewBox="0 0 24 24"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z"/></svg>
+                    <strong>MANG ĐI (TAKEAWAY)</strong>
+                    <small class="text-muted">Đóng gói ly mang đi tiện lợi</small>
+                </button>
+            </div>
+
+            <!-- NHẬP SĐT TÍCH ĐIỂM & NHẬN ƯU ĐÃI -->
+            <div class="kiosk-phone-section">
+                <div class="kiosk-phone-header">
+                    <span>Số điện thoại tích điểm &amp; nhận ưu đãi</span>
+                </div>
+                <input type="tel" id="kiosk-phone-input" class="kiosk-phone-input" placeholder="09xx xxx xxx" maxlength="10" autocomplete="off" />
+                <div id="kiosk-phone-error" class="text-danger small mt-2 fw-bold text-center" style="display: none;"></div>
+                <div class="text-center text-muted small mt-2" style="white-space: nowrap;">
+                    Nhập số điện thoại để nhận ưu đãi (hoặc bấm Bỏ qua để đặt món)
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <button type="button" class="btn btn-outline-secondary px-4 py-3 fw-bold rounded-pill" onclick="closeOrderModal()">
+                    Đóng
+                </button>
+                <button type="button" class="btn btn-light px-4 py-3 fw-bold rounded-pill border" style="background: #FFF8E1; border-color: #FFE082 !important; color: #795548;" onclick="skipPhoneAndOrder()">
+                    Bỏ qua ➔
+                </button>
+                <button type="button" class="btn btn-primary px-5 py-3 fw-bold rounded-pill" style="background: var(--kiosk-primary); border: none; font-size: 16px;" onclick="goToOrder()">
+                    BẮT ĐẦU ĐẶT MÓN ➔
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    <script>
+        // 1. Tự động lướt 3 banner mỗi 2.5 giây
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.kiosk-slide');
+        const dots = document.querySelectorAll('.kiosk-dot');
+
+        function showSlide(index) {
+            if (index < 0) index = slides.length - 1;
+            if (index >= slides.length) index = 0;
+            currentSlide = index;
+
+            slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+            dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function gotoSlide(i) {
+            showSlide(i);
+        }
+
+        // Tự động lướt đều đặn mỗi 2.5 giây (2500ms)
+        let slideInterval = setInterval(nextSlide, 2500);
+
+        // 2. Xử lý mở Modal chọn Dùng tại bàn / Mang đi
+        let selectedOrderMode = 'dinein';
+
+        function openOrderModal() {
+            const errorBox = document.getElementById('kiosk-phone-error');
+            if (errorBox) errorBox.style.display = 'none';
+            document.getElementById('kiosk-order-modal').style.display = 'flex';
+        }
+
+        function closeOrderModal() {
+            document.getElementById('kiosk-order-modal').style.display = 'none';
+        }
+
+        function selectOrderMode(mode) {
+            selectedOrderMode = mode;
+            document.getElementById('btn-mode-dinein').classList.toggle('active', mode === 'dinein');
+            document.getElementById('btn-mode-pickup').classList.toggle('active', mode === 'pickup');
+        }
+
+        const phoneInput = document.getElementById('kiosk-phone-input');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+                const errorBox = document.getElementById('kiosk-phone-error');
+                if (errorBox) errorBox.style.display = 'none';
+            });
+            phoneInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    goToOrder();
+                }
+            });
+        }
+
+        function skipPhoneAndOrder() {
+            window.location.href = `/Kiosk/Order?mode=${selectedOrderMode}`;
+        }
+
+        function goToOrder() {
+            const input = document.getElementById('kiosk-phone-input');
+            const errorBox = document.getElementById('kiosk-phone-error');
+            const phone = input?.value.trim() || '';
+
+            if (!phone) {
+                if (errorBox) {
+                    errorBox.textContent = 'Vui lòng nhập số điện thoại hoặc bấm "Bỏ qua" để đặt món ngay.';
+                    errorBox.style.display = 'block';
+                }
+                input?.focus();
+                return;
+            }
+
+            const phonePattern = /^0[0-9]{9}$/;
+            if (!phonePattern.test(phone)) {
+                if (errorBox) {
+                    errorBox.textContent = 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0.';
+                    errorBox.style.display = 'block';
+                }
+                input?.focus();
+                return;
+            }
+
+            if (errorBox) errorBox.style.display = 'none';
+            window.location.href = `/Kiosk/Order?mode=${selectedOrderMode}&phone=${encodeURIComponent(phone)}`;
+        }
+    </script>
+</body>
+</html>

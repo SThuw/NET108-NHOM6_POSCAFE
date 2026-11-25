@@ -1,0 +1,130 @@
+@model CafePOSManagement.Web.Models.ViewModels.KioskTicketViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = $"Phiếu nhận món #{Model.OrderNumber} · PolyKaFé";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phiếu nhận món #@Model.OrderNumber · PolyKaFé</title>
+    <link rel="icon" type="image/svg+xml" href="~/images/polykafe-logo.svg" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/kiosk.css" asp-append-version="true" />
+</head>
+<body class="kiosk-body" style="background: #F4EBE4;">
+
+    <div class="kiosk-ticket-wrap">
+        <img src="~/images/kiosk/logo.png" style="height: 48px; max-width: 180px; object-fit: contain; margin-bottom: 12px;" alt="PolyKaFé" />
+        <p class="text-uppercase fw-bold text-muted small mb-0" style="letter-spacing: 1px;">PHIẾU GỌI MÓN TỰ PHỤC VỤ (KIOSK)</p>
+
+        <div class="kiosk-ticket-number">
+            #@Model.OrderNumber
+        </div>
+
+        <div class="alert alert-success fw-bold py-2 mb-3" style="font-size: 15px;">
+            🎉 ĐẶT MÓN THÀNH CÔNG!
+        </div>
+
+        <p class="text-secondary small mb-3">
+            Quý khách vui lòng giữ số thứ tự này để nhận đồ uống tại quầy phục vụ.
+        </p>
+
+        <div class="d-flex justify-content-between text-muted small mb-2">
+            <span>Thời gian: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+            <span class="fw-bold text-dark">@(Model.OrderType == "pickup" ? "📦 Mang đi" : "🪑 Dùng tại bàn")</span>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Note))
+        {
+            <div class="text-start bg-light p-2 rounded small mb-2 border">
+                <strong>Ghi chú:</strong> @Model.Note
+            </div>
+        }
+
+        <!-- BẢNG CHI TIẾT CÁC MÓN GỌI -->
+        <table class="kiosk-ticket-table">
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td style="padding: 6px 0;">
+                            <strong>@item.Quantity ×</strong> @item.ProductName
+                        </td>
+                        <td class="text-end fw-bold" style="padding: 6px 0;">
+                            @item.LineTotal.ToString("N0") ₫
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- TỔNG CỘNG TIỀN -->
+        <div class="d-flex justify-content-between text-muted small mb-1">
+            <span>Tạm tính:</span>
+            <span>@Model.Subtotal.ToString("N0") ₫</span>
+        </div>
+        @if (Model.DiscountAmount > 0)
+        {
+            <div class="d-flex justify-content-between text-success small mb-1">
+                <span>Ưu đãi (@Model.MemberTier -@Model.DiscountPercent%):</span>
+                <span>-@Model.DiscountAmount.ToString("N0") ₫</span>
+            </div>
+        }
+        <div class="d-flex justify-content-between fw-bold fs-5 mt-2 pt-2 border-top">
+            <span>Tổng cộng:</span>
+            <span style="color: var(--kiosk-primary);">@Model.Total.ToString("N0") ₫</span>
+        </div>
+
+        <!-- MÃ VẠCH ĐỐI SOÁT MINH HỌA -->
+        <div class="my-4 text-center">
+            <svg width="220" height="46" viewBox="0 0 220 46" fill="#24140E">
+                <rect x="10" y="5" width="3" height="35"/>
+                <rect x="16" y="5" width="2" height="35"/>
+                <rect x="22" y="5" width="5" height="35"/>
+                <rect x="30" y="5" width="2" height="35"/>
+                <rect x="36" y="5" width="4" height="35"/>
+                <rect x="44" y="5" width="3" height="35"/>
+                <rect x="52" y="5" width="6" height="35"/>
+                <rect x="62" y="5" width="2" height="35"/>
+                <rect x="68" y="5" width="4" height="35"/>
+                <rect x="76" y="5" width="3" height="35"/>
+                <rect x="83" y="5" width="5" height="35"/>
+                <rect x="92" y="5" width="2" height="35"/>
+                <rect x="98" y="5" width="4" height="35"/>
+                <rect x="106" y="5" width="3" height="35"/>
+                <rect x="114" y="5" width="6" height="35"/>
+                <rect x="124" y="5" width="2" height="35"/>
+                <rect x="130" y="5" width="4" height="35"/>
+                <rect x="138" y="5" width="3" height="35"/>
+                <rect x="145" y="5" width="5" height="35"/>
+                <rect x="154" y="5" width="2" height="35"/>
+                <rect x="160" y="5" width="4" height="35"/>
+                <rect x="168" y="5" width="3" height="35"/>
+                <rect x="176" y="5" width="5" height="35"/>
+                <rect x="185" y="5" width="2" height="35"/>
+                <rect x="191" y="5" width="4" height="35"/>
+                <rect x="199" y="5" width="3" height="35"/>
+                <rect x="206" y="5" width="4" height="35"/>
+            </svg>
+            <div class="small text-muted font-monospace mt-1">PK-ORDER-#@Model.OrderNumber</div>
+        </div>
+
+        <!-- CÁC NÚT THAO TÁC -->
+        <div class="kiosk-ticket-actions d-flex flex-column gap-2">
+            <button type="button" class="btn btn-primary py-3 fw-bold rounded-3" style="background: var(--kiosk-primary); border: none;" onclick="window.print()">
+                🖨️ IN PHIẾU GỌI MÓN
+            </button>
+            <a href="/" class="btn btn-outline-secondary py-3 fw-bold rounded-3">
+                Hoàn tất &amp; Quay lại trang chủ
+            </a>
+            <p class="text-muted small mt-2 mb-0">
+                Tự động quay về trang chủ sau <strong id="ticket-countdown">10</strong> giây...
+            </p>
+        </div>
+    </div>
+
+    <script src="~/js/kiosk.js" asp-append-version="true"></script>
+</body>
+</html>

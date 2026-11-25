@@ -1,0 +1,711 @@
+/* ==========================================================================
+   POLYKAFE KIOSK SYSTEM STYLESHEET
+   Full Screen, Touch-optimized, 16:9 Landscape & Responsive
+   Author: Nguyen Kim Song Thu (Leader - Nhom 6)
+   ========================================================================== */
+
+:root {
+    --kiosk-primary: #C54B1F;
+    --kiosk-primary-hover: #9E3814;
+    --kiosk-primary-light: #FDF2EC;
+    --kiosk-accent: #D97706;
+    --kiosk-bg: #F8F5F1;
+    --kiosk-surface: #FFFFFF;
+    --kiosk-border: #E8DFD8;
+    --kiosk-text: #1F2937;
+    --kiosk-text-muted: #6B7280;
+    --kiosk-radius: 18px;
+    --kiosk-radius-sm: 10px;
+    --kiosk-shadow: 0 10px 30px rgba(78, 52, 46, 0.08);
+    --kiosk-shadow-hover: 0 16px 36px rgba(197, 75, 31, 0.16);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.kiosk-body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--kiosk-bg);
+    color: var(--kiosk-text);
+    height: 100vh;
+    width: 100vw;
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==========================================================================
+   HEADER / NAVBAR
+/* ==========================================================================
+   FLOATING TOP BAR (LOGO TO TÁCH NỀN & QUẦY THU NGÂN TRỰC TIẾP TRÊN BANNER)
+   ========================================================================== */
+.kiosk-floating-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 40px;
+    pointer-events: none;
+}
+
+.kiosk-brand-floating {
+    display: inline-flex;
+    align-items: center;
+    pointer-events: auto;
+    text-decoration: none;
+    transition: transform 0.25s ease;
+}
+
+.kiosk-brand-floating:hover {
+    transform: scale(1.04);
+}
+
+.kiosk-logo-huge {
+    height: 85px;
+    max-height: 90px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
+}
+
+.kiosk-admin-floating-btn {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(22, 16, 13, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
+    color: #FFFFFF !important;
+    padding: 12px 24px;
+    border-radius: 40px;
+    font-size: 15px;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kiosk-admin-floating-btn:hover {
+    background: var(--kiosk-primary);
+    border-color: #fff;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 25px rgba(197, 75, 31, 0.5);
+}
+
+/* ==========================================================================
+   FULL-SCREEN BANNER (100% KHUNG HÌNH, THẤY TRỌN VẸN 100% GÓC TRÊN ĐẾN ĐÁY)
+   ========================================================================== */
+.kiosk-fullscreen-banner {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    background: #1B120C;
+    display: block;
+}
+
+.kiosk-banner-slider {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.kiosk-slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1B120C;
+}
+
+.kiosk-slide.active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+}
+
+.kiosk-slide img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+}
+
+/* Chấm chỉ thị slide */
+.kiosk-dots {
+    position: absolute;
+    bottom: 110px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 20;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 8px 16px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+}
+
+.kiosk-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1.5px solid rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kiosk-dot.active {
+    width: 40px;
+    border-radius: 10px;
+    background: #FF5722;
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(255, 87, 34, 0.7);
+}
+
+/* Nút duy nhất: CHẠM ĐỂ GỌI MÓN NGAY - Thu nhỏ thanh lịch, để lộ bánh */
+.kiosk-cta-wrapper {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 25;
+    width: auto;
+    max-width: 90vw;
+}
+
+.kiosk-cta-huge-btn {
+    background: linear-gradient(135deg, #FF6F00 0%, #E65100 45%, #C54B1F 100%);
+    color: #FFFFFF !important;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    padding: 10px 28px;
+    border-radius: 40px;
+    border: 2px solid #FFFFFF;
+    box-shadow: 0 6px 22px rgba(230, 81, 0, 0.45), 0 0 0 3px rgba(255, 111, 0, 0.25);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: uppercase;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: kioskCtaPulse 2.2s infinite;
+}
+
+.kiosk-cta-huge-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 10px 28px rgba(230, 81, 0, 0.6), 0 0 0 5px rgba(255, 111, 0, 0.35);
+    background: linear-gradient(135deg, #FF8F00 0%, #EF6C00 45%, #D84315 100%);
+}
+
+.kiosk-cta-huge-btn .pulse-icon {
+    font-size: 18px;
+    animation: handPoint 1.2s infinite alternate ease-in-out;
+}
+
+.kiosk-cta-huge-btn .cta-arrow {
+    font-size: 16px;
+    transition: transform 0.2s ease;
+}
+
+.kiosk-cta-huge-btn:hover .cta-arrow {
+    transform: translateX(4px);
+}
+
+@keyframes kioskCtaPulse {
+    0% {
+        box-shadow: 0 12px 35px rgba(230, 81, 0, 0.55), 0 0 0 0 rgba(255, 111, 0, 0.5);
+    }
+    70% {
+        box-shadow: 0 12px 35px rgba(230, 81, 0, 0.55), 0 0 0 14px rgba(255, 111, 0, 0);
+    }
+    100% {
+        box-shadow: 0 12px 35px rgba(230, 81, 0, 0.55), 0 0 0 0 rgba(255, 111, 0, 0);
+    }
+}
+
+@keyframes handPoint {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(6px); }
+}
+
+/* ==========================================================================
+   MODAL POPUP CHỌN HÌNH THỨC & SĐT TÍCH ĐIỂM
+   ========================================================================== */
+.kiosk-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 12, 10, 0.75);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.kiosk-modal-card {
+    background: var(--kiosk-surface);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 680px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+    padding: 36px 40px;
+    text-align: center;
+    animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+    from { opacity: 0; transform: scale(0.92) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.kiosk-modal-title {
+    font-size: 28px;
+    font-weight: 950;
+    color: var(--kiosk-text);
+    margin-bottom: 6px;
+}
+
+.kiosk-modal-sub {
+    font-size: 15px;
+    color: var(--kiosk-text-muted);
+    margin-bottom: 28px;
+}
+
+.kiosk-mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 26px;
+}
+
+.kiosk-mode-btn {
+    background: #FAF7F4;
+    border: 3px solid var(--kiosk-border);
+    border-radius: var(--kiosk-radius);
+    padding: 22px 18px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.kiosk-mode-btn.active, .kiosk-mode-btn:hover {
+    background: var(--kiosk-primary-light);
+    border-color: var(--kiosk-primary);
+}
+
+.kiosk-mode-btn svg {
+    width: 44px;
+    height: 44px;
+    fill: var(--kiosk-primary);
+}
+
+.kiosk-mode-btn strong {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--kiosk-text);
+}
+
+.kiosk-phone-section {
+    background: #FAF7F4;
+    border: 2px dashed var(--kiosk-border);
+    border-radius: var(--kiosk-radius);
+    padding: 20px;
+    margin-bottom: 28px;
+    text-align: left;
+}
+
+.kiosk-phone-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--kiosk-primary);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.kiosk-phone-input {
+    width: 100%;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    padding: 12px 16px;
+    border: 2px solid var(--kiosk-border);
+    border-radius: var(--kiosk-radius-sm);
+    text-align: center;
+    background: #fff;
+    color: var(--kiosk-text);
+}
+
+.kiosk-phone-input:focus {
+    border-color: var(--kiosk-primary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(197, 75, 31, 0.15);
+}
+
+/* ==========================================================================
+   ORDER SCREEN (MENU & CART) - 16:9 LANDSCAPE
+   ========================================================================== */
+.kiosk-order-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 440px;
+    height: calc(100vh - 74px);
+    overflow: hidden;
+}
+
+.kiosk-menu-pane {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: var(--kiosk-bg);
+    border-right: 2px solid var(--kiosk-border);
+}
+
+.kiosk-category-bar {
+    background: var(--kiosk-surface);
+    border-bottom: 2px solid var(--kiosk-border);
+    padding: 12px 28px;
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-shrink: 0;
+}
+
+.kiosk-category-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.kiosk-cat-pill {
+    border: 2px solid var(--kiosk-border);
+    background: #FAF7F4;
+    border-radius: 40px;
+    padding: 10px 22px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--kiosk-text);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.kiosk-cat-pill.active, .kiosk-cat-pill:hover {
+    background: var(--kiosk-primary);
+    border-color: var(--kiosk-primary);
+    color: #fff;
+}
+
+.kiosk-products-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px;
+}
+
+.kiosk-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 20px;
+}
+
+.kiosk-product-card {
+    background: var(--kiosk-surface);
+    border: 2px solid var(--kiosk-border);
+    border-radius: var(--kiosk-radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.kiosk-product-card:hover {
+    border-color: var(--kiosk-primary);
+    transform: translateY(-4px);
+    box-shadow: var(--kiosk-shadow-hover);
+}
+
+.kiosk-card-img-wrap {
+    height: 170px;
+    width: 100%;
+    overflow: hidden;
+    background: #EFE4DC;
+    position: relative;
+}
+
+.kiosk-card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.kiosk-card-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.kiosk-card-name {
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1.3;
+    margin-bottom: 6px;
+    color: var(--kiosk-text);
+}
+
+.kiosk-card-desc {
+    font-size: 13px;
+    color: var(--kiosk-text-muted);
+    line-height: 1.35;
+    margin-bottom: 12px;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.kiosk-card-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.kiosk-card-price {
+    font-size: 18px;
+    font-weight: 950;
+    color: var(--kiosk-primary);
+}
+
+.kiosk-card-add-btn {
+    background: var(--kiosk-primary);
+    color: #fff;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 900;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(197, 75, 31, 0.3);
+    transition: transform 0.15s ease;
+}
+
+.kiosk-card-add-btn:active {
+    transform: scale(0.9);
+}
+
+/* ==========================================================================
+   CART PANE
+   ========================================================================== */
+.kiosk-cart-pane {
+    background: var(--kiosk-surface);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-left: 2px solid var(--kiosk-border);
+}
+
+.kiosk-cart-header {
+    padding: 18px 24px;
+    border-bottom: 2px solid var(--kiosk-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.kiosk-cart-header h2 {
+    font-size: 20px;
+    font-weight: 950;
+    margin: 0;
+}
+
+.kiosk-member-badge {
+    background: #FFFBEB;
+    border: 1px solid #FCD34D;
+    color: #92400E;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.kiosk-cart-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 24px;
+}
+
+.kiosk-cart-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--kiosk-border);
+}
+
+.kiosk-item-info {
+    flex: 1;
+}
+
+.kiosk-item-title {
+    font-weight: 800;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.kiosk-item-price {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--kiosk-primary);
+}
+
+.kiosk-qty-group {
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--kiosk-border);
+    border-radius: var(--kiosk-radius-sm);
+    overflow: hidden;
+}
+
+.kiosk-qty-btn {
+    width: 36px;
+    height: 36px;
+    background: #FAF7F4;
+    border: none;
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+    color: var(--kiosk-text);
+}
+
+.kiosk-qty-val {
+    width: 38px;
+    text-align: center;
+    font-weight: 900;
+    font-size: 15px;
+}
+
+.kiosk-cart-footer {
+    border-top: 2px solid var(--kiosk-border);
+    padding: 18px 24px;
+    background: #FAF7F4;
+}
+
+.kiosk-summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: var(--kiosk-text-muted);
+}
+
+.kiosk-summary-row.total {
+    font-size: 22px;
+    font-weight: 950;
+    color: var(--kiosk-text);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px dashed var(--kiosk-border);
+}
+
+.kiosk-summary-row.total strong {
+    color: var(--kiosk-primary);
+}
+
+.kiosk-checkout-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 18px;
+    border-radius: var(--kiosk-radius);
+    background: var(--kiosk-primary);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 950;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(197, 75, 31, 0.35);
+    transition: all 0.2s ease;
+}
+
+.kiosk-checkout-btn:hover {
+    background: var(--kiosk-primary-hover);
+    transform: translateY(-2px);
+}
+
+.kiosk-checkout-btn:disabled {
+    background: #D1C7C1;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* ==========================================================================
+   TICKET SCREEN
+   ========================================================================== */
+.kiosk-ticket-container {
+    max-width: 540px;
+    margin: 36px auto;
+    background: #fff;
+    border: 2px solid var(--kiosk-border);
+    border-radius: var(--kiosk-radius);
+    padding: 36px 32px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.kiosk-ticket-number {
+    font-size: 64px;
+    font-weight: 950;
+    color: var(--kiosk-primary);
+    line-height: 1;
+    margin: 14px 0;
+    letter-spacing: -2px;
+}
+
+@media (max-width: 992px) {
+    .kiosk-order-shell {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+    .kiosk-cart-pane {
+        border-left: none;
+        border-top: 2px solid var(--kiosk-border);
+    }
+}

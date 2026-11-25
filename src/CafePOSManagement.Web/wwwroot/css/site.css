@@ -425,10 +425,54 @@ h2 { font-size: 18px; font-weight: 700; margin: 0; letter-spacing: -.3px; color:
 @media (max-width: 480px) { .kpi-grid { grid-template-columns: 1fr; } }
 @media (max-width: 900px) { .management-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .management-filters .btn { justify-self: start; } .account-link strong { max-width: 100px; } }
 @media (max-width: 600px) { .management-page .app-main { padding: 0 14px 30px; } .management-shell { padding-top: 16px; } .management-heading { align-items: flex-start; flex-direction: column; } .management-stats { gap: 10px; } .management-stats > div { padding: 14px; display: block; } .management-stats span { display: block; font-size: 12px; min-height: 24px; } .management-stats strong { font-size: 22px; } .management-filters { grid-template-columns: 1fr; } .management-filters .btn { width: 100%; } .management-table thead { display: none; } .management-table tbody { display: grid; gap: 12px; padding: 12px; } .management-table tr { display: grid; grid-template-columns: 70px 1fr; gap: 8px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 12px; background: var(--color-surface); } .management-table td { border: 0; padding: 0; text-align: left !important; } .management-table td:first-child { grid-row: span 3; } .management-table td:nth-child(4), .management-table td:nth-child(5), .management-table td:nth-child(6), .management-table td:nth-child(7) { grid-column: 1 / -1; } .management-table td:nth-child(4)::before, .management-table td:nth-child(5)::before, .management-table td:nth-child(6)::before { content: attr(data-label) ': '; color: var(--color-muted); font-size: 12px; } .management-table td:nth-child(7) { border-top: 1px solid var(--color-border-light); padding-top: 10px; } .form-grid, .product-detail { grid-template-columns: 1fr; } .form-grid .full { grid-column: auto; } .product-detail dl { grid-template-columns: 110px 1fr; } .account-link { display: none; } }
-@media (min-width: 1181px) { .pos-page .app-shell { grid-template-columns: 288px minmax(0, 1fr); } }
-@media (min-width: 768px) { .pos-page .cart-panel { margin: -16px -20px -20px 0; border-top: 0; border-right: 0; border-bottom: 0; border-radius: 0; } }
-@media (min-width: 1650px) { .order-controls { grid-template-columns: 1.3fr .8fr 1.2fr; } .note-field { grid-column: auto; } .product-name { font-size: 14px; } .product-prices strong { font-size: 15px; } }
-@media (max-width: 1500px) { .pos-page .header-context, .pos-page .account-link { display: none; } }
+@media (min-width: 768px) {
+    .pos-page .pos-workspace {
+        grid-template-columns: minmax(0, 1.45fr) minmax(360px, 420px);
+        height: 100%;
+        min-height: 0;
+    }
+    .pos-page .cart-panel {
+        margin: -80px -20px -20px 0;
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100dvh;
+        z-index: 920;
+        border-top: 0;
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 1px solid var(--color-border);
+        border-radius: 0;
+        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .pos-page .cart-heading {
+        min-height: 64px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--color-border);
+        background: #fff;
+    }
+    .pos-page .cart-scroll {
+        flex: 1 1 0;
+        min-height: 0;
+        max-height: none;
+        overflow-y: auto;
+        padding: 8px 12px;
+        scrollbar-width: thin;
+    }
+    .pos-page .cart-bottom {
+        flex-shrink: 0;
+        margin-top: auto;
+        padding: 8px 14px 12px;
+        border-top: 1px solid var(--color-border);
+        background: var(--color-surface);
+    }
+}
 @media (max-width: 1440px) { .app-header { gap: 12px; padding: 12px 18px; } .header-search { max-width: 360px; } .pos-workspace { grid-template-columns: minmax(0, 1fr) minmax(360px, 400px); gap: 12px; } .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .order-controls { grid-template-columns: minmax(0, 1fr); padding: 12px; gap: 10px; } .note-field { grid-column: auto; } .menu-tip { display: none; } .cart-bottom { padding: 14px; } }
 @media (max-width: 1180px) {
     .app-shell { grid-template-columns: minmax(0, 1fr); }
@@ -504,56 +548,136 @@ h2 { font-size: 18px; font-weight: 700; margin: 0; letter-spacing: -.3px; color:
     min-height: 0;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
 }
 
 .pos-page .cart-heading {
     flex-shrink: 0;
-    padding: 14px 16px 12px;
+    padding: 10px 14px 6px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.pos-page .cart-heading h2 {
+    font-size: 15px;
+    margin: 0;
+}
+
+.pos-page .order-meta strong {
+    font-size: 12px;
+}
+
+.pos-page .order-meta time {
+    font-size: 11px;
+    margin-top: 2px;
 }
 
 .pos-page .cart-scroll {
-    flex: 1;
-    min-height: 100px;
+    flex: 1 1 0;
+    min-height: 120px;
+    max-height: none;
     overflow-y: auto;
-    padding: 10px 12px 4px;
+    padding: 8px 12px;
+    scrollbar-width: thin;
+}
+
+.vip-member-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 750;
+    background: #FFF8E1;
+    color: #8D4004;
+    border: 1px solid #FFE082;
+    width: 100%;
+    min-height: 34px;
+    margin-bottom: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.35;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Ẩn khối loại đơn hàng trong Kiosk (vì đã chọn ở ngoài màn hình chính) */
+.pos-page.kiosk-pos-mode .order-type-field,
+.kiosk-pos-mode .order-type-field {
+    display: none !important;
+}
+
+.pos-page .cart-bottom .note-field.full-width {
+    grid-column: 1 / -1 !important;
+    width: 100%;
 }
 
 /* Thu gọn từng món trong giỏ */
 .pos-page .cart-item {
-    padding: 9px;
-    gap: 9px;
-    margin-bottom: 8px;
+    padding: 6px 8px;
+    gap: 8px;
+    margin-bottom: 6px;
 }
 
 .pos-page .cart-thumbnail {
-    width: 42px;
-    height: 42px;
+    width: 36px;
+    height: 36px;
+}
+
+.pos-page .cart-item h3 {
+    font-size: 12px;
+    margin: 0 0 2px;
+}
+
+.pos-page .cart-unit-price {
+    font-size: 11px;
+}
+
+.pos-page .quantity-control {
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.pos-page .quantity-control button {
+    height: 22px;
+    width: 22px;
+    font-size: 14px;
+}
+
+.pos-page .line-total {
+    font-size: 12px;
 }
 
 /* 3. Khu vực thông tin đơn hàng */
 .pos-page .cart-bottom {
     flex-shrink: 0;
-    padding: 12px 16px;
+    padding: 8px 14px 10px;
     border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
 }
 
-
-/* Sắp xếp lại khu vực thông tin đơn hàng */
+/* Sắp xếp lại khu vực thông tin đơn hàng cực gọn */
 .pos-page .cart-bottom .order-controls {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 10px;
-    padding: 0 0 12px;
-    margin: 0 0 12px;
+    grid-template-columns: minmax(0, 1.28fr) minmax(0, 0.92fr);
+    gap: 8px;
+    padding: 0 0 6px;
+    margin: 0 0 6px;
     border-bottom: 1px solid var(--color-border);
 }
 
-/* Mỗi trường chiếm toàn bộ chiều ngang */
-.pos-page .cart-bottom .order-type-field,
-.pos-page .cart-bottom .discount-field,
-.pos-page .cart-bottom .note-field {
+.pos-page .cart-bottom .order-type-field {
     grid-column: 1 / -1;
+    min-width: 0;
+}
+
+.pos-page .cart-bottom .discount-field {
+    grid-column: 1;
+    min-width: 0;
+}
+
+.pos-page .cart-bottom .note-field {
+    grid-column: 2;
     min-width: 0;
 }
 
@@ -562,124 +686,112 @@ h2 { font-size: 18px; font-weight: 700; margin: 0; letter-spacing: -.3px; color:
     display: flex;
     width: 100%;
     min-width: 0;
-    gap: 5px;
+    gap: 4px;
+    min-height: 32px;
 }
 
 .pos-page .cart-bottom .segmented button {
     flex: 1 1 0;
     min-width: 0;
-    padding: 8px 5px;
-    gap: 6px;
+    padding: 4px 6px;
+    gap: 4px;
     justify-content: center;
     white-space: nowrap;
-    font-size: 12px;
+    font-size: 11.5px;
+    font-weight: 600;
 }
 
-/* Không để icon bị co nhỏ */
 .pos-page .cart-bottom .segmented button .icon {
+    width: 14px;
+    height: 14px;
     flex-shrink: 0;
-}
-
-/* Ô giảm giá và ghi chú */
-.pos-page .cart-bottom .discount-field .form-select,
-.pos-page .cart-bottom .note-field .form-control {
-    width: 100%;
-    min-width: 0;
-}
-
-/* Màn hình điện thoại */
-@media (max-width: 767.98px) {
-    .pos-page .cart-bottom .segmented {
-        gap: 3px;
-    }
-
-    .pos-page .cart-bottom .segmented button {
-        flex-direction: column;
-        white-space: normal;
-        min-height: 54px;
-        gap: 3px;
-        line-height: 1.2;
-    }
-}
-
-
-.pos-page .cart-bottom .note-field {
-    grid-column: 1 / -1;
 }
 
 /* Thu gọn nhãn và ô nhập */
 .pos-page .cart-bottom .field-label {
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     font-size: 11px;
+    font-weight: 700;
 }
 
-.pos-page .cart-bottom .segmented {
-    min-height: 38px;
-}
-
-.pos-page .cart-bottom .segmented button {
-    padding: 6px 5px;
-    font-size: 11px;
-    gap: 4px;
-}
-
-.pos-page .cart-bottom .form-control,
-.pos-page .cart-bottom .form-select {
-    min-height: 38px;
-    padding: 6px 10px;
-    font-size: 12px;
+.pos-page .cart-bottom .discount-field .form-select,
+.pos-page .cart-bottom .note-field .form-control {
+    width: 100%;
+    min-width: 0;
+    min-height: 34px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    border-radius: var(--radius-sm);
 }
 
 /* 4. Bảng tổng tiền */
 .pos-page .order-summary > div {
-    margin-bottom: 6px;
-    font-size: 12px;
+    margin-bottom: 3px;
+    font-size: 11.5px;
 }
 
 .pos-page .order-summary .total-row {
-    padding-top: 10px;
-    margin-top: 10px;
-    margin-bottom: 12px;
+    padding-top: 6px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    border-top: 1px dashed var(--color-border);
 }
 
 .pos-page .total-row dt {
-    font-size: 15px;
+    font-size: 14px;
+    font-weight: 700;
 }
 
 .pos-page .total-row dd {
-    font-size: 23px;
+    font-size: 20px;
+    font-weight: 850;
+    color: var(--color-primary);
 }
 
-/* 5. Phương thức thanh toán */
+/* 5. Phương thức thanh toán gọn nằm ngang */
 .pos-page .payment-field legend {
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+    font-size: 11px;
+    font-weight: 700;
 }
 
 .pos-page .payment-options {
-    gap: 7px;
+    gap: 6px;
 }
 
 .pos-page .payment-option > span {
-    min-height: 62px;
-    padding: 8px 3px;
-    gap: 5px;
-    font-size: 12px;
+    min-height: 36px;
+    padding: 4px 8px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+}
+
+.pos-page .payment-option > span .icon {
+    width: 14px;
+    height: 14px;
 }
 
 .pos-page .not-integrated {
-    font-size: 10px;
+    display: none;
 }
 
-/* 6. Nút ghi nhận đơn */
+/* 6. Nút ghi nhận đơn luôn nổi bật */
 .pos-page .checkout-button {
-    min-height: 46px;
-    margin-top: 10px;
-    font-size: 14px;
+    min-height: 42px;
+    margin-top: 8px;
+    font-size: 15px;
+    font-weight: 800;
+    border-radius: 25px;
 }
 
 .pos-page .preview-note {
-    margin-top: 5px;
-    font-size: 11px;
+    margin-top: 3px;
+    font-size: 10.5px;
 }
 
 /* =========================================
