@@ -29,3 +29,4 @@ $runArguments = @('run', '--project', (Join-Path $root 'src\CafePOSManagement.We
 if ($Build) { $runArguments += '--no-build' }
 & $dotnet @runArguments
 if ($LASTEXITCODE -ne 0) { throw "CafePOS dừng với mã lỗi $LASTEXITCODE." }
+dotnet run --project src/CafePOSManagement.Web.\run.ps1 -Build
