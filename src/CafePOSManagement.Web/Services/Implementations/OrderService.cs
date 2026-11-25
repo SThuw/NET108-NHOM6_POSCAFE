@@ -9,7 +9,12 @@ namespace CafePOSManagement.Web.Services.Implementations;
 public sealed class OrderService(IProductService products, TimeProvider clock) : IOrderService
 {
     private static readonly object Gate = new();
-    private static readonly DiscountCode[] Discounts = [new("SALE10", "Giảm 10%", 10), new("SALE20", "Giảm 20%", 20)];
+    private static readonly DiscountCode[] Discounts = [
+        new("SALE5", "Giảm 5%", 5),
+        new("SALE10", "Giảm 10%", 10),
+        new("SALE15", "Giảm 15%", 15),
+        new("SALE20", "Giảm 20%", 20)
+    ];
     private static readonly decimal[] TaxRates = [0, 5, 8, 10];
     // shortcut: Đơn và khóa chống gửi trùng mất khi restart; chuyển sang transaction + unique key khi dùng SQL Server.
     private static readonly List<(Order Order, string Fingerprint)> Orders = [];

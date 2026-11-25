@@ -10,6 +10,57 @@
     const productById = new Map(products.map(product => [product.id, product]));
     const state = { category: "all", search: "", discount: 0, discountCode: "", tax: 0,
         orderType: "pickup", payment: "cash", note: "", cart: new Map() };
+
+    // Hỗ trợ chế độ Kiosk tự gọi món
+    const urlParams = new URLSearchParams(window.location.search);
+    const isKioskMode = urlParams.get("kiosk") === "1" || window.location.pathname.toLowerCase().includes("/kiosk") || !app.dataset.userId;
+    const initialMode = urlParams.get("mode");
+    const initialPhone = urlParams.get("phone");
+
+    if (initialMode === "dinein" || initialMode === "pickup") {
+        state.orderType = initialMode;
+    }
+    if (isKioskMode) {
+        state.tax = 5; // Cố định thuế VAT 5% cho Kiosk
+    }
+    let vipBadgeText = "";
+    if (initialPhone && /^0[0-9]{9}$/.test(initialPhone.trim())) {
+        const phone = initialPhone.trim();
+        const visitKey = `polykafe_visits_${phone}`;
+        let visitCount = Number(localStorage.getItem(visitKey) || 0);
+
+        // Khởi tạo số lần ghé mẫu cho các SĐT test nếu chưa lưu:
+        if (!localStorage.getItem(visitKey)) {
+            if (["0901234567", "0912345678", "0987654321", "0909090909", "0988888888"].includes(phone)) {
+                visitCount = 8; // Khách quen ghé 8 lần -> VVIP
+            } else if (["0911223344", "0933445566", "0977889900", "0903456789"].includes(phone)) {
+                visitCount = 3; // Khách quen ghé 3 lần -> VIP
+            } else {
+                visitCount = 1; // Khách mới lần đầu ghé quán
+            }
+            localStorage.setItem(visitKey, String(visitCount));
+        }
+
+        // Tiêu chuẩn phân hạng theo số lần khách ghé quán:
+        // - Lần đầu (1 - 2 lần): Khách hàng mới -> Giảm 5%
+        // - Từ 3 đến 5 lần: Khách ghé nhiều lần -> Hội viên VIP -> Giảm 10%
+        // - Từ 6 lần trở lên: Khách quen thân thiết lâu năm -> Hội viên VVIP -> Giảm 15%
+        if (visitCount >= 6) {
+            state.discountCode = "SALE15";
+            vipBadgeText = "Giảm 15% (Hội viên VVIP)";
+        } else if (visitCount >= 3) {
+            state.discountCode = "SALE10";
+            vipBadgeText = "Giảm 10% (Hội viên VIP)";
+        } else {
+            state.discountCode = "SALE5";
+            vipBadgeText = "Giảm 5% (Thành viên mới)";
+        }
+    } else {
+        // Khách vãng lai: BỎ LUÔN dòng ưu đãi, không hiển thị bất kỳ thông báo nào
+        state.discountCode = "";
+        vipBadgeText = "";
+    }
+
     const draftKey = `cafepos.pos-draft.${app.dataset.userId}`;
     try {
         const draft = JSON.parse(sessionStorage.getItem(draftKey) || "null");
@@ -21,10 +72,10 @@
             });
             if (categories.some(c => c.id === draft.category)) state.category = draft.category;
             if (typeof draft.search === "string") state.search = draft.search.slice(0, 100);
-            if (["pickup", "dinein"].includes(draft.orderType)) state.orderType = draft.orderType;
+            if (!initialMode && ["pickup", "dinein"].includes(draft.orderType)) state.orderType = draft.orderType;
             if (["cash", "card", "wallet"].includes(draft.payment)) state.payment = draft.payment;
-            if (typeof draft.note === "string") state.note = draft.note.slice(0, 200);
-            if (initial.discounts.some(d => d.code === draft.discountCode)) state.discountCode = draft.discountCode;
+            if (!initialPhone && typeof draft.note === "string") state.note = draft.note.slice(0, 200);
+            if (!initialPhone && initial.discounts.some(d => d.code === draft.discountCode)) state.discountCode = draft.discountCode;
             if (initial.taxRates.includes(draft.tax)) state.tax = draft.tax;
         }
     } catch { /* Trình duyệt chặn sessionStorage: tiếp tục với đơn trống. */ }
@@ -48,10 +99,52 @@
     $("#tax-percent").value = String(state.tax);
     $("#order-note").value = state.note;
     $("input[name=payment][value=" + state.payment + "]").checked = true;
-    $("#order-types").querySelectorAll("button").forEach(button => {
+    $("#order-types")?.querySelectorAll("button").forEach(button => {
         button.classList.toggle("active", button.dataset.order === state.orderType);
         button.setAttribute("aria-pressed", String(button.dataset.order === state.orderType));
     });
+    const backKioskBtn = $("#btn-back-kiosk-toolbar");
+    if (backKioskBtn && !isKioskMode) {
+        backKioskBtn.style.display = "none";
+    }
+    const orderTypeField = $("#order-type-field");
+    const discountField = $("#discount-field");
+    const vipBadge = $("#vip-member-badge");
+    const noteField = $("#note-field");
+
+    if (isKioskMode) {
+        if (orderTypeField) orderTypeField.style.display = "none";
+        if (vipBadgeText) {
+            if (discountField) discountField.style.display = "block";
+            if (vipBadge) {
+                vipBadge.textContent = vipBadgeText;
+                vipBadge.hidden = false;
+            }
+            const discountSelect = $("#discount");
+            if (discountSelect) {
+                discountSelect.style.display = "none";
+                discountSelect.disabled = true;
+            }
+            const discountLabel = $("#discount-label-title");
+            if (discountLabel) discountLabel.textContent = "Ưu đãi thành viên";
+        } else {
+            // Khách vãng lai: ẩn hoàn toàn ô ưu đãi, không hiển thị gì cả
+            if (discountField) discountField.style.display = "none";
+            if (vipBadge) vipBadge.hidden = true;
+            if (noteField) noteField.classList.add("full-width");
+        }
+    } else {
+        if (vipBadge) vipBadge.hidden = true;
+    }
+    const taxSelect = $("#tax-percent");
+    if (taxSelect && isKioskMode) {
+        taxSelect.value = "5";
+        state.tax = 5;
+        taxSelect.disabled = true;
+        taxSelect.style.display = "none";
+        const taxLabel = $("#tax-fixed-label");
+        if (taxLabel) taxLabel.hidden = false;
+    }
     let notificationTimer;
 
     function notify(message) {
@@ -250,11 +343,11 @@
         else if (button.dataset.action === "decrease") { if (quantity === 1) state.cart.delete(id); else state.cart.set(id, quantity - 1); }
         renderCart();
     });
-    $("#order-types").addEventListener("click", event => {
+    $("#order-types")?.addEventListener("click", event => {
         const button = event.target.closest("[data-order]");
         if (!button || button.disabled) return;
         state.orderType = button.dataset.order;
-        $("#order-types").querySelectorAll("button").forEach(item => {
+        $("#order-types")?.querySelectorAll("button").forEach(item => {
             item.classList.toggle("active", item === button);
             item.setAttribute("aria-pressed", String(item === button));
         });
@@ -280,7 +373,7 @@
     $("#refresh-pos").addEventListener("click", () => loadProducts(true));
     let loggingOut = false;
     let navigatingToManager = false;
-    $("#pos-logout").addEventListener("submit", () => {
+    $("#pos-logout")?.addEventListener("submit", () => {
         loggingOut = true;
         try { sessionStorage.removeItem(draftKey); } catch { /* Không có draft cần xóa. */ }
     });
@@ -384,21 +477,43 @@
     }
 
     function orderPayload() {
+        let userNote = ($("#order-note")?.value || state.note || "").trim();
+        let finalNote = userNote;
+        if (initialPhone && /^0[0-9]{9}$/.test(initialPhone.trim())) {
+            const p = initialPhone.trim();
+            finalNote = userNote ? `${userNote} (SĐT: ${p})` : `SĐT: ${p}`;
+        }
         return { requestId: generateUuid(), orderType: state.orderType, paymentMethod: state.payment,
-            discountCode: state.discountCode || null, taxPercent: state.tax, note: state.note,
+            discountCode: state.discountCode || null, taxPercent: state.tax, note: finalNote,
             items: [...state.cart].map(([productId, quantity]) => ({ productId, quantity })) };
     }
 
     function resetOrder() {
         state.cart.clear();
         editingOrderId = null;
-        state.discount = 0; state.discountCode = ""; state.tax = 0; state.note = "";
-        state.orderType = "pickup"; state.payment = "cash";
-        $("#discount").value = ""; $("#tax-percent").value = "0"; $("#order-note").value = "";
+        if (!initialPhone) {
+            state.discount = 0;
+            state.discountCode = "";
+        }
+        state.note = "";
+        state.payment = "cash";
+        if (initialMode) {
+            state.orderType = initialMode;
+        } else {
+            state.orderType = "pickup";
+        }
+        if (!isKioskMode) {
+            $("#discount").value = "";
+            $("#tax-percent").value = "0";
+            state.tax = 0;
+        } else {
+            state.tax = 5;
+        }
+        $("#order-note").value = "";
         $("input[name=payment][value=cash]").checked = true;
-        $("#order-types").querySelectorAll("button").forEach(button => {
-            button.classList.toggle("active", button.dataset.order === "pickup");
-            button.setAttribute("aria-pressed", String(button.dataset.order === "pickup"));
+        $("#order-types")?.querySelectorAll("button").forEach(button => {
+            button.classList.toggle("active", button.dataset.order === state.orderType);
+            button.setAttribute("aria-pressed", String(button.dataset.order === state.orderType));
         });
         renderCart();
     }
@@ -434,6 +549,25 @@
         if (editBtn) {
             editBtn.style.display = committed ? "" : "none";
         }
+        const kioskReturnBtn = $("#kiosk-modal-return-btn");
+        if (kioskReturnBtn) {
+            if (isKioskMode && committed) {
+                kioskReturnBtn.style.display = "";
+                let countdown = 12;
+                const cdSpan = $("#kiosk-countdown");
+                if (cdSpan) cdSpan.textContent = String(countdown);
+                const timer = setInterval(() => {
+                    countdown--;
+                    if (cdSpan) cdSpan.textContent = String(countdown);
+                    if (countdown <= 0) {
+                        clearInterval(timer);
+                        window.location.href = "/Kiosk";
+                    }
+                }, 1000);
+            } else {
+                kioskReturnBtn.style.display = "none";
+            }
+        }
         bootstrap.Modal.getOrCreateInstance($("#receipt-modal")).show();
     }
 
@@ -451,6 +585,13 @@
             orderNumber = result.nextOrderNumber;
             $("#order-number").textContent = `Đơn ${orderNumber}`;
             pendingCheckout = null;
+            // Tự động tăng số lần ghé quán cho SĐT khi đặt đơn thành công
+            if (initialPhone && /^0[0-9]{9}$/.test(initialPhone.trim())) {
+                const p = initialPhone.trim();
+                const vk = `polykafe_visits_${p}`;
+                const currentVisits = Number(localStorage.getItem(vk) || 1);
+                localStorage.setItem(vk, String(currentVisits + 1));
+            }
             resetOrder();
             showReceipt(lastReceipt, true);
             notify(wasEditing ? `Đã cập nhật đơn ${lastReceipt.orderNumber}.` : `Đã ghi nhận đơn ${lastReceipt.orderNumber}.`);
@@ -532,7 +673,7 @@
             $("#tax-percent").value = String(state.tax);
             $("#order-note").value = state.note;
             $("input[name=payment][value=" + state.payment + "]").checked = true;
-            $("#order-types").querySelectorAll("button").forEach(button => {
+            $("#order-types")?.querySelectorAll("button").forEach(button => {
                 button.classList.toggle("active", button.dataset.order === state.orderType);
                 button.setAttribute("aria-pressed", String(button.dataset.order === state.orderType));
             });

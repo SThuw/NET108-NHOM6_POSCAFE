@@ -1,5 +1,6 @@
 using System.Globalization;
 using CafePOSManagement.Web.Data;
+using CafePOSManagement.Web.Models.Entities;
 using CafePOSManagement.Web.Services.Implementations;
 using CafePOSManagement.Web.Services.Interfaces;
 using Microsoft.AspNetCore.Localization;
@@ -128,11 +129,46 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<CafePosDbContext>();
-        db.Database.Migrate();
+        try { db.Database.Migrate(); } catch { db.Database.EnsureCreated(); }
+
+        // Tự động đồng bộ các Category mới (của Kha: matcha, milktea, combo) nếu DB chưa có
+        var existingCatIds = db.Categories.Select(c => c.Id).ToHashSet();
+        var newCategories = new[]
+        {
+            new Category("matcha", "Matcha & Đá xay") { DisplayOrder = 8, IsActive = true, CreatedAt = DateTimeOffset.Now },
+            new Category("milktea", "Trà sữa") { DisplayOrder = 9, IsActive = true, CreatedAt = DateTimeOffset.Now },
+            new Category("combo", "Combo Tiết Kiệm (Deal Hời)") { DisplayOrder = 10, IsActive = true, CreatedAt = DateTimeOffset.Now }
+        };
+        foreach (var cat in newCategories)
+        {
+            if (!existingCatIds.Contains(cat.Id))
+                db.Categories.Add(cat);
+        }
+        db.SaveChanges();
+
+        // Tự động đồng bộ các Product mới (của Kha: p17 - p24) nếu DB chưa có
+        var existingProdIds = db.Products.Select(p => p.Id).ToHashSet();
+        var newProducts = new[]
+        {
+            new Product("p17", "Matcha Latte", "matcha", 65000, 59000, "https://images.unsplash.com/photo-1576092762791-dd9e2220e561?auto=format&fit=crop&w=800&q=85") { IsAvailable = true, Description = "Matcha Latte — món đặc sắc của CafePOS." },
+            new Product("p18", "Matcha Freeze", "matcha", 75000, 69000, "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=85") { IsAvailable = true, Description = "Matcha Freeze — món đặc sắc của CafePOS." },
+            new Product("p19", "Cacao sữa", "matcha", 60000, 55000, "https://images.unsplash.com/photo-1542990253-a781e04c0082?auto=format&fit=crop&w=800&q=85") { IsAvailable = true, Description = "Cacao sữa — món đặc sắc của CafePOS." },
+            new Product("p20", "Trà sữa Oolong nướng", "milktea", 65000, 59000, "https://images.unsplash.com/photo-1558857563-b371033fe7cf?auto=format&fit=crop&w=800&q=85") { IsAvailable = true, Description = "Trà sữa Oolong nướng — món đặc sắc của CafePOS." },
+            new Product("p21", "Hồng trà Macchiato", "milktea", 70000, 65000, "https://images.unsplash.com/photo-1576092762791-dd9e2220e561?auto=format&fit=crop&w=800&q=85&sat=-10") { IsAvailable = true, Description = "Hồng trà Macchiato — món đặc sắc của CafePOS." },
+            new Product("p22", "Trà sữa lài", "milktea", 60000, 55000, "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=800&q=85&sat=-15") { IsAvailable = true, Description = "Trà sữa lài — món đặc sắc của CafePOS." },
+            new Product("p23", "Combo Sáng: Cà phê + Bánh croissant", "combo", 95000, 79000, "https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&w=800&q=85") { IsAvailable = true, Description = "Combo Sáng: Cà phê + Bánh croissant — combo Deal Hời." },
+            new Product("p24", "Combo Trà chiều: Trà đào + Bánh", "combo", 95000, 79000, "https://images.unsplash.com/photo-1507133750040-4a8f57021571?auto=format&fit=crop&w=800&q=85") { IsAvailable = true, Description = "Combo Trà chiều: Trà đào + Bánh — combo Deal Hời." }
+        };
+        foreach (var prod in newProducts)
+        {
+            if (!existingProdIds.Contains(prod.Id))
+                db.Products.Add(prod);
+        }
+        db.SaveChanges();
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[Lưu ý CSDL] Chưa thể tự động migrate: {ex.Message}");
+        Console.WriteLine($"[Lưu ý CSDL] {ex.Message}");
     }
 }
 

@@ -48,9 +48,38 @@
             <a asp-action="ForgotPassword">Quên mật khẩu?</a>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100 auth-submit-btn" data-saving-label="Đang đăng nhập...">
+        <button type="submit" class="btn btn-primary w-100 auth-submit-btn mb-3" data-saving-label="Đang đăng nhập...">
             <span>Đăng nhập hệ thống</span>
             <svg class="icon"><use href="#i-arrow" /></svg>
         </button>
+
+        <div class="border-top pt-3 mt-3">
+            <p class="small text-muted fw-bold mb-2">⚡ TÀI KHOẢN MẪU DÙNG THỬ (BẤM ĐỂ TỰ ĐIỀN):</p>
+            <div class="d-flex flex-column gap-2">
+                <button type="button" class="btn btn-sm btn-outline-primary text-start fw-bold" onclick="fillAccount('thu@polycafe.vn', '123456')">
+                    👑 Quản lý: Nguyễn Kim Song Thư (Full quyền)
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary text-start fw-bold" onclick="fillAccount('admin@polykafe.local', 'Admin@123')">
+                    🛡️ Quản lý: Hệ thống Admin (admin@polykafe.local)
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-info text-start fw-bold" onclick="fillAccount('duc@polycafe.vn', '123456')">
+                    👔 Nhân viên bán hàng: Ninh Văn Đức (Quầy POS)
+                </button>
+            </div>
+            <div class="text-center mt-3 pt-2 border-top">
+                <a href="/Kiosk" class="btn btn-link text-decoration-none fw-bold small text-primary">
+                    Mở Màn Hình Máy Kiosk Tự Phục Vụ ➔
+                </a>
+            </div>
+        </div>
     </form>
 </div>
+
+<script>
+    function fillAccount(email, pass) {
+        const emailEl = document.querySelector('input[name="Email"]');
+        const passEl = document.getElementById('login-password');
+        if (emailEl) emailEl.value = email;
+        if (passEl) passEl.value = pass;
+    }
+</script>
