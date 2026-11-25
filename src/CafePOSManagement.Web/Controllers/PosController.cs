@@ -9,10 +9,17 @@ namespace CafePOSManagement.Web.Controllers;
 [Authorize(Policy = "EmployeeOrManager")]
 public sealed class PosController(IPosService posService, IProductService products, IOrderService orders) : Controller
 {
-    [HttpGet]
+    [HttpGet("Pos")]
+    [HttpGet("/Kiosk/Order")]
+    [HttpGet("/")]
     [AllowAnonymous]
     public IActionResult Index()
     {
+        var isKiosk = HttpContext.Request.Path.Value?.Contains("/Kiosk/Order", StringComparison.OrdinalIgnoreCase) == true
+            || HttpContext.Request.Query.ContainsKey("kiosk")
+            || User.Identity?.IsAuthenticated != true;
+        ViewData["IsKioskOrder"] = isKiosk;
+        ViewData["Title"] = isKiosk ? "PolyKaFé · Gọi Món Kiosk" : "Bán hàng";
         return View(posService.GetOverview());
     }
 

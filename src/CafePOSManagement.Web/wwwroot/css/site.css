@@ -425,10 +425,54 @@ h2 { font-size: 18px; font-weight: 700; margin: 0; letter-spacing: -.3px; color:
 @media (max-width: 480px) { .kpi-grid { grid-template-columns: 1fr; } }
 @media (max-width: 900px) { .management-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .management-filters .btn { justify-self: start; } .account-link strong { max-width: 100px; } }
 @media (max-width: 600px) { .management-page .app-main { padding: 0 14px 30px; } .management-shell { padding-top: 16px; } .management-heading { align-items: flex-start; flex-direction: column; } .management-stats { gap: 10px; } .management-stats > div { padding: 14px; display: block; } .management-stats span { display: block; font-size: 12px; min-height: 24px; } .management-stats strong { font-size: 22px; } .management-filters { grid-template-columns: 1fr; } .management-filters .btn { width: 100%; } .management-table thead { display: none; } .management-table tbody { display: grid; gap: 12px; padding: 12px; } .management-table tr { display: grid; grid-template-columns: 70px 1fr; gap: 8px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 12px; background: var(--color-surface); } .management-table td { border: 0; padding: 0; text-align: left !important; } .management-table td:first-child { grid-row: span 3; } .management-table td:nth-child(4), .management-table td:nth-child(5), .management-table td:nth-child(6), .management-table td:nth-child(7) { grid-column: 1 / -1; } .management-table td:nth-child(4)::before, .management-table td:nth-child(5)::before, .management-table td:nth-child(6)::before { content: attr(data-label) ': '; color: var(--color-muted); font-size: 12px; } .management-table td:nth-child(7) { border-top: 1px solid var(--color-border-light); padding-top: 10px; } .form-grid, .product-detail { grid-template-columns: 1fr; } .form-grid .full { grid-column: auto; } .product-detail dl { grid-template-columns: 110px 1fr; } .account-link { display: none; } }
-@media (min-width: 1181px) { .pos-page .app-shell { grid-template-columns: 288px minmax(0, 1fr); } }
-@media (min-width: 768px) { .pos-page .cart-panel { margin: -16px -20px -20px 0; border-top: 0; border-right: 0; border-bottom: 0; border-radius: 0; } }
-@media (min-width: 1650px) { .order-controls { grid-template-columns: 1.3fr .8fr 1.2fr; } .note-field { grid-column: auto; } .product-name { font-size: 14px; } .product-prices strong { font-size: 15px; } }
-@media (max-width: 1500px) { .pos-page .header-context, .pos-page .account-link { display: none; } }
+@media (min-width: 768px) {
+    .pos-page .pos-workspace {
+        grid-template-columns: minmax(0, 1.45fr) minmax(360px, 420px);
+        height: 100%;
+        min-height: 0;
+    }
+    .pos-page .cart-panel {
+        margin: -80px -20px -20px 0;
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100dvh;
+        z-index: 920;
+        border-top: 0;
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 1px solid var(--color-border);
+        border-radius: 0;
+        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .pos-page .cart-heading {
+        min-height: 64px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--color-border);
+        background: #fff;
+    }
+    .pos-page .cart-scroll {
+        flex: 1 1 0;
+        min-height: 0;
+        max-height: none;
+        overflow-y: auto;
+        padding: 8px 12px;
+        scrollbar-width: thin;
+    }
+    .pos-page .cart-bottom {
+        flex-shrink: 0;
+        margin-top: auto;
+        padding: 8px 14px 12px;
+        border-top: 1px solid var(--color-border);
+        background: var(--color-surface);
+    }
+}
 @media (max-width: 1440px) { .app-header { gap: 12px; padding: 12px 18px; } .header-search { max-width: 360px; } .pos-workspace { grid-template-columns: minmax(0, 1fr) minmax(360px, 400px); gap: 12px; } .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .order-controls { grid-template-columns: minmax(0, 1fr); padding: 12px; gap: 10px; } .note-field { grid-column: auto; } .menu-tip { display: none; } .cart-bottom { padding: 14px; } }
 @media (max-width: 1180px) {
     .app-shell { grid-template-columns: minmax(0, 1fr); }
@@ -504,10 +548,6 @@ h2 { font-size: 18px; font-weight: 700; margin: 0; letter-spacing: -.3px; color:
     min-height: 0;
     display: flex;
     flex-direction: column;
-    height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: thin;
 }
 
 .pos-page .cart-heading {
@@ -531,12 +571,45 @@ h2 { font-size: 18px; font-weight: 700; margin: 0; letter-spacing: -.3px; color:
 }
 
 .pos-page .cart-scroll {
-    flex: 1 1 auto;
-    min-height: 60px;
-    max-height: 180px;
+    flex: 1 1 0;
+    min-height: 120px;
+    max-height: none;
     overflow-y: auto;
-    padding: 6px 12px 2px;
+    padding: 8px 12px;
     scrollbar-width: thin;
+}
+
+.vip-member-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 750;
+    background: #FFF8E1;
+    color: #8D4004;
+    border: 1px solid #FFE082;
+    width: 100%;
+    min-height: 34px;
+    margin-bottom: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.35;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Ẩn khối loại đơn hàng trong Kiosk (vì đã chọn ở ngoài màn hình chính) */
+.pos-page.kiosk-pos-mode .order-type-field,
+.kiosk-pos-mode .order-type-field {
+    display: none !important;
+}
+
+.pos-page .cart-bottom .note-field.full-width {
+    grid-column: 1 / -1 !important;
+    width: 100%;
 }
 
 /* Thu gọn từng món trong giỏ */
@@ -586,8 +659,8 @@ h2 { font-size: 18px; font-weight: 700; margin: 0; letter-spacing: -.3px; color:
 /* Sắp xếp lại khu vực thông tin đơn hàng cực gọn */
 .pos-page .cart-bottom .order-controls {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
+    grid-template-columns: minmax(0, 1.28fr) minmax(0, 0.92fr);
+    gap: 8px;
     padding: 0 0 6px;
     margin: 0 0 6px;
     border-bottom: 1px solid var(--color-border);
@@ -645,9 +718,10 @@ h2 { font-size: 18px; font-weight: 700; margin: 0; letter-spacing: -.3px; color:
 .pos-page .cart-bottom .note-field .form-control {
     width: 100%;
     min-width: 0;
-    min-height: 32px;
-    padding: 3px 8px;
+    min-height: 34px;
+    padding: 4px 10px;
     font-size: 11.5px;
+    border-radius: var(--radius-sm);
 }
 
 /* 4. Bảng tổng tiền */

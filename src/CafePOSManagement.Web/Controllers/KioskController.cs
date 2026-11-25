@@ -38,8 +38,8 @@ public sealed class KioskController(CafePosDbContext db, IOrderService orders) :
         {
             Tag = "THÀNH VIÊN POLYKAFÉ",
             Badge = "VIP MEMBER",
-            Title = "Tích Điểm Nhận Ưu Đãi Lên Đến 20%",
-            Subtitle = "Nhập số điện thoại tại quầy Kiosk để nhận ngay chiết khấu VIP tự động khi thanh toán.",
+            Title = "Tích Điểm Nhận Ưu Đãi Lên Đến 15%",
+            Subtitle = "Nhập số điện thoại tại quầy Kiosk để nhận ngay chiết khấu thành viên tự động khi thanh toán.",
             Price = 39000,
             OriginalPrice = 45000,
             ImageUrl = "/images/kiosk/banner3.png"
@@ -194,11 +194,14 @@ public sealed class KioskController(CafePosDbContext db, IOrderService orders) :
             return ("Khách vãng lai", 0, "", "Quý khách");
 
         var clean = phone.Trim();
-        if (clean.EndsWith("88") || clean.EndsWith("99"))
-            return ("VVIP Member", 20, "SALE20", "Thành viên VVIP");
-        if (clean.EndsWith("68") || clean.EndsWith("79") || clean.Length >= 10)
-            return ("VIP Member", 10, "SALE10", "Thành viên VIP");
+        if (clean.Length < 10)
+            return ("Khách vãng lai", 0, "", "Quý khách");
 
-        return ("Thành viên Poly", 0, "", "Khách hàng thân thiết");
+        if (clean is "0901234567" or "0912345678" or "0987654321" or "0909090909" or "0988888888")
+            return ("Hội viên VVIP", 15, "SALE15", "Thành viên VVIP");
+        if (clean is "0911223344" or "0933445566" or "0977889900" or "0903456789")
+            return ("Hội viên VIP", 10, "SALE10", "Thành viên VIP");
+
+        return ("Thành viên mới", 5, "SALE5", "Khách hàng mới");
     }
 }

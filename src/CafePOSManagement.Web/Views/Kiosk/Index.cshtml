@@ -19,7 +19,7 @@
         <!-- LOGO & QUẦY THU NGÂN NỔI TRỰC TIẾP TRÊN BANNER -->
         <div class="kiosk-floating-top" onclick="event.stopPropagation()">
             <a class="kiosk-brand-floating" href="/Kiosk" title="PolyKaFé">
-                <img src="~/images/kiosk/logo.png" class="kiosk-logo-huge" alt="PolyKaFé" />
+                <img src="~/images/kiosk/logo.png" class="kiosk-logo-huge" alt="PolyKaFé" asp-append-version="true" />
             </a>
 
             <a class="kiosk-admin-floating-btn" asp-controller="Login" asp-action="Login" title="Đăng nhập Quản lý & Thu ngân">
@@ -32,13 +32,13 @@
         <!-- 3 BANNER TỰ ĐỘNG CHUYỂN 2.5 GIÂY - KHÔNG CÓ CHỮ HTML ĐÈ LÊN -->
         <div class="kiosk-banner-slider" id="kiosk-slider">
             <div class="kiosk-slide active">
-                <img src="~/images/kiosk/banner1.png" alt="Combo 1" />
+                <img src="~/images/kiosk/banner1.png" alt="Combo 1" asp-append-version="true" />
             </div>
             <div class="kiosk-slide">
-                <img src="~/images/kiosk/banner2.png" alt="Combo 2" />
+                <img src="~/images/kiosk/banner2.png" alt="Combo 2" asp-append-version="true" />
             </div>
             <div class="kiosk-slide">
-                <img src="~/images/kiosk/banner3.png" alt="Combo 3" />
+                <img src="~/images/kiosk/banner3.png" alt="Combo 3" asp-append-version="true" />
             </div>
         </div>
 
@@ -52,7 +52,6 @@
         <!-- CHỈ ĐỂ 1 NÚT DUY NHẤT: CHẠM ĐỂ GỌI MÓN NGAY -->
         <div class="kiosk-cta-wrapper" onclick="event.stopPropagation()">
             <button type="button" class="kiosk-cta-huge-btn" onclick="openOrderModal()">
-                <span class="pulse-icon">👉</span>
                 <span>CHẠM ĐỂ GỌI MÓN NGAY</span>
                 <span class="cta-arrow">➔</span>
             </button>
@@ -78,21 +77,24 @@
                 </button>
             </div>
 
-            <!-- NHẬP SĐT TÍCH ĐIỂM VIP (TÙY CHỌN) -->
+            <!-- NHẬP SĐT TÍCH ĐIỂM & NHẬN ƯU ĐÃI -->
             <div class="kiosk-phone-section">
                 <div class="kiosk-phone-header">
-                    <span>📱 Số điện thoại tích điểm &amp; Ưu đãi VIP</span>
-                    <span class="badge bg-warning text-dark">Tùy chọn</span>
+                    <span>Số điện thoại tích điểm &amp; nhận ưu đãi</span>
                 </div>
-                <input type="tel" id="kiosk-phone-input" class="kiosk-phone-input" placeholder="09xx xxx xxx" maxlength="11" autocomplete="off" />
-                <div class="text-center text-muted small mt-2">
-                    Nhập SĐT để nhận diện hạng VVIP/VIP giảm 10% - 20%
+                <input type="tel" id="kiosk-phone-input" class="kiosk-phone-input" placeholder="09xx xxx xxx" maxlength="10" autocomplete="off" />
+                <div id="kiosk-phone-error" class="text-danger small mt-2 fw-bold text-center" style="display: none;"></div>
+                <div class="text-center text-muted small mt-2" style="white-space: nowrap;">
+                    Nhập số điện thoại để nhận ưu đãi (hoặc bấm Bỏ qua để đặt món)
                 </div>
             </div>
 
-            <div class="d-flex gap-3 justify-content-center">
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
                 <button type="button" class="btn btn-outline-secondary px-4 py-3 fw-bold rounded-pill" onclick="closeOrderModal()">
                     Đóng
+                </button>
+                <button type="button" class="btn btn-light px-4 py-3 fw-bold rounded-pill border" style="background: #FFF8E1; border-color: #FFE082 !important; color: #795548;" onclick="skipPhoneAndOrder()">
+                    Bỏ qua ➔
                 </button>
                 <button type="button" class="btn btn-primary px-5 py-3 fw-bold rounded-pill" style="background: var(--kiosk-primary); border: none; font-size: 16px;" onclick="goToOrder()">
                     BẮT ĐẦU ĐẶT MÓN ➔
@@ -132,6 +134,8 @@
         let selectedOrderMode = 'dinein';
 
         function openOrderModal() {
+            const errorBox = document.getElementById('kiosk-phone-error');
+            if (errorBox) errorBox.style.display = 'none';
             document.getElementById('kiosk-order-modal').style.display = 'flex';
         }
 
@@ -145,9 +149,50 @@
             document.getElementById('btn-mode-pickup').classList.toggle('active', mode === 'pickup');
         }
 
+        const phoneInput = document.getElementById('kiosk-phone-input');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+                const errorBox = document.getElementById('kiosk-phone-error');
+                if (errorBox) errorBox.style.display = 'none';
+            });
+            phoneInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    goToOrder();
+                }
+            });
+        }
+
+        function skipPhoneAndOrder() {
+            window.location.href = `/Kiosk/Order?mode=${selectedOrderMode}`;
+        }
+
         function goToOrder() {
-            const phone = document.getElementById('kiosk-phone-input')?.value.trim() || '';
-            window.location.href = `/Pos?kiosk=1&mode=${selectedOrderMode}&phone=${encodeURIComponent(phone)}`;
+            const input = document.getElementById('kiosk-phone-input');
+            const errorBox = document.getElementById('kiosk-phone-error');
+            const phone = input?.value.trim() || '';
+
+            if (!phone) {
+                if (errorBox) {
+                    errorBox.textContent = 'Vui lòng nhập số điện thoại hoặc bấm "Bỏ qua" để đặt món ngay.';
+                    errorBox.style.display = 'block';
+                }
+                input?.focus();
+                return;
+            }
+
+            const phonePattern = /^0[0-9]{9}$/;
+            if (!phonePattern.test(phone)) {
+                if (errorBox) {
+                    errorBox.textContent = 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng số 0.';
+                    errorBox.style.display = 'block';
+                }
+                input?.focus();
+                return;
+            }
+
+            if (errorBox) errorBox.style.display = 'none';
+            window.location.href = `/Kiosk/Order?mode=${selectedOrderMode}&phone=${encodeURIComponent(phone)}`;
         }
     </script>
 </body>
