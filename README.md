@@ -108,3 +108,13 @@ CafePOSManagement/
 5. **Truy cập ứng dụng:**
    - Giao diện Bán hàng POS: [http://localhost:5088/Pos](http://localhost:5088/Pos)
    - Giao diện Quản lý Hệ thống: [http://localhost:5088/Lab3](http://localhost:5088/Lab3)
+   - Giao diện Kiosk tự phục vụ: [http://localhost:5088/Kiosk](http://localhost:5088/Kiosk)
+   - Giao diện Quản lý Đồ uống: [http://localhost:5088/Products](http://localhost:5088/Products)
+   - Giao diện Quản lý Nhân sự: [http://localhost:5088/Employees](http://localhost:5088/Employees)
+
+---
+
+## 5. Tài liệu và Báo cáo môn học
+- 📄 [Báo cáo thực hành Lab 3 (Code First, ADO.NET DBUtil)](docs/BAO_CAO_LAB3.md)
+- 📄 [Báo cáo thực hành Lab 5 (CRUD Đồ uống, Nhân sự, Email mật khẩu & Nghiên cứu OTP)](docs/BAO_CAO_LAB5.md)
+- 📄 [Tài liệu kiến trúc phân quyền & đăng nhập ASM1](docs/ASM1_DUC_AUTH_EMPLOYEES.md)
