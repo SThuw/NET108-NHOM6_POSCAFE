@@ -1,0 +1,131 @@
+@model CafePOSManagement.Web.Services.TopSellingViewModel
+
+@{
+    ViewData["Title"] = "Top 5 thức uống bán chạy";
+    var rankLabels = new[] { "🥇", "🥈", "🥉", "4", "5" };
+}
+
+<style>
+    .top-selling-page { max-width: 1180px; margin: 0 auto; padding: 28px 22px 48px; color: #30251f; }
+    .ts-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; margin-bottom:24px; }
+    .ts-heading h1 { margin:0 0 8px; font-size:clamp(25px,3vw,34px); font-weight:850; color:#3e2723; }
+    .ts-heading p { margin:0; color:#81736b; }
+    .ts-filter { display:flex; flex-wrap:wrap; align-items:end; gap:12px; padding:18px; margin-bottom:20px; background:#fff; border:1px solid #eee5df; border-radius:16px; }
+    .ts-field { display:flex; flex-direction:column; gap:6px; min-width:180px; }
+    .ts-field label { font-size:13px; font-weight:700; color:#6e5a50; }
+    .ts-field input { min-height:42px; padding:8px 11px; border:1px solid #ddd0c8; border-radius:9px; color:#382a24; }
+    .ts-btn { min-height:42px; border:0; border-radius:9px; padding:9px 17px; background:#6d4030; color:white; font-weight:750; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+    .ts-btn:hover { background:#513023; color:white; }
+    .ts-reset { color:#72584c; font-weight:700; text-decoration:none; padding:10px 4px; }
+    .ts-summary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-bottom:20px; }
+    .ts-stat { padding:19px 21px; border:1px solid #eee5df; border-radius:15px; background:linear-gradient(135deg,#fff,#fbf7f3); }
+    .ts-stat span { display:block; color:#85766d; font-size:13px; font-weight:650; margin-bottom:7px; }
+    .ts-stat strong { display:block; color:#4e342e; font-size:clamp(22px,3vw,29px); font-weight:850; }
+    .ts-table-card { overflow:hidden; background:white; border:1px solid #eee5df; border-radius:16px; }
+    .ts-table-head { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:18px 20px; border-bottom:1px solid #f0e9e4; }
+    .ts-table-head h2 { margin:0; color:#4e342e; font-size:18px; font-weight:800; }
+    .ts-table-head span { color:#8b7b72; font-size:13px; }
+    .ts-table { width:100%; border-collapse:collapse; }
+    .ts-table th,.ts-table td { padding:15px 18px; border-bottom:1px solid #f2ece8; text-align:left; }
+    .ts-table th { background:#faf7f4; color:#78675e; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+    .ts-table td { color:#493a33; }
+    .ts-table tbody tr:last-child td { border-bottom:0; }
+    .ts-table tbody tr:hover { background:#fffaf6; }
+    .ts-rank { width:65px; font-size:19px; font-weight:850; color:#8b573c; }
+    .ts-product { font-weight:800; }
+    .ts-sub { display:block; color:#9a8b82; font-size:12px; font-weight:500; margin-top:3px; }
+    .ts-quantity { font-weight:850; color:#4e342e; }
+    .ts-revenue { text-align:right !important; white-space:nowrap; font-weight:800; }
+    .ts-empty { padding:42px 20px; text-align:center; color:#887970; }
+    .ts-validation { width:100%; color:#a52b25; font-weight:650; }
+    @@media(max-width:680px) {
+        .top-selling-page { padding:20px 12px 35px; }
+        .ts-heading { display:block; }
+        .ts-summary { grid-template-columns:1fr; }
+        .ts-table th,.ts-table td { padding:12px 9px; font-size:13px; }
+        .ts-table th:nth-child(2),.ts-table td:nth-child(2) { min-width:130px; }
+        .ts-filter { align-items:stretch; }
+        .ts-field { min-width:100%; }
+    }
+</style>
+
+<div class="top-selling-page">
+    <header class="ts-heading">
+        <div>
+            <h1>Top 5 thức uống bán chạy</h1>
+            <p>Xếp hạng theo số lượng bán ra từ các hóa đơn đã hoàn thành.</p>
+        </div>
+    </header>
+
+    <form asp-controller="TopSelling" asp-action="Index" method="get" class="ts-filter">
+        <div asp-validation-summary="All" class="ts-validation"></div>
+        <div class="ts-field">
+            <label for="fromDate">Từ ngày</label>
+            <input id="fromDate" name="fromDate" type="date"
+                   value="@(Model.FromDate?.ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="ts-field">
+            <label for="toDate">Đến ngày</label>
+            <input id="toDate" name="toDate" type="date"
+                   value="@(Model.ToDate?.ToString("yyyy-MM-dd"))" />
+        </div>
+        <button class="ts-btn" type="submit">Thống kê</button>
+        <a asp-controller="TopSelling" asp-action="Index" class="ts-reset">Xóa bộ lọc</a>
+    </form>
+
+    <section class="ts-summary" aria-label="Tổng quan Top 5">
+        <article class="ts-stat">
+            <span>Tổng số ly bán ra trong Top 5</span>
+            <strong>@Model.TotalQuantity.ToString("N0")</strong>
+        </article>
+        <article class="ts-stat">
+            <span>Doanh thu của Top 5</span>
+            <strong>@Model.TotalRevenue.ToString("N0") ₫</strong>
+        </article>
+    </section>
+
+    <section class="ts-table-card">
+        <div class="ts-table-head">
+            <h2>Bảng xếp hạng thức uống</h2>
+            <span>@Model.Items.Count / 5 món</span>
+        </div>
+
+        @if (Model.Items.Count == 0)
+        {
+            <div class="ts-empty">
+                <h3>Chưa có dữ liệu thống kê</h3>
+                <p>Không tìm thấy hóa đơn đã hoàn thành trong khoảng thời gian được chọn.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="ts-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Hạng</th>
+                            <th scope="col">Thức uống</th>
+                            <th scope="col">Số lượng bán</th>
+                            <th scope="col" class="text-end">Doanh thu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @for (var i = 0; i < Model.Items.Count; i++)
+                    {
+                        var item = Model.Items[i];
+                        <tr>
+                            <td class="ts-rank">@rankLabels[i]</td>
+                            <td>
+                                <span class="ts-product">@item.ProductName</span>
+                                <span class="ts-sub">Mã món: @item.ProductId</span>
+                            </td>
+                            <td><span class="ts-quantity">@item.QuantitySold.ToString("N0") ly</span></td>
+                            <td class="ts-revenue">@item.Revenue.ToString("N0") ₫</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+</div>
