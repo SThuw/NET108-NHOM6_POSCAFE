@@ -30,7 +30,7 @@ public sealed class OrderService(IProductService products, TimeProvider clock) :
         return Calculate(input) with { OrderNumber = GetNextOrderNumber() };
     }
 
-    public Order Checkout(CheckoutOrderDto input)
+    public Order Checkout(CheckoutOrderDto input, string? createdByUserId = null)
     {
         Validate(input);
         var fingerprint = JsonSerializer.Serialize(input);
@@ -43,7 +43,12 @@ public sealed class OrderService(IProductService products, TimeProvider clock) :
                     throw new ValidationException("Mã yêu cầu đã được dùng cho một nội dung đơn khác. Vui lòng tạo đơn mới.");
                 return previous.Order;
             }
-            var order = Calculate(input) with { Id = ++sequence, OrderNumber = $"#{sequence:000}" };
+            var order = Calculate(input) with
+            {
+                Id = ++sequence,
+                OrderNumber = $"#{sequence:000}",
+                CreatedByUserId = createdByUserId
+            };
             Orders.Add((order, fingerprint));
             return order;
         }
@@ -63,7 +68,8 @@ public sealed class OrderService(IProductService products, TimeProvider clock) :
             var updated = Calculate(input) with
             {
                 Id = current.Id, RequestId = input.RequestId, OrderNumber = current.OrderNumber,
-                CreatedAt = current.CreatedAt, Status = current.Status
+                CreatedAt = current.CreatedAt, Status = current.Status,
+                CreatedByUserId = current.CreatedByUserId
             };
             Orders[index] = (updated, JsonSerializer.Serialize(input));
             return updated;

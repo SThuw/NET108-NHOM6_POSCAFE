@@ -47,7 +47,7 @@ public sealed class DbOrderService(CafePosDbContext db, IProductService products
         return Calculate(input) with { OrderNumber = GetNextOrderNumber() };
     }
 
-    public Order Checkout(CheckoutOrderDto input)
+    public Order Checkout(CheckoutOrderDto input, string? createdByUserId = null)
     {
         Validate(input);
 
@@ -59,7 +59,7 @@ public sealed class DbOrderService(CafePosDbContext db, IProductService products
         if (existing is not null)
             return existing;
 
-        var order = Calculate(input);
+        var order = Calculate(input) with { CreatedByUserId = createdByUserId };
 
         // Lấy DiscountId nếu có mã giảm giá.
         int? discountId = null;

@@ -86,6 +86,8 @@ public sealed class CafePosDbContext(DbContextOptions<CafePosDbContext> options)
         order.Property(x => x.TaxAmount).HasPrecision(18, 0);
         order.Property(x => x.Total).HasColumnName("TotalAmount").HasPrecision(18, 0);
         order.HasOne(x => x.Discount).WithMany(x => x.Orders).HasForeignKey(x => x.DiscountId).OnDelete(DeleteBehavior.Restrict);
+        order.Property(x => x.CreatedByUserId).HasMaxLength(40).IsUnicode(false);
+        order.HasOne(x => x.CreatedByUser).WithMany().HasForeignKey(x => x.CreatedByUserId).OnDelete(DeleteBehavior.SetNull);
         order.HasIndex(x => x.OrderNumber).IsUnique();
         order.HasIndex(x => x.RequestId).IsUnique();
         order.HasIndex(x => x.CreatedAt);
