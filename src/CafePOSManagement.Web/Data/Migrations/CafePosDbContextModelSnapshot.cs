@@ -903,7 +903,7 @@ namespace CafePOSManagement.Web.Data.Migrations
                             CategoryId = "coldbrew",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "Cold Brew sữa tươi — món đặc sắc của CafePOS.",
-                            ImageUrl = "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?auto=format&fit=crop&w=800&q=85",
+                            ImageUrl = "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=800&q=85",
                             IsAvailable = true,
                             Name = "Cold Brew sữa tươi",
                             OriginalPrice = 60000m,
@@ -949,7 +949,7 @@ namespace CafePOSManagement.Web.Data.Migrations
                             CategoryId = "coldbrew",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "Cold Brew đá — món đặc sắc của CafePOS.",
-                            ImageUrl = "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=800&q=85",
+                            ImageUrl = "https://images.unsplash.com/photo-1760304737368-7d8376bde94c?auto=format&fit=crop&w=800&q=85",
                             IsAvailable = true,
                             Name = "Cold Brew đá",
                             OriginalPrice = 55000m,
@@ -985,7 +985,7 @@ namespace CafePOSManagement.Web.Data.Migrations
                             CategoryId = "traditional",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "Cà phê phin Filter Coffee — món đặc sắc của CafePOS.",
-                            ImageUrl = "https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=800&q=85",
+                            ImageUrl = "https://images.unsplash.com/photo-1745210358756-e7f7ff40e506?auto=format&fit=crop&w=800&q=85",
                             IsAvailable = true,
                             Name = "Cà phê phin Filter Coffee",
                             Price = 22000m
@@ -1007,7 +1007,7 @@ namespace CafePOSManagement.Web.Data.Migrations
                             CategoryId = "coldbrew",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "Cold Brew cam sả — món đặc sắc của CafePOS.",
-                            ImageUrl = "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=85",
+                            ImageUrl = "https://images.unsplash.com/photo-1786783506828-d0f8b16e4fbd?auto=format&fit=crop&w=800&q=85",
                             IsAvailable = true,
                             Name = "Cold Brew cam sả",
                             Price = 45000m
@@ -1030,7 +1030,7 @@ namespace CafePOSManagement.Web.Data.Migrations
                             CategoryId = "matcha",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "Matcha Freeze — món đặc sắc của CafePOS.",
-                            ImageUrl = "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=800&q=85",
+                            ImageUrl = "https://images.unsplash.com/photo-1749280447307-31a68eb38673?auto=format&fit=crop&w=800&q=85",
                             IsAvailable = true,
                             Name = "Matcha Freeze",
                             OriginalPrice = 69000m,
@@ -1053,7 +1053,7 @@ namespace CafePOSManagement.Web.Data.Migrations
                             CategoryId = "milktea",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "Trà sữa Oolong nướng — món đặc sắc của CafePOS.",
-                            ImageUrl = "https://images.unsplash.com/photo-1525385133512-2f3bdd039054?auto=format&fit=crop&w=800&q=85",
+                            ImageUrl = "https://images.unsplash.com/photo-1692783029695-1956cd253e10?auto=format&fit=crop&w=800&q=85",
                             IsAvailable = true,
                             Name = "Trà sữa Oolong nướng",
                             OriginalPrice = 55000m,
@@ -1065,7 +1065,7 @@ namespace CafePOSManagement.Web.Data.Migrations
                             CategoryId = "milktea",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "Hồng trà Macchiato — món đặc sắc của CafePOS.",
-                            ImageUrl = "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=85",
+                            ImageUrl = "https://images.unsplash.com/photo-1788016284566-c7f5d5dadc10?auto=format&fit=crop&w=800&q=85",
                             IsAvailable = true,
                             Name = "Hồng trà Macchiato",
                             OriginalPrice = 52000m,
@@ -1077,7 +1077,7 @@ namespace CafePOSManagement.Web.Data.Migrations
                             CategoryId = "milktea",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
                             Description = "Trà sữa lài — món đặc sắc của CafePOS.",
-                            ImageUrl = "https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&w=800&q=85",
+                            ImageUrl = "https://images.unsplash.com/photo-1575417634984-8e608b88a04b?auto=format&fit=crop&w=800&q=85",
                             IsAvailable = true,
                             Name = "Trà sữa lài",
                             Price = 42000m
@@ -1087,24 +1087,36 @@ namespace CafePOSManagement.Web.Data.Migrations
                             Id = "p23",
                             CategoryId = "combo",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
-                            Description = "Combo Sáng: Cà phê + Bánh croissant — món đặc sắc của CafePOS.",
-                            ImageUrl = "https://images.unsplash.com/photo-1525610553991-2bede1a236e2?auto=format&fit=crop&w=800&q=85",
+                            Description = "Combo Bữa Sáng: Cafe Kem Trứng + Bánh Mì Chấm — món đặc sắc của CafePOS.",
+                            ImageUrl = "/images/kiosk/banner1.png",
                             IsAvailable = true,
-                            Name = "Combo Sáng: Cà phê + Bánh croissant",
-                            OriginalPrice = 95000m,
-                            Price = 75000m
+                            Name = "Combo Bữa Sáng: Cafe Kem Trứng + Bánh Mì Chấm",
+                            OriginalPrice = 50000m,
+                            Price = 35000m
                         },
                         new
                         {
                             Id = "p24",
                             CategoryId = "combo",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
-                            Description = "Combo Trà chiều: Trà đào + Bánh — món đặc sắc của CafePOS.",
-                            ImageUrl = "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=85",
+                            Description = "Combo Deal Hời: Bánh Cuộn Trà Xanh + Matcha Đá Xay — món đặc sắc của CafePOS.",
+                            ImageUrl = "/images/kiosk/banner2.png",
                             IsAvailable = true,
-                            Name = "Combo Trà chiều: Trà đào + Bánh",
-                            OriginalPrice = 85000m,
-                            Price = 69000m
+                            Name = "Combo Deal Hời: Bánh Cuộn Trà Xanh + Matcha Đá Xay",
+                            OriginalPrice = 59000m,
+                            Price = 43000m
+                        },
+                        new
+                        {
+                            Id = "p25",
+                            CategoryId = "combo",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            Description = "Combo Deal Sốc: Trà Sữa Ô Lông + Bánh Croissant Trứng Muối — món đặc sắc của CafePOS.",
+                            ImageUrl = "/images/kiosk/banner3.png",
+                            IsAvailable = true,
+                            Name = "Combo Deal Sốc: Trà Sữa Ô Lông + Bánh Croissant Trứng Muối",
+                            OriginalPrice = 65000m,
+                            Price = 45000m
                         });
                 });
 
@@ -1320,3 +1332,4 @@ namespace CafePOSManagement.Web.Data.Migrations
         }
     }
 }
+
