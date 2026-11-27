@@ -1,0 +1,115 @@
+@model CafePOSManagement.Web.Services.RevenueReportViewModel
+
+@{
+    ViewData["Title"] = "Thống kê doanh thu";
+
+    var periodLabel = Model.FromDate.HasValue && Model.ToDate.HasValue
+        ? $"Từ {Model.FromDate:dd/MM/yyyy} đến {Model.ToDate:dd/MM/yyyy}"
+        : Model.FromDate.HasValue
+            ? $"Từ {Model.FromDate:dd/MM/yyyy} đến nay"
+            : Model.ToDate.HasValue
+                ? $"Đến hết ngày {Model.ToDate:dd/MM/yyyy}"
+                : "Toàn bộ thời gian";
+}
+
+<style>
+    .revenue-page { max-width: 1120px; margin: 0 auto; padding: 28px 22px 48px; color: #30251f; }
+    .revenue-heading { margin-bottom: 24px; }
+    .revenue-heading h1 { margin: 0 0 8px; color: #3e2723; font-size: clamp(25px, 3vw, 34px); font-weight: 850; }
+    .revenue-heading p { margin: 0; color: #786b64; }
+    .revenue-filter { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; padding: 18px; margin-bottom: 20px; background: #fff; border: 1px solid #e8dfda; border-radius: 14px; }
+    .revenue-field { display: flex; flex-direction: column; gap: 6px; min-width: 190px; }
+    .revenue-field label { color: #66564e; font-size: 13px; font-weight: 750; }
+    .revenue-field input { min-height: 42px; padding: 8px 11px; color: #382a24; background: #fff; border: 1px solid #d7cbc4; border-radius: 8px; }
+    .revenue-field input:focus-visible { outline: 3px solid rgba(109, 64, 48, .22); border-color: #6d4030; }
+    .revenue-submit { min-height: 42px; padding: 9px 18px; color: #fff; background: #6d4030; border: 0; border-radius: 8px; font-weight: 750; }
+    .revenue-submit:hover { background: #543126; }
+    .revenue-submit:focus-visible, .revenue-reset:focus-visible { outline: 3px solid rgba(109, 64, 48, .24); outline-offset: 2px; }
+    .revenue-submit:active { transform: translateY(1px); }
+    .revenue-reset { display: inline-flex; align-items: center; min-height: 42px; padding: 9px 4px; color: #6d554a; font-weight: 700; text-decoration: none; }
+    .revenue-reset:hover { color: #3e2723; text-decoration: underline; }
+    .revenue-validation { width: 100%; color: #a52b25; font-weight: 650; }
+    .revenue-validation.validation-summary-valid { display: none; }
+    .revenue-period { display: flex; justify-content: space-between; gap: 16px; padding: 14px 16px; margin-bottom: 16px; color: #62534b; background: #f8f4f1; border-left: 4px solid #8a5a44; border-radius: 8px; }
+    .revenue-period strong { color: #4e342e; }
+    .revenue-period span { color: #887970; font-size: 13px; text-align: right; }
+    .revenue-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .revenue-card { min-height: 142px; padding: 21px; background: #fff; border: 1px solid #e8dfda; border-radius: 14px; }
+    .revenue-card span { display: block; margin-bottom: 12px; color: #7e7068; font-size: 13px; font-weight: 700; }
+    .revenue-card strong { display: block; overflow-wrap: anywhere; color: #4e342e; font-size: clamp(24px, 3vw, 32px); font-weight: 850; line-height: 1.2; }
+    .revenue-card small { display: block; margin-top: 10px; color: #94867e; }
+    .revenue-empty { padding: 32px 20px; margin-top: 18px; text-align: center; background: #fff; border: 1px dashed #d9cbc3; border-radius: 14px; }
+    .revenue-empty h2 { margin: 0 0 8px; color: #4e342e; font-size: 19px; }
+    .revenue-empty p { margin: 0; color: #81736b; }
+    @@media (max-width: 760px) {
+        .revenue-page { padding: 20px 12px 36px; }
+        .revenue-summary { grid-template-columns: 1fr; }
+        .revenue-card { min-height: auto; }
+        .revenue-period { display: block; }
+        .revenue-period span { display: block; margin-top: 5px; text-align: left; }
+    }
+    @@media (max-width: 520px) {
+        .revenue-filter { align-items: stretch; }
+        .revenue-field { width: 100%; min-width: 0; }
+        .revenue-submit, .revenue-reset { width: 100%; justify-content: center; }
+    }
+</style>
+
+<div class="revenue-page">
+    <header class="revenue-heading">
+        <h1>Thống kê doanh thu</h1>
+        <p>Theo dõi doanh thu từ các hóa đơn đã hoàn thành trong khoảng thời gian được chọn.</p>
+    </header>
+
+    <form asp-controller="RevenueReport" asp-action="Index" method="get" class="revenue-filter">
+        <div asp-validation-summary="All" class="revenue-validation" role="alert"></div>
+
+        <div class="revenue-field">
+            <label for="fromDate">Từ ngày</label>
+            <input id="fromDate" name="fromDate" type="date"
+                   value="@(Model.FromDate?.ToString("yyyy-MM-dd"))" />
+        </div>
+
+        <div class="revenue-field">
+            <label for="toDate">Đến ngày</label>
+            <input id="toDate" name="toDate" type="date"
+                   value="@(Model.ToDate?.ToString("yyyy-MM-dd"))" />
+        </div>
+
+        <button class="revenue-submit" type="submit">Xem thống kê</button>
+        <a asp-controller="RevenueReport" asp-action="Index" class="revenue-reset">Xóa bộ lọc</a>
+    </form>
+
+    <section class="revenue-period" aria-label="Khoảng thời gian thống kê">
+        <strong>@periodLabel</strong>
+        <span>Chỉ tính hóa đơn có trạng thái Hoàn thành</span>
+    </section>
+
+    <section class="revenue-summary" aria-label="Kết quả thống kê doanh thu">
+        <article class="revenue-card">
+            <span>Số lượng đơn</span>
+            <strong>@Model.OrderCount.ToString("N0")</strong>
+            <small>Hóa đơn hoàn thành</small>
+        </article>
+
+        <article class="revenue-card">
+            <span>Tổng doanh thu</span>
+            <strong>@Model.TotalRevenue.ToString("N0") ₫</strong>
+            <small>Tổng giá trị sau giảm giá và thuế</small>
+        </article>
+
+        <article class="revenue-card">
+            <span>Doanh thu trung bình mỗi đơn</span>
+            <strong>@Model.AverageRevenuePerOrder.ToString("N0") ₫</strong>
+            <small>Tổng doanh thu chia cho số đơn</small>
+        </article>
+    </section>
+
+    @if (Model.OrderCount == 0)
+    {
+        <section class="revenue-empty" aria-live="polite">
+            <h2>Chưa có dữ liệu doanh thu</h2>
+            <p>Không tìm thấy hóa đơn đã hoàn thành trong khoảng thời gian này.</p>
+        </section>
+    }
+</div>
