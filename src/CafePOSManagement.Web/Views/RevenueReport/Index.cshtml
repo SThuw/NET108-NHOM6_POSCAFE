@@ -1,115 +1,357 @@
+@using System.Text.Json
 @model CafePOSManagement.Web.Services.RevenueReportViewModel
-
 @{
     ViewData["Title"] = "Thống kê doanh thu";
-
-    var periodLabel = Model.FromDate.HasValue && Model.ToDate.HasValue
-        ? $"Từ {Model.FromDate:dd/MM/yyyy} đến {Model.ToDate:dd/MM/yyyy}"
-        : Model.FromDate.HasValue
-            ? $"Từ {Model.FromDate:dd/MM/yyyy} đến nay"
-            : Model.ToDate.HasValue
-                ? $"Đến hết ngày {Model.ToDate:dd/MM/yyyy}"
-                : "Toàn bộ thời gian";
+    ViewData["PageClass"] = "management-page revenue-analytics-page";
+    var reportJson = JsonSerializer.Serialize(Model, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+    string TrendClass(double value) => value >= 0 ? "up" : "down";
+    string TrendText(double value) => $"{(value >= 0 ? "+" : "")}{value:N1}%";
 }
 
 <style>
-    .revenue-page { max-width: 1120px; margin: 0 auto; padding: 28px 22px 48px; color: #30251f; }
-    .revenue-heading { margin-bottom: 24px; }
-    .revenue-heading h1 { margin: 0 0 8px; color: #3e2723; font-size: clamp(25px, 3vw, 34px); font-weight: 850; }
-    .revenue-heading p { margin: 0; color: #786b64; }
-    .revenue-filter { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; padding: 18px; margin-bottom: 20px; background: #fff; border: 1px solid #e8dfda; border-radius: 14px; }
-    .revenue-field { display: flex; flex-direction: column; gap: 6px; min-width: 190px; }
-    .revenue-field label { color: #66564e; font-size: 13px; font-weight: 750; }
-    .revenue-field input { min-height: 42px; padding: 8px 11px; color: #382a24; background: #fff; border: 1px solid #d7cbc4; border-radius: 8px; }
-    .revenue-field input:focus-visible { outline: 3px solid rgba(109, 64, 48, .22); border-color: #6d4030; }
-    .revenue-submit { min-height: 42px; padding: 9px 18px; color: #fff; background: #6d4030; border: 0; border-radius: 8px; font-weight: 750; }
-    .revenue-submit:hover { background: #543126; }
-    .revenue-submit:focus-visible, .revenue-reset:focus-visible { outline: 3px solid rgba(109, 64, 48, .24); outline-offset: 2px; }
-    .revenue-submit:active { transform: translateY(1px); }
-    .revenue-reset { display: inline-flex; align-items: center; min-height: 42px; padding: 9px 4px; color: #6d554a; font-weight: 700; text-decoration: none; }
-    .revenue-reset:hover { color: #3e2723; text-decoration: underline; }
-    .revenue-validation { width: 100%; color: #a52b25; font-weight: 650; }
-    .revenue-validation.validation-summary-valid { display: none; }
-    .revenue-period { display: flex; justify-content: space-between; gap: 16px; padding: 14px 16px; margin-bottom: 16px; color: #62534b; background: #f8f4f1; border-left: 4px solid #8a5a44; border-radius: 8px; }
-    .revenue-period strong { color: #4e342e; }
-    .revenue-period span { color: #887970; font-size: 13px; text-align: right; }
-    .revenue-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-    .revenue-card { min-height: 142px; padding: 21px; background: #fff; border: 1px solid #e8dfda; border-radius: 14px; }
-    .revenue-card span { display: block; margin-bottom: 12px; color: #7e7068; font-size: 13px; font-weight: 700; }
-    .revenue-card strong { display: block; overflow-wrap: anywhere; color: #4e342e; font-size: clamp(24px, 3vw, 32px); font-weight: 850; line-height: 1.2; }
-    .revenue-card small { display: block; margin-top: 10px; color: #94867e; }
-    .revenue-empty { padding: 32px 20px; margin-top: 18px; text-align: center; background: #fff; border: 1px dashed #d9cbc3; border-radius: 14px; }
-    .revenue-empty h2 { margin: 0 0 8px; color: #4e342e; font-size: 19px; }
-    .revenue-empty p { margin: 0; color: #81736b; }
-    @@media (max-width: 760px) {
-        .revenue-page { padding: 20px 12px 36px; }
-        .revenue-summary { grid-template-columns: 1fr; }
-        .revenue-card { min-height: auto; }
-        .revenue-period { display: block; }
-        .revenue-period span { display: block; margin-top: 5px; text-align: left; }
-    }
-    @@media (max-width: 520px) {
-        .revenue-filter { align-items: stretch; }
-        .revenue-field { width: 100%; min-width: 0; }
-        .revenue-submit, .revenue-reset { width: 100%; justify-content: center; }
-    }
+    @@import url('@Url.Content("~/lib/bootstrap-icons/bootstrap-icons.min.css")');
+    @@import url('@Url.Content("~/css/revenue-report.css")');
 </style>
 
-<div class="revenue-page">
-    <header class="revenue-heading">
-        <h1>Thống kê doanh thu</h1>
-        <p>Theo dõi doanh thu từ các hóa đơn đã hoàn thành trong khoảng thời gian được chọn.</p>
+<div class="rev-dashboard" id="revenue-dashboard">
+    <!-- HÀNG 1: HEADER & THANH BỘ LỌC -->
+    <header class="rev-header-bar">
+        <div>
+            <nav class="rev-breadcrumb" aria-label="Breadcrumb">
+                <a asp-controller="Lab3" asp-action="Index">PolyKafé</a>
+                <span aria-hidden="true">/</span>
+                <span>Quản lý</span>
+                <span aria-hidden="true">/</span>
+                <span class="text-dark">Thống kê</span>
+            </nav>
+            <div class="rev-title-row">
+                <h1>Thống kê doanh thu</h1>
+                <span class="rev-status-note">
+                    <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                    Chỉ tính các hóa đơn có trạng thái Hoàn thành
+                </span>
+            </div>
+        </div>
+
+        <button type="button" id="rev-export-excel" class="btn rev-export-btn">
+            <i class="bi bi-file-earmark-excel-fill" aria-hidden="true"></i>
+            <span>Xuất Excel</span>
+        </button>
     </header>
 
-    <form asp-controller="RevenueReport" asp-action="Index" method="get" class="revenue-filter">
-        <div asp-validation-summary="All" class="revenue-validation" role="alert"></div>
-
-        <div class="revenue-field">
-            <label for="fromDate">Từ ngày</label>
-            <input id="fromDate" name="fromDate" type="date"
-                   value="@(Model.FromDate?.ToString("yyyy-MM-dd"))" />
+    <section class="rev-filter-card" aria-label="Bộ lọc thời gian thống kê">
+        <div class="rev-quick-pills" role="group" aria-label="Chọn nhanh khoảng thời gian">
+            <button type="button" class="rev-pill-btn @(Model.ActivePeriod == "today" ? "active" : "")" data-period="today" aria-pressed="@(Model.ActivePeriod == "today" ? "true" : "false")">Hôm nay</button>
+            <button type="button" class="rev-pill-btn @(Model.ActivePeriod == "week" ? "active" : "")" data-period="week" aria-pressed="@(Model.ActivePeriod == "week" ? "true" : "false")">Tuần này (7 ngày)</button>
+            <button type="button" class="rev-pill-btn @(Model.ActivePeriod == "month" ? "active" : "")" data-period="month" aria-pressed="@(Model.ActivePeriod == "month" ? "true" : "false")">Tháng này</button>
+            <button type="button" class="rev-pill-btn @(Model.ActivePeriod == "year" ? "active" : "")" data-period="year" aria-pressed="@(Model.ActivePeriod == "year" ? "true" : "false")">Năm nay</button>
         </div>
 
-        <div class="revenue-field">
-            <label for="toDate">Đến ngày</label>
-            <input id="toDate" name="toDate" type="date"
-                   value="@(Model.ToDate?.ToString("yyyy-MM-dd"))" />
-        </div>
-
-        <button class="revenue-submit" type="submit">Xem thống kê</button>
-        <a asp-controller="RevenueReport" asp-action="Index" class="revenue-reset">Xóa bộ lọc</a>
-    </form>
-
-    <section class="revenue-period" aria-label="Khoảng thời gian thống kê">
-        <strong>@periodLabel</strong>
-        <span>Chỉ tính hóa đơn có trạng thái Hoàn thành</span>
+        <form id="rev-filter-form" asp-controller="RevenueReport" asp-action="Index" method="get" class="rev-custom-filter">
+            <div asp-validation-summary="All" class="rev-validation" role="alert"></div>
+            <div class="rev-date-field">
+                <label for="rev-from-date">Từ ngày</label>
+                <input id="rev-from-date" name="fromDate" type="date" value="@Model.FromDate" required />
+            </div>
+            <div class="rev-date-field">
+                <label for="rev-to-date">Đến ngày</label>
+                <input id="rev-to-date" name="toDate" type="date" value="@Model.ToDate" required />
+            </div>
+            <button type="submit" class="rev-btn-espresso">
+                <i class="bi bi-funnel-fill me-1" aria-hidden="true"></i>Xem thống kê
+            </button>
+            <button type="button" id="rev-reset-filter" class="rev-btn-reset">Xóa bộ lọc</button>
+        </form>
     </section>
 
-    <section class="revenue-summary" aria-label="Kết quả thống kê doanh thu">
-        <article class="revenue-card">
-            <span>Số lượng đơn</span>
-            <strong>@Model.OrderCount.ToString("N0")</strong>
-            <small>Hóa đơn hoàn thành</small>
-        </article>
+    <div class="rev-period-banner" aria-live="polite">
+        <span><i class="bi bi-calendar3 me-2" aria-hidden="true"></i>Kỳ thống kê: <strong id="rev-period-text">@Model.PeriodRangeText</strong></span>
+        <span>Nguồn dữ liệu: <strong>SQL Server · Hóa đơn hoàn thành</strong></span>
+    </div>
 
-        <article class="revenue-card">
-            <span>Tổng doanh thu</span>
-            <strong>@Model.TotalRevenue.ToString("N0") ₫</strong>
-            <small>Tổng giá trị sau giảm giá và thuế</small>
-        </article>
-
-        <article class="revenue-card">
-            <span>Doanh thu trung bình mỗi đơn</span>
-            <strong>@Model.AverageRevenuePerOrder.ToString("N0") ₫</strong>
-            <small>Tổng doanh thu chia cho số đơn</small>
-        </article>
+    <!-- EMPTY STATE (KHI KHOẢNG NGÀY KHÔNG HỢP LỆ HOẶC KHÔNG CÓ DỮ LIỆU) -->
+    <section id="rev-empty-state" class="rev-empty-state" hidden="@(!Model.Invalid && Model.OrderCount > 0)" aria-live="polite">
+        <div class="rev-empty-icon"><i class="bi bi-calendar-x" aria-hidden="true"></i></div>
+        <h2>Không có dữ liệu thống kê phù hợp</h2>
+        <p id="rev-empty-message">@(string.IsNullOrWhiteSpace(Model.Message) ? "Không tìm thấy hóa đơn đã hoàn thành trong khoảng thời gian bạn đã chọn." : Model.Message)</p>
+        <button type="button" id="rev-empty-reset" class="rev-btn-espresso">
+            <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Quay lại Tháng này
+        </button>
     </section>
 
-    @if (Model.OrderCount == 0)
-    {
-        <section class="revenue-empty" aria-live="polite">
-            <h2>Chưa có dữ liệu doanh thu</h2>
-            <p>Không tìm thấy hóa đơn đã hoàn thành trong khoảng thời gian này.</p>
+    <!-- NỘI DUNG CHÍNH 4 HÀNG DƯỚI -->
+    <div id="rev-dashboard-content" class="d-flex flex-column gap-4" hidden="@(Model.Invalid || Model.OrderCount == 0)">
+        <!-- HÀNG 2: 4 THẺ KPI NỔI BẬT -->
+        <section class="rev-kpi-grid" aria-label="Chỉ số doanh thu nổi bật">
+            <article class="rev-kpi-card">
+                <div class="rev-kpi-top">
+                    <div class="rev-kpi-label-wrap">
+                        <span class="rev-kpi-icon espresso"><i class="bi bi-cash-stack" aria-hidden="true"></i></span>
+                        <span class="rev-kpi-label">Tổng doanh thu</span>
+                    </div>
+                    <span id="kpi-revenue-trend" class="rev-trend-badge @TrendClass(Model.Kpis.Revenue.Growth)">@TrendText(Model.Kpis.Revenue.Growth)</span>
+                </div>
+                <div id="kpi-revenue-value" class="rev-kpi-value">@Model.Kpis.Revenue.Value.ToString("N0") ₫</div>
+                <div id="kpi-revenue-sub" class="rev-kpi-sub">@Model.Kpis.Revenue.Sub</div>
+                <div class="rev-sparkline-wrap"><canvas id="spark-revenue" aria-label="Biểu đồ thu nhỏ doanh thu"></canvas></div>
+            </article>
+
+            <article class="rev-kpi-card">
+                <div class="rev-kpi-top">
+                    <div class="rev-kpi-label-wrap">
+                        <span class="rev-kpi-icon caramel"><i class="bi bi-receipt-cutoff" aria-hidden="true"></i></span>
+                        <span class="rev-kpi-label">Số lượng đơn hàng</span>
+                    </div>
+                    <span id="kpi-orders-trend" class="rev-trend-badge @TrendClass(Model.Kpis.Orders.Growth)">@TrendText(Model.Kpis.Orders.Growth)</span>
+                </div>
+                <div id="kpi-orders-value" class="rev-kpi-value">@Model.Kpis.Orders.Value.ToString("N0") đơn</div>
+                <div id="kpi-orders-sub" class="rev-kpi-sub">@Model.Kpis.Orders.Sub</div>
+                <div class="rev-sparkline-wrap"><canvas id="spark-orders" aria-label="Biểu đồ thu nhỏ số đơn hàng"></canvas></div>
+            </article>
+
+            <article class="rev-kpi-card">
+                <div class="rev-kpi-top">
+                    <div class="rev-kpi-label-wrap">
+                        <span class="rev-kpi-icon latte"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i></span>
+                        <span class="rev-kpi-label">TB mỗi đơn (AOV)</span>
+                    </div>
+                    <span id="kpi-aov-trend" class="rev-trend-badge @TrendClass(Model.Kpis.Aov.Growth)">@TrendText(Model.Kpis.Aov.Growth)</span>
+                </div>
+                <div id="kpi-aov-value" class="rev-kpi-value">@Model.Kpis.Aov.Value.ToString("N0") ₫</div>
+                <div id="kpi-aov-sub" class="rev-kpi-sub">@Model.Kpis.Aov.Sub</div>
+                <div class="rev-sparkline-wrap"><canvas id="spark-aov" aria-label="Biểu đồ thu nhỏ giá trị trung bình đơn"></canvas></div>
+            </article>
+
+            <article class="rev-kpi-card">
+                <div class="rev-kpi-top">
+                    <div class="rev-kpi-label-wrap">
+                        <span class="rev-kpi-icon matcha"><i class="bi bi-cup-hot-fill" aria-hidden="true"></i></span>
+                        <span class="rev-kpi-label">Tổng số ly đã bán</span>
+                    </div>
+                    <span id="kpi-cups-trend" class="rev-trend-badge @TrendClass(Model.Kpis.Cups.Growth)">@TrendText(Model.Kpis.Cups.Growth)</span>
+                </div>
+                <div id="kpi-cups-value" class="rev-kpi-value">@Model.Kpis.Cups.Value.ToString("N0") ly</div>
+                <div id="kpi-cups-sub" class="rev-kpi-sub">@Model.Kpis.Cups.Sub</div>
+                <div class="rev-sparkline-wrap"><canvas id="spark-cups" aria-label="Biểu đồ thu nhỏ tổng số ly"></canvas></div>
+            </article>
         </section>
-    }
+
+        <!-- HÀNG 3: BIỂU ĐỒ TỔNG QUAN (65%) & CƠ CẤU BÁN HÀNG (35%) -->
+        <section class="rev-row-3">
+            <article class="rev-card">
+                <div class="rev-card-header">
+                    <div>
+                        <h2 class="rev-card-title">
+                            <i class="bi bi-activity" style="color:#A16236" aria-hidden="true"></i>
+                            Biến động doanh thu &amp; đơn hàng theo ngày
+                        </h2>
+                        <p class="rev-card-subtitle">So sánh doanh thu kỳ này với kỳ trước kèm sản lượng đơn hàng thực tế</p>
+                    </div>
+                    <div class="rev-series-pills">
+                        <span class="rev-series-tag"><span class="rev-series-line" style="background:#4E342E"></span>Kỳ này</span>
+                        <span class="rev-series-tag"><span class="rev-series-line" style="border-top:2px dashed #D99B52;background:transparent"></span>Kỳ trước</span>
+                        <span class="rev-series-tag"><span class="rev-series-line" style="background:#4F772D"></span>Số đơn</span>
+                    </div>
+                </div>
+                <div class="rev-chart-area-box">
+                    <canvas id="chart-daily-trend" aria-label="Biểu đồ biến động doanh thu và đơn hàng"></canvas>
+                </div>
+            </article>
+
+            <article class="rev-card">
+                <div class="rev-card-header mb-2">
+                    <div>
+                        <h2 class="rev-card-title">
+                            <i class="bi bi-pie-chart-fill" style="color:#4E342E" aria-hidden="true"></i>
+                            Cơ cấu Danh mục &amp; Kênh bán
+                        </h2>
+                        <p class="rev-card-subtitle">Tỷ trọng doanh thu theo nhóm món và phương thức phục vụ</p>
+                    </div>
+                </div>
+                <div class="rev-mix-body">
+                    <div class="rev-donut-wrap">
+                        <canvas id="chart-category-donut" aria-label="Biểu đồ tỷ trọng danh mục"></canvas>
+                    </div>
+                    <div id="rev-category-legend" class="rev-donut-legend"></div>
+
+                    <div class="rev-breakdown-group">
+                        <div>
+                            <div class="rev-breakdown-title">Kênh bán hàng</div>
+                            <div class="rev-stacked-bar" role="img" aria-label="Tỷ lệ kênh bán POS và Kiosk">
+                                <div id="rev-channel-pos-bar" class="rev-stacked-seg" style="width:0;background:#4E342E"></div>
+                                <div id="rev-channel-kiosk-bar" class="rev-stacked-seg" style="width:0;background:#D99B52"></div>
+                            </div>
+                            <div class="rev-breakdown-stats">
+                                <span><span class="rev-legend-dot" style="background:#4E342E"></span><strong id="rev-channel-pos-text">POS tại quầy: 0%</strong></span>
+                                <span><span class="rev-legend-dot" style="background:#D99B52"></span><strong id="rev-channel-kiosk-text">Kiosk/không xác định: 0%</strong></span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="rev-breakdown-title">Phương thức thanh toán</div>
+                            <div class="rev-stacked-bar" role="img" aria-label="Tỷ lệ phương thức thanh toán">
+                                <div id="rev-pay-cash-bar" class="rev-stacked-seg" style="width:0;background:#A16236"></div>
+                                <div id="rev-pay-card-bar" class="rev-stacked-seg" style="width:0;background:#4F772D"></div>
+                                <div id="rev-pay-wallet-bar" class="rev-stacked-seg" style="width:0;background:#D99B52"></div>
+                            </div>
+                            <div class="rev-breakdown-stats">
+                                <span><span class="rev-legend-dot" style="background:#A16236"></span><span id="rev-pay-cash-text">Tiền mặt: 0%</span></span>
+                                <span><span class="rev-legend-dot" style="background:#4F772D"></span><span id="rev-pay-card-text">Thẻ ngân hàng: 0%</span></span>
+                                <span><span class="rev-legend-dot" style="background:#D99B52"></span><span id="rev-pay-wallet-text">Ví điện tử: 0%</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <!-- HÀNG 4: SO SÁNH THEO THÁNG (50%) & KHUNG GIỜ VÀNG (50%) -->
+        <section class="rev-row-4">
+            <article class="rev-card">
+                <div class="rev-card-header">
+                    <div>
+                        <h2 class="rev-card-title">
+                            <i class="bi bi-bar-chart-line-fill" style="color:#4E342E" aria-hidden="true"></i>
+                            So sánh doanh thu giữa các tháng
+                        </h2>
+                        <p class="rev-card-subtitle">So sánh doanh thu thực tế với cùng tháng của năm trước</p>
+                    </div>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Chọn số tháng hiển thị">
+                        <button type="button" class="rev-pill-btn active px-3 py-1" style="min-height:30px;font-size:12px" data-monthly-range="months6">6 tháng</button>
+                        <button type="button" class="rev-pill-btn px-3 py-1" style="min-height:30px;font-size:12px" data-monthly-range="months12">12 tháng</button>
+                    </div>
+                </div>
+                <div class="rev-chart-box">
+                    <canvas id="chart-monthly-compare" aria-label="Biểu đồ so sánh doanh thu theo tháng"></canvas>
+                </div>
+            </article>
+
+            <article class="rev-card">
+                <div class="rev-card-header">
+                    <div>
+                        <h2 class="rev-card-title">
+                            <i class="bi bi-clock-history" style="color:#A16236" aria-hidden="true"></i>
+                            Khung giờ vàng (Peak Hours)
+                        </h2>
+                        <p class="rev-card-subtitle">Phân bố doanh thu &amp; lượng đơn từ 07:00 đến 22:00 để tối ưu ca nhân viên</p>
+                    </div>
+                    <span id="rev-peak-slot-badge" class="rev-peak-badge">Đang tổng hợp dữ liệu</span>
+                </div>
+                <div class="rev-chart-box">
+                    <canvas id="chart-peak-hours" aria-label="Biểu đồ khung giờ vàng"></canvas>
+                </div>
+            </article>
+        </section>
+
+        <!-- HÀNG 5: TOP 5 BÁN CHẠY (50%) & HÓA ĐƠN GẦN ĐÂY (50%) -->
+        <section class="rev-row-5">
+            <article class="rev-card">
+                <div class="rev-card-header">
+                    <div>
+                        <h2 class="rev-card-title">
+                            <i class="bi bi-award-fill" style="color:#D99B52" aria-hidden="true"></i>
+                            Top 5 đồ uống bán chạy nhất
+                        </h2>
+                        <p class="rev-card-subtitle">Xếp hạng theo tổng số ly bán ra từ các đơn hoàn thành</p>
+                    </div>
+                    <a asp-controller="TopSelling" asp-action="Index" class="btn btn-sm btn-outline-secondary">Xem chi tiết</a>
+                </div>
+                <div class="rev-table-wrap">
+                    <table class="rev-table">
+                        <thead>
+                            <tr>
+                                <th>Hạng</th>
+                                <th>Đồ uống</th>
+                                <th>Số ly</th>
+                                <th>Tỷ trọng</th>
+                                <th class="text-end">Doanh thu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rev-top-products-body"></tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="rev-card">
+                <div class="rev-card-header">
+                    <div>
+                        <h2 class="rev-card-title">
+                            <i class="bi bi-journal-check" style="color:#4F772D" aria-hidden="true"></i>
+                            Hóa đơn hoàn thành gần đây
+                        </h2>
+                        <p class="rev-card-subtitle">6 giao dịch mới nhất từ quầy thu ngân POS và máy Kiosk</p>
+                    </div>
+                    <a asp-controller="Lab3" asp-action="Index" asp-route-tab="orders" class="btn btn-sm btn-outline-secondary">Tất cả hóa đơn</a>
+                </div>
+                <div class="rev-table-wrap">
+                    <table class="rev-table">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Thời gian</th>
+                                <th>Kênh đặt</th>
+                                <th>Thanh toán</th>
+                                <th class="text-end">Tổng tiền</th>
+                                <th class="text-center">Chi tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rev-recent-orders-body"></tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+    </div>
 </div>
+
+<!-- MODAL CHI TIẾT HÓA ĐƠN -->
+<div class="modal fade" id="rev-order-modal" tabindex="-1" aria-labelledby="rev-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <span class="eyebrow mb-1">PHIẾU HÓA ĐƠN HOÀN THÀNH</span>
+                    <h2 class="modal-title fs-5" id="rev-modal-title">Chi tiết đơn <span id="rev-modal-code">—</span></h2>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <p id="rev-modal-meta" class="text-muted small mb-3"></p>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tên món</th>
+                                <th class="text-center">SL</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rev-modal-items"></tbody>
+                    </table>
+                </div>
+                <div class="rev-modal-summary d-flex flex-column gap-1">
+                    <div class="d-flex justify-content-between"><span class="text-muted">Tạm tính</span><strong id="rev-modal-subtotal">0 ₫</strong></div>
+                    <div class="d-flex justify-content-between"><span class="text-muted">Giảm giá</span><strong id="rev-modal-discount" class="text-success">0 ₫</strong></div>
+                    <div class="d-flex justify-content-between border-top pt-2 mt-1"><span class="fw-bold">Tổng thanh toán</span><strong id="rev-modal-total" style="color:#4E342E;font-size:17px;">0 ₫</strong></div>
+                </div>
+                <p id="rev-modal-note" class="small text-muted mt-3 mb-0"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST THÔNG BÁO -->
+<div id="rev-toast" class="rev-toast" role="status" aria-live="polite" hidden>
+    <i class="bi bi-check-circle-fill" style="color:#8CD156" aria-hidden="true"></i>
+    <span></span>
+</div>
+
+<script id="revenue-report-data" type="application/json">@Html.Raw(reportJson)</script>
+
+@section Scripts {
+    <script src="~/lib/chart.js/chart.umd.min.js" asp-append-version="true" defer></script>
+    <script src="~/js/revenue-report.js" asp-append-version="true" defer></script>
+}
