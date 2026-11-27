@@ -2,7 +2,7 @@
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
     var currentTab = ViewContext.HttpContext.Request.Query["tab"].ToString().ToLowerInvariant();
     var isManager = User.IsInRole("Manager");
-    var isManagement = currentController is "Lab3" or "Products" or "Categories" or "Employees";
+    var isManagement = currentController is "Lab3" or "Products" or "Categories" or "Employees" or "TopSelling";
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
     var displayName = User.Identity?.Name ?? "Người dùng";
     var roleName = isManager ? "Quản lý" : "Nhân viên";
@@ -17,6 +17,7 @@
         "Products" => "Quản lý sản phẩm",
         "Categories" => "Quản lý danh mục",
         "Employees" => "Quản lý nhân viên",
+        "TopSelling" => "Top 5 thức uống bán chạy",
         "Login" => "Thông tin tài khoản",
         "Lab3" when currentTab == "cards" => "Bàn và thẻ định danh",
         "Lab3" when currentTab == "users" => "Nhân sự và tài khoản",
@@ -86,6 +87,7 @@
                                 <a asp-controller="Lab3" asp-action="Index" asp-route-tab="cards" data-manage-link class="sidebar-link @(currentController == "Lab3" && currentTab == "cards" ? "active" : "")" aria-current="@(currentController == "Lab3" && currentTab == "cards" ? "page" : null)">Bàn / Thẻ</a>
                                 <a asp-controller="Employees" asp-action="Index" data-manage-link class="sidebar-link @(currentController == "Employees" ? "active" : "")" aria-current="@(currentController == "Employees" ? "page" : null)">Nhân viên</a>
                                 <a asp-controller="Lab3" asp-action="Index" asp-route-tab="orders" data-manage-link class="sidebar-link @(currentController == "Lab3" && currentTab == "orders" ? "active" : "")" aria-current="@(currentController == "Lab3" && currentTab == "orders" ? "page" : null)">Hóa đơn</a>
+                                <a asp-controller="TopSelling" asp-action="Index" data-manage-link class="sidebar-link @(currentController == "TopSelling" ? "active" : "")" aria-current="@(currentController == "TopSelling" ? "page" : null)"> Top 5 thức uống bán chạy </a>
                             </div>
                         </details>
                     }
