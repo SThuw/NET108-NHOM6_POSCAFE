@@ -1087,24 +1087,36 @@ namespace CafePOSManagement.Web.Data.Migrations
                             Id = "p23",
                             CategoryId = "combo",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
-                            Description = "Combo Sáng: Cà phê + Bánh croissant — món đặc sắc của CafePOS.",
-                            ImageUrl = "https://images.unsplash.com/photo-1525610553991-2bede1a236e2?auto=format&fit=crop&w=800&q=85",
+                            Description = "Combo Bữa Sáng: Cafe Kem Trứng + Bánh Mì Chấm — món đặc sắc của CafePOS.",
+                            ImageUrl = "/images/kiosk/banner1.png",
                             IsAvailable = true,
-                            Name = "Combo Sáng: Cà phê + Bánh croissant",
-                            OriginalPrice = 95000m,
-                            Price = 75000m
+                            Name = "Combo Bữa Sáng: Cafe Kem Trứng + Bánh Mì Chấm",
+                            OriginalPrice = 50000m,
+                            Price = 35000m
                         },
                         new
                         {
                             Id = "p24",
                             CategoryId = "combo",
                             CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
-                            Description = "Combo Trà chiều: Trà đào + Bánh — món đặc sắc của CafePOS.",
-                            ImageUrl = "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=85",
+                            Description = "Combo Deal Hời: Bánh Cuộn Trà Xanh + Matcha Đá Xay — món đặc sắc của CafePOS.",
+                            ImageUrl = "/images/kiosk/banner2.png",
                             IsAvailable = true,
-                            Name = "Combo Trà chiều: Trà đào + Bánh",
-                            OriginalPrice = 85000m,
-                            Price = 69000m
+                            Name = "Combo Deal Hời: Bánh Cuộn Trà Xanh + Matcha Đá Xay",
+                            OriginalPrice = 59000m,
+                            Price = 43000m
+                        },
+                        new
+                        {
+                            Id = "p25",
+                            CategoryId = "combo",
+                            CreatedAt = new DateTimeOffset(new DateTime(2026, 11, 7, 8, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 7, 0, 0, 0)),
+                            Description = "Combo Deal Sốc: Trà Sữa Ô Lông + Bánh Croissant Trứng Muối — món đặc sắc của CafePOS.",
+                            ImageUrl = "/images/kiosk/banner3.png",
+                            IsAvailable = true,
+                            Name = "Combo Deal Sốc: Trà Sữa Ô Lông + Bánh Croissant Trứng Muối",
+                            OriginalPrice = 65000m,
+                            Price = 45000m
                         });
                 });
 

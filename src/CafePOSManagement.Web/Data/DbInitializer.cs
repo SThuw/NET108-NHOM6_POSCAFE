@@ -56,8 +56,9 @@ public static class DbInitializer
             new("p21", "Hồng trà Macchiato", "milktea", 52000, 45000, "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=85"),
             new("p22", "Trà sữa lài", "milktea", null, 42000, "https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&w=800&q=85"),
             // Non-Coffee: Combo Tiết Kiệm (Deal Hời)
-            new("p23", "Combo Sáng: Cà phê + Bánh croissant", "combo", 95000, 75000, "https://images.unsplash.com/photo-1525610553991-2bede1a236e2?auto=format&fit=crop&w=800&q=85"),
-            new("p24", "Combo Trà chiều: Trà đào + Bánh", "combo", 85000, 69000, "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=85")
+            new("p23", "Combo Bữa Sáng: Cafe Kem Trứng + Bánh Mì Chấm", "combo", 50000, 35000, "/images/kiosk/banner1.png"),
+            new("p24", "Combo Deal Hời: Bánh Cuộn Trà Xanh + Matcha Đá Xay", "combo", 59000, 43000, "/images/kiosk/banner2.png"),
+            new("p25", "Combo Deal Sốc: Trà Sữa Ô Lông + Bánh Croissant Trứng Muối", "combo", 65000, 45000, "/images/kiosk/banner3.png")
         ];
         modelBuilder.Entity<Product>().HasData(products.Select(p => new
         {
