@@ -84,6 +84,19 @@
         </article>
     </section>
 
+    @if (Model.Items.Count > 0)
+    {
+        <section class="ts-table-card" style="margin-bottom: 20px; padding-bottom: 18px;">
+            <div class="ts-table-head">
+                <h2>Biểu đồ thống kê 5 thức uống bán chạy (Chart.js)</h2>
+                <span>Số lượng ly bán ra &amp; Doanh thu</span>
+            </div>
+            <div style="width: 88%; max-width: 920px; height: 320px; margin: 18px auto 0;">
+                <canvas id="myChart" aria-label="Biểu đồ Top 5 thức uống bán chạy"></canvas>
+            </div>
+        </section>
+    }
+
     <section class="ts-table-card">
         <div class="ts-table-head">
             <h2>Bảng xếp hạng thức uống</h2>
@@ -129,3 +142,64 @@
         }
     </section>
 </div>
+
+@if (Model.Items.Count > 0)
+{
+    @section Scripts {
+        <script src="~/lib/chart.js/chart.umd.min.js" asp-append-version="true"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Items.Select(x => x.ProductName)));
+                const quantityValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Items.Select(x => x.QuantitySold)));
+                const revenueValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Items.Select(x => x.Revenue)));
+                const canvas = document.getElementById('myChart');
+                if (!canvas || typeof Chart === 'undefined') return;
+                const ctx = canvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Số lượng bán (Ly)',
+                                data: quantityValues,
+                                backgroundColor: 'rgba(109, 64, 48, 0.78)',
+                                borderColor: 'rgba(109, 64, 48, 1)',
+                                borderWidth: 1,
+                                borderRadius: 8,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Doanh thu (VNĐ)',
+                                data: revenueValues,
+                                backgroundColor: 'rgba(217, 155, 82, 0.65)',
+                                borderColor: 'rgba(217, 155, 82, 1)',
+                                borderWidth: 1,
+                                borderRadius: 8,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                position: 'left',
+                                title: { display: true, text: 'Số lượng (Ly)' },
+                                ticks: { precision: 0 }
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                position: 'right',
+                                grid: { drawOnChartArea: false },
+                                title: { display: true, text: 'Doanh thu (VNĐ)' }
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+    }
+}

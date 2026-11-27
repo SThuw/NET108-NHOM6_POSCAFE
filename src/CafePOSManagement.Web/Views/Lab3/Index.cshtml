@@ -402,9 +402,14 @@
                                                 </div>
                                             </td>
                                             <td class="text-center pe-3">
-                                                <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3 shadow-none d-inline-flex align-items-center gap-1" onclick="viewOrderDetail(@o.Id)">
-                                                    <span>Chi tiết</span>
-                                                </button>
+                                                <div class="d-inline-flex align-items-center gap-1">
+                                                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3 shadow-none" onclick="viewOrderDetail(@o.Id)">
+                                                        <span>Xem nhanh</span>
+                                                    </button>
+                                                    <a asp-controller="OrderDetail" asp-action="Index" asp-route-id="@o.Id" class="btn btn-sm btn-primary rounded-pill px-3 shadow-none">
+                                                        <span>Chi tiết</span>
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                     }
@@ -694,7 +699,11 @@
                             <span class="text-muted small d-block">Trạng thái:</span>
                             <span class="badge bg-success rounded-pill px-2 mt-1" id="modal-order-status">--</span>
                         </div>
-                        <div class="col-12 border-top pt-2 mt-2">
+                        <div class="col-sm-6 border-top pt-2 mt-2">
+                            <span class="text-muted small">Nhân viên tạo đơn: </span>
+                            <strong class="text-dark small" id="modal-order-employee">--</strong>
+                        </div>
+                        <div class="col-sm-6 border-top pt-2 mt-2">
                             <span class="text-muted small">Ghi chú đơn hàng: </span>
                             <span class="fst-italic text-dark small" id="modal-order-note">Không có</span>
                         </div>
@@ -989,6 +998,7 @@
                     document.getElementById('modal-order-type').innerText = o.orderType;
                     document.getElementById('modal-order-payment').innerText = o.paymentMethod;
                     document.getElementById('modal-order-status').innerText = o.status;
+                    document.getElementById('modal-order-employee').innerText = o.employeeName || 'Nguyễn Kim Song Thư';
                     document.getElementById('modal-order-note').innerText = o.note;
 
                     document.getElementById('modal-subtotal').innerText = o.subtotal.toLocaleString('vi-VN') + ' ₫';

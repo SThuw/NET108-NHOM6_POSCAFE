@@ -270,6 +270,7 @@ public IActionResult DeleteAiHistory()
                     createdAt = order.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss"),
                     paymentMethod = order.PaymentMethod,
                     status = order.Status,
+                    employeeName = order.EmployeeName,
                     note = string.IsNullOrEmpty(order.Note) ? "Không có" : order.Note,
                     subtotal = order.Subtotal,
                     discountAmount = order.DiscountAmount,

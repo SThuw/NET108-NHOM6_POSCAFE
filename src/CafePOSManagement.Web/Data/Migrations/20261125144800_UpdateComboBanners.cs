@@ -36,21 +36,11 @@ public sealed partial class UpdateComboBanners : Migration
                 "Combo Deal Hời: Bánh Cuộn Trà Xanh + Matcha Đá Xay — món đặc sắc của CafePOS."
             });
 
-        migrationBuilder.InsertData(
-            table: "Products",
-            columns: new[] { "Id", "CategoryId", "CreatedAt", "Description", "ImageUrl", "IsAvailable", "Name", "OriginalPrice", "Price" },
-            values: new object?[]
-            {
-                "p25",
-                "combo",
-                created,
-                "Combo Deal Sốc: Trà Sữa Ô Lông + Bánh Croissant Trứng Muối — món đặc sắc của CafePOS.",
-                "/images/kiosk/banner3.png",
-                true,
-                "Combo Deal Sốc: Trà Sữa Ô Lông + Bánh Croissant Trứng Muối",
-                65000m,
-                45000m
-            });
+        migrationBuilder.Sql(@"
+IF NOT EXISTS (SELECT 1 FROM [Products] WHERE [Id] = 'p25')
+    INSERT INTO [Products] ([Id], [CategoryId], [CreatedAt], [Description], [ImageUrl], [IsAvailable], [Name], [OriginalPrice], [Price])
+    VALUES ('p25', 'combo', '2026-11-07T08:00:00.0000000+07:00', N'Combo Deal Sốc: Trà Sữa Ô Lông + Bánh Croissant Trứng Muối — món đặc sắc của CafePOS.', N'/images/kiosk/banner3.png', 1, N'Combo Deal Sốc: Trà Sữa Ô Lông + Bánh Croissant Trứng Muối', 65000.0, 45000.0);
+");
     }
 
     protected override void Down(MigrationBuilder migrationBuilder)

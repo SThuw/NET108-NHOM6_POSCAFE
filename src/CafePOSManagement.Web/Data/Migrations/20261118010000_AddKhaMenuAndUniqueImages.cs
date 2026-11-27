@@ -7,30 +7,35 @@ public sealed partial class AddKhaMenuAndUniqueImages : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)
     {
-        var created = new DateTimeOffset(2026, 11, 7, 8, 0, 0, TimeSpan.FromHours(7));
+        // 1. Ba danh mục Non-Coffee (chèn an toàn IF NOT EXISTS để không lỗi trên DB đã có sẵn).
+        migrationBuilder.Sql(@"
+IF NOT EXISTS (SELECT 1 FROM [Categories] WHERE [Id] = 'matcha')
+    INSERT INTO [Categories] ([Id], [Code], [CreatedAt], [DisplayOrder], [IsActive], [Name]) VALUES ('matcha', 'matcha', '2026-11-07T08:00:00.0000000+07:00', 8, 1, N'Matcha & Đá xay');
+IF NOT EXISTS (SELECT 1 FROM [Categories] WHERE [Id] = 'milktea')
+    INSERT INTO [Categories] ([Id], [Code], [CreatedAt], [DisplayOrder], [IsActive], [Name]) VALUES ('milktea', 'milktea', '2026-11-07T08:00:00.0000000+07:00', 9, 1, N'Trà sữa');
+IF NOT EXISTS (SELECT 1 FROM [Categories] WHERE [Id] = 'combo')
+    INSERT INTO [Categories] ([Id], [Code], [CreatedAt], [DisplayOrder], [IsActive], [Name]) VALUES ('combo', 'combo', '2026-11-07T08:00:00.0000000+07:00', 10, 1, N'Combo Tiết Kiệm (Deal Hời)');
+");
 
-        // 1. Ba danh mục Non-Coffee (thứ tự hiển thị nối tiếp 7 danh mục cũ).
-        migrationBuilder.InsertData("Categories", new[] { "Id", "Code", "CreatedAt", "DisplayOrder", "IsActive", "Name" },
-            new object?[,]
-            {
-                { "matcha", "matcha", created, 8, true, "Matcha & Đá xay" },
-                { "milktea", "milktea", created, 9, true, "Trà sữa" },
-                { "combo", "combo", created, 10, true, "Combo Tiết Kiệm (Deal Hời)" }
-            });
-
-        // 2. Tám món Non-Coffee. Mỗi món một photo-id Unsplash riêng.
-        migrationBuilder.InsertData("Products", new[] { "Id", "CategoryId", "CreatedAt", "Description", "ImageUrl", "IsAvailable", "Name", "OriginalPrice", "Price" },
-            new object?[,]
-            {
-                { "p17", "matcha", created, "Matcha Latte — món đặc sắc của CafePOS.", "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=800&q=85", true, "Matcha Latte", 65000m, 55000m },
-                { "p18", "matcha", created, "Matcha Freeze — món đặc sắc của CafePOS.", "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=800&q=85", true, "Matcha Freeze", 69000m, 59000m },
-                { "p19", "matcha", created, "Cacao sữa — món đặc sắc của CafePOS.", "https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=800&q=85", true, "Cacao sữa", (decimal?)null, 49000m },
-                { "p20", "milktea", created, "Trà sữa Oolong nướng — món đặc sắc của CafePOS.", "https://images.unsplash.com/photo-1525385133512-2f3bdd039054?auto=format&fit=crop&w=800&q=85", true, "Trà sữa Oolong nướng", 55000m, 48000m },
-                { "p21", "milktea", created, "Hồng trà Macchiato — món đặc sắc của CafePOS.", "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=85", true, "Hồng trà Macchiato", 52000m, 45000m },
-                { "p22", "milktea", created, "Trà sữa lài — món đặc sắc của CafePOS.", "https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&w=800&q=85", true, "Trà sữa lài", (decimal?)null, 42000m },
-                { "p23", "combo", created, "Combo Sáng: Cà phê + Bánh croissant — món đặc sắc của CafePOS.", "https://images.unsplash.com/photo-1525610553991-2bede1a236e2?auto=format&fit=crop&w=800&q=85", true, "Combo Sáng: Cà phê + Bánh croissant", 95000m, 75000m },
-                { "p24", "combo", created, "Combo Trà chiều: Trà đào + Bánh — món đặc sắc của CafePOS.", "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=85", true, "Combo Trà chiều: Trà đào + Bánh", 85000m, 69000m }
-            });
+        // 2. Tám món Non-Coffee (chèn an toàn IF NOT EXISTS).
+        migrationBuilder.Sql(@"
+IF NOT EXISTS (SELECT 1 FROM [Products] WHERE [Id] = 'p17')
+    INSERT INTO [Products] ([Id], [CategoryId], [CreatedAt], [Description], [ImageUrl], [IsAvailable], [Name], [OriginalPrice], [Price]) VALUES ('p17', 'matcha', '2026-11-07T08:00:00.0000000+07:00', N'Matcha Latte — món đặc sắc của CafePOS.', N'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=800&q=85', 1, N'Matcha Latte', 65000.0, 55000.0);
+IF NOT EXISTS (SELECT 1 FROM [Products] WHERE [Id] = 'p18')
+    INSERT INTO [Products] ([Id], [CategoryId], [CreatedAt], [Description], [ImageUrl], [IsAvailable], [Name], [OriginalPrice], [Price]) VALUES ('p18', 'matcha', '2026-11-07T08:00:00.0000000+07:00', N'Matcha Freeze — món đặc sắc của CafePOS.', N'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=800&q=85', 1, N'Matcha Freeze', 69000.0, 59000.0);
+IF NOT EXISTS (SELECT 1 FROM [Products] WHERE [Id] = 'p19')
+    INSERT INTO [Products] ([Id], [CategoryId], [CreatedAt], [Description], [ImageUrl], [IsAvailable], [Name], [OriginalPrice], [Price]) VALUES ('p19', 'matcha', '2026-11-07T08:00:00.0000000+07:00', N'Cacao sữa — món đặc sắc của CafePOS.', N'https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?auto=format&fit=crop&w=800&q=85', 1, N'Cacao sữa', NULL, 49000.0);
+IF NOT EXISTS (SELECT 1 FROM [Products] WHERE [Id] = 'p20')
+    INSERT INTO [Products] ([Id], [CategoryId], [CreatedAt], [Description], [ImageUrl], [IsAvailable], [Name], [OriginalPrice], [Price]) VALUES ('p20', 'milktea', '2026-11-07T08:00:00.0000000+07:00', N'Trà sữa Oolong nướng — món đặc sắc của CafePOS.', N'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?auto=format&fit=crop&w=800&q=85', 1, N'Trà sữa Oolong nướng', 55000.0, 48000.0);
+IF NOT EXISTS (SELECT 1 FROM [Products] WHERE [Id] = 'p21')
+    INSERT INTO [Products] ([Id], [CategoryId], [CreatedAt], [Description], [ImageUrl], [IsAvailable], [Name], [OriginalPrice], [Price]) VALUES ('p21', 'milktea', '2026-11-07T08:00:00.0000000+07:00', N'Hồng trà Macchiato — món đặc sắc của CafePOS.', N'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=85', 1, N'Hồng trà Macchiato', 52000.0, 45000.0);
+IF NOT EXISTS (SELECT 1 FROM [Products] WHERE [Id] = 'p22')
+    INSERT INTO [Products] ([Id], [CategoryId], [CreatedAt], [Description], [ImageUrl], [IsAvailable], [Name], [OriginalPrice], [Price]) VALUES ('p22', 'milktea', '2026-11-07T08:00:00.0000000+07:00', N'Trà sữa lài — món đặc sắc của CafePOS.', N'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&w=800&q=85', 1, N'Trà sữa lài', NULL, 42000.0);
+IF NOT EXISTS (SELECT 1 FROM [Products] WHERE [Id] = 'p23')
+    INSERT INTO [Products] ([Id], [CategoryId], [CreatedAt], [Description], [ImageUrl], [IsAvailable], [Name], [OriginalPrice], [Price]) VALUES ('p23', 'combo', '2026-11-07T08:00:00.0000000+07:00', N'Combo Sáng: Cà phê + Bánh croissant — món đặc sắc của CafePOS.', N'https://images.unsplash.com/photo-1525610553991-2bede1a236e2?auto=format&fit=crop&w=800&q=85', 1, N'Combo Sáng: Cà phê + Bánh croissant', 95000.0, 75000.0);
+IF NOT EXISTS (SELECT 1 FROM [Products] WHERE [Id] = 'p24')
+    INSERT INTO [Products] ([Id], [CategoryId], [CreatedAt], [Description], [ImageUrl], [IsAvailable], [Name], [OriginalPrice], [Price]) VALUES ('p24', 'combo', '2026-11-07T08:00:00.0000000+07:00', N'Combo Trà chiều: Trà đào + Bánh — món đặc sắc của CafePOS.', N'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=85', 1, N'Combo Trà chiều: Trà đào + Bánh', 85000.0, 69000.0);
+");
 
         // 3. Gán lại ảnh cho 16 món cũ: trước đây nhiều món dùng chung một ảnh,
         //    nay mỗi món một photo-id riêng để cả 24 món không trùng ảnh.

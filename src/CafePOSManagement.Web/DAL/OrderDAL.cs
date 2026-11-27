@@ -22,14 +22,26 @@ public class OrderDAL
     public string Status { get; set; } = "Hoàn thành";
     public DateTime CreatedAt { get; set; }
     public string Note { get; set; } = string.Empty;
+    public string EmployeeName { get; set; } = "Nguyễn Kim Song Thư";
 
     public static List<OrderDAL> GetAll()
     {
         var list = new List<OrderDAL>();
-        string sql = "SELECT Id, OrderNumber, OrderType, Subtotal, DiscountAmount, TaxAmount, TotalAmount AS Total, PaymentMethod, Status, CreatedAt, Note FROM Orders ORDER BY Id DESC";
+        string sql = @"
+            SELECT o.Id, o.OrderNumber, o.OrderType, o.Subtotal, o.DiscountAmount, o.TaxAmount, o.TotalAmount AS Total,
+                   o.PaymentMethod, o.Status, o.CreatedAt, o.Note, u.FullName AS EmployeeName
+            FROM Orders o
+            LEFT JOIN Users u ON o.CreatedByUserId = u.Id
+            ORDER BY o.Id DESC";
         DataTable dt = DBUtil.queryDataTable(sql);
         foreach (DataRow row in dt.Rows)
         {
+            var note = row["Note"]?.ToString() ?? "";
+            var empName = row["EmployeeName"]?.ToString();
+            if (string.IsNullOrWhiteSpace(empName))
+            {
+                empName = note.Contains("Kiosk", StringComparison.OrdinalIgnoreCase) ? "Kiosk tự phục vụ" : "Nguyễn Kim Song Thư";
+            }
             list.Add(new OrderDAL
             {
                 Id = Convert.ToInt64(row["Id"]),
@@ -42,7 +54,8 @@ public class OrderDAL
                 PaymentMethod = row["PaymentMethod"].ToString() ?? "",
                 Status = row["Status"].ToString() ?? "",
                 CreatedAt = row["CreatedAt"] is DateTimeOffset dto ? dto.DateTime : Convert.ToDateTime(row["CreatedAt"]),
-                Note = row["Note"]?.ToString() ?? ""
+                Note = note,
+                EmployeeName = empName
             });
         }
         return list;
@@ -50,10 +63,21 @@ public class OrderDAL
 
     public static OrderDAL? GetById(long id)
     {
-        string sql = "SELECT Id, OrderNumber, OrderType, Subtotal, DiscountAmount, TaxAmount, TotalAmount AS Total, PaymentMethod, Status, CreatedAt, Note FROM Orders WHERE Id = @1";
+        string sql = @"
+            SELECT o.Id, o.OrderNumber, o.OrderType, o.Subtotal, o.DiscountAmount, o.TaxAmount, o.TotalAmount AS Total,
+                   o.PaymentMethod, o.Status, o.CreatedAt, o.Note, u.FullName AS EmployeeName
+            FROM Orders o
+            LEFT JOIN Users u ON o.CreatedByUserId = u.Id
+            WHERE o.Id = @1";
         DataTable dt = DBUtil.queryDataTable(sql, new List<object> { id });
         if (dt.Rows.Count == 0) return null;
         DataRow row = dt.Rows[0];
+        var note = row["Note"]?.ToString() ?? "";
+        var empName = row["EmployeeName"]?.ToString();
+        if (string.IsNullOrWhiteSpace(empName))
+        {
+            empName = note.Contains("Kiosk", StringComparison.OrdinalIgnoreCase) ? "Kiosk tự phục vụ" : "Nguyễn Kim Song Thư";
+        }
         return new OrderDAL
         {
             Id = Convert.ToInt64(row["Id"]),
@@ -66,7 +90,8 @@ public class OrderDAL
             PaymentMethod = row["PaymentMethod"].ToString() ?? "",
             Status = row["Status"].ToString() ?? "",
             CreatedAt = row["CreatedAt"] is DateTimeOffset dto ? dto.DateTime : Convert.ToDateTime(row["CreatedAt"]),
-            Note = row["Note"]?.ToString() ?? ""
+            Note = note,
+            EmployeeName = empName
         };
     }
 

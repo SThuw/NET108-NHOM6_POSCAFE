@@ -131,6 +131,21 @@ using (var scope = app.Services.CreateScope())
         var db = scope.ServiceProvider.GetRequiredService<CafePosDbContext>();
         try { db.Database.Migrate(); } catch { db.Database.EnsureCreated(); }
 
+        // Đảm bảo bảng Orders luôn có cột CreatedByUserId kể cả trên DB cũ
+        try
+        {
+            db.Database.ExecuteSqlRaw(@"
+IF COL_LENGTH('dbo.Orders', 'CreatedByUserId') IS NULL
+BEGIN
+    ALTER TABLE [Orders] ADD [CreatedByUserId] varchar(40) NULL;
+END
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Orders_CreatedByUserId' AND object_id = OBJECT_ID('dbo.Orders'))
+BEGIN
+    CREATE INDEX [IX_Orders_CreatedByUserId] ON [Orders] ([CreatedByUserId]);
+END");
+        }
+        catch { }
+
         // Tự động đồng bộ các Category mới (của Kha: matcha, milktea, combo) nếu DB chưa có
         var existingCatIds = db.Categories.Select(c => c.Id).ToHashSet();
         var newCategories = new[]
