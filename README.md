@@ -120,4 +120,5 @@ CafePOSManagement/
 - 📄 [Báo cáo thực hành Lab 3 (Code First, ADO.NET DBUtil)](docs/BAO_CAO_LAB3.md)
 - 📄 [Báo cáo thực hành Lab 5 (CRUD Đồ uống, Nhân sự, Email mật khẩu & Nghiên cứu OTP)](docs/BAO_CAO_LAB5.md)
 - 📄 [Báo cáo thực hành Lab 6 (Quản lý Hóa đơn, Thống kê Doanh thu, Top 5 Bán chạy & Biểu đồ Chart.js)](docs/BAO_CAO_LAB6.md)
+- 📄 [Báo cáo thực hành Lab 7 (Phân tích phạm vi, Test Plan, Test Case, Ghi nhận lỗi & Prompt AI)](docs/BAO_CAO_LAB7.md)
 - 📄 [Tài liệu kiến trúc phân quyền & đăng nhập ASM1](docs/ASM1_DUC_AUTH_EMPLOYEES.md)
