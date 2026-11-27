@@ -521,6 +521,11 @@ namespace CafePOSManagement.Web.Data.Migrations
                         .HasColumnType("datetimeoffset")
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
+                    b.Property<string>("CreatedByUserId")
+                        .HasMaxLength(40)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(40)");
+
                     b.Property<decimal>("DiscountAmount")
                         .HasPrecision(18)
                         .HasColumnType("decimal(18,0)");
@@ -581,6 +586,8 @@ namespace CafePOSManagement.Web.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedAt");
+
+                    b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("DiscountId");
 
@@ -1238,10 +1245,17 @@ namespace CafePOSManagement.Web.Data.Migrations
 
             modelBuilder.Entity("CafePOSManagement.Web.Models.Entities.Order", b =>
                 {
+                    b.HasOne("CafePOSManagement.Web.Models.Entities.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("CafePOSManagement.Web.Models.Entities.Discount", "Discount")
                         .WithMany("Orders")
                         .HasForeignKey("DiscountId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
 
                     b.Navigation("Discount");
                 });

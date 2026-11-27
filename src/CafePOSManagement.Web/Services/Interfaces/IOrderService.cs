@@ -9,6 +9,6 @@ public interface IOrderService
     IReadOnlyList<decimal> GetTaxRates();
     string GetNextOrderNumber();
     Order Preview(CheckoutOrderDto input);
-    Order Checkout(CheckoutOrderDto input);
+    Order Checkout(CheckoutOrderDto input, string? createdByUserId = null);
     Order Update(long orderId, CheckoutOrderDto input);
 }

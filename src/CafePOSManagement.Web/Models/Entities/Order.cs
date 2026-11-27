@@ -14,6 +14,10 @@ public sealed record Order
     public int? DiscountId { get; init; }
     [JsonIgnore]
     public Discount? Discount { get; init; }
+    [StringLength(40)]
+    public string? CreatedByUserId { get; init; }
+    [JsonIgnore]
+    public User? CreatedByUser { get; init; }
     [Range(0, 100), Display(Name = "Giảm giá (%)")]
     public decimal DiscountPercent { get; init; }
     [Range(0, 100), Display(Name = "Thuế VAT (%)")]

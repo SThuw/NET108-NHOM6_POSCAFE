@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using CafePOSManagement.Web.Models.ViewModels;
 using CafePOSManagement.Web.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -41,7 +42,7 @@ public sealed class PosController(IPosService posService, IProductService produc
 
     [HttpPost, AllowAnonymous, RequestSizeLimit(32768)]
     public IActionResult Checkout([FromBody] CheckoutOrderDto input) => Execute(() =>
-        new { order = orders.Checkout(input), nextOrderNumber = orders.GetNextOrderNumber() });
+        new { order = orders.Checkout(input, User.FindFirstValue(ClaimTypes.NameIdentifier)), nextOrderNumber = orders.GetNextOrderNumber() });
 
     // Cập nhật đơn vừa tạo: giữ nguyên Id/OrderNumber, chỉ thay thông tin và chi tiết món.
     [HttpPut, AllowAnonymous, RequestSizeLimit(32768)]

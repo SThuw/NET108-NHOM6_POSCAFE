@@ -1,0 +1,42 @@
+@model OrderDetailViewModel
+<section id="print-receipt" aria-label="Hóa đơn in">
+    <h1>PolyCafe</h1>
+    <p class="receipt-center">HÓA ĐƠN BÁN HÀNG</p>
+    <div class="receipt-rule"></div>
+    <p><strong>Mã hóa đơn:</strong> @Model.Order.OrderNumber</p>
+    <p><strong>Thời gian:</strong> @Model.Order.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+    <p><strong>Nhân viên:</strong> @Model.EmployeeName</p>
+    <p><strong>Loại đơn:</strong> @(Model.Order.OrderType switch { "pickup" => "Mang đi", "delivery" => "Giao hàng", "dinein" => "Tại bàn", _ => Model.Order.OrderType })</p>
+    <div class="receipt-rule"></div>
+    <table>
+        <thead>
+            <tr><th>Món / SL</th><th class="receipt-number">Thành tiền</th></tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.Order.Items)
+        {
+            <tr>
+                <td>@item.ProductName<br />@item.Quantity x @item.UnitPrice.ToString("N0") ₫</td>
+                <td class="receipt-number">@item.LineTotal.ToString("N0") ₫</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <div class="receipt-rule"></div>
+    <table>
+        <tbody>
+            <tr><td>Tạm tính</td><td class="receipt-number">@Model.Order.Subtotal.ToString("N0") ₫</td></tr>
+            @if (Model.Order.DiscountAmount > 0)
+            {
+                <tr><td>Giảm giá</td><td class="receipt-number">-@Model.Order.DiscountAmount.ToString("N0") ₫</td></tr>
+            }
+            @if (Model.Order.TaxAmount > 0)
+            {
+                <tr><td>Thuế VAT</td><td class="receipt-number">@Model.Order.TaxAmount.ToString("N0") ₫</td></tr>
+            }
+            <tr class="receipt-total"><td>TỔNG CỘNG</td><td class="receipt-number">@Model.Order.Total.ToString("N0") ₫</td></tr>
+        </tbody>
+    </table>
+    <div class="receipt-rule"></div>
+    <p class="receipt-center">Cảm ơn quý khách và hẹn gặp lại!</p>
+</section>
