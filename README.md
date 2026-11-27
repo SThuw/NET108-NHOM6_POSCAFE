@@ -1,4 +1,4 @@
-﻿# PolyCafe — Hệ thống Quản lý Bán hàng Quán Đồ uống (CafePOS)
+# PolyKaFé — Hệ thống Quản lý Bán hàng Quán Đồ uống (CafePOS)
 
 > **Môn học:** Dự án .NET 1 (NET108) — Cao đẳng FPT Polytechnic  
 > **Nhóm thực hiện:** Nhóm 6  
@@ -13,7 +13,7 @@
 
 ## 1. Giới thiệu dự án
 
-**PolyCafe (CafePOS Management)** là hệ thống phần mềm quản lý bán hàng quán cà phê và đồ uống, phục vụ cho cả quầy thu ngân (POS) và công tác quản trị thực đơn, nhân sự, bàn/thẻ định danh và lịch sử đơn hàng.
+**PolyKaFé (CafePOS Management)** là hệ thống phần mềm quản lý bán hàng quán cà phê và đồ uống, phục vụ cho cả quầy thu ngân (POS) và công tác quản trị thực đơn, nhân sự, bàn/thẻ định danh và lịch sử đơn hàng.
 
 Hệ thống được phát triển theo **Kiến trúc 3 Lớp (3-Layer Architecture)** kết hợp:
 - **Entity Framework Core 8 (Code First)** để khởi tạo và quản lý cấu trúc cơ sở dữ liệu trên SQL Server.

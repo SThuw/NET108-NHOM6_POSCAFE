@@ -1,5 +1,5 @@
 # BÁO CÁO THỰC HÀNH LAB 7 — KIỂM THỬ PHẦN MỀM (DỰ ÁN .NET 1)
-**Đề tài:** Hệ thống Quản lý Bán hàng Quán Đồ uống (PolyCafe - POS Cafe)  
+**Đề tài:** Hệ thống Quản lý Bán hàng Quán Đồ uống (PolyKaFé - POS Cafe)  
 **Nhóm thực hiện:** Nhóm 6  
 **Lớp / Khóa:** Dự án .NET 1 (NET108 — FPT Polytechnic)  
 **Kho lưu trữ GitHub:** [https://github.com/SThuw/NET108-NHOM6_POSCAFE](https://github.com/SThuw/NET108-NHOM6_POSCAFE)  
@@ -9,7 +9,7 @@
 
 ## MỤC TIÊU LAB 7
 ✓ Hiểu đúng vai trò của kiểm thử phần mềm trong vòng đời phát triển hệ thống.  
-✓ Phân tích yêu cầu và lập kế hoạch kiểm thử (Test Plan) cho hệ thống PolyCafe.  
+✓ Phân tích yêu cầu và lập kế hoạch kiểm thử (Test Plan) cho hệ thống PolyKaFé.  
 ✓ Xây dựng Test Case có cấu trúc, đúng nghiệp vụ và bao phủ yêu cầu (Happy Path & Invalid/Exception Case).  
 ✓ Thực hiện kiểm thử, phát hiện – ghi nhận – theo dõi lỗi theo quy trình chuẩn.  
 ✓ Ứng dụng AI trong phân tích, lập kế hoạch kiểm thử và xác định điểm dễ phát sinh lỗi trong ASP.NET Core MVC.
@@ -112,7 +112,7 @@ Kết hợp song song **2 phương pháp**:
 
 ## BÀI 3B (2 ĐIỂM): THỰC HIỆN KIỂM THỬ VÀ GHI NHẬN LỖI
 
-### 3.1. Báo cáo ghi nhận lỗi thực tế trong quá trình kiểm thử hệ thống PolyCafe
+### 3.1. Báo cáo ghi nhận lỗi thực tế trong quá trình kiểm thử hệ thống PolyKaFé
 
 #### 🐞 Lỗi 1 (BUG_01): Lỗi văng ngoại lệ SQL trùng khóa chính khi chạy Migration CSDL
 - **Mô tả lỗi:** Khi chạy cập nhật cơ sở dữ liệu (`dotnet ef database update`) trên môi trường đã có sẵn dữ liệu danh mục từ `Program.cs`, hệ thống bị văng lỗi SQL `Violation of PRIMARY KEY constraint 'PK_Categories'` ở giá trị `'matcha'`, làm kẹt luôn Migration thêm cột `CreatedByUserId` vào bảng `Orders`.
@@ -147,7 +147,7 @@ Kết hợp song song **2 phương pháp**:
 ---
 
 ### 3.2. Mô tả vòng đời của lỗi (Bug Life Cycle)
-Trong dự án PolyCafe, mỗi lỗi từ lúc Tester phát hiện đến khi hoàn tất tuân theo quy trình chuẩn **6 trạng thái**:
+Trong dự án PolyKaFé, mỗi lỗi từ lúc Tester phát hiện đến khi hoàn tất tuân theo quy trình chuẩn **6 trạng thái**:
 
 ```text
 [1. New (Mới)] ──> [2. Assigned (Đã giao)] ──> [3. Open / In Progress (Đang sửa)]
@@ -171,12 +171,12 @@ Trong dự án PolyCafe, mỗi lỗi từ lúc Tester phát hiện đến khi ho
 
 ### 4.1. Prompt 1 — Phân tích và xác định phạm vi kiểm thử
 > **Prompt:**  
-> *"Tôi đang đóng vai trò QA/Tester cho hệ thống web quản lý quán cà phê PolyCafe viết bằng ASP.NET Core 8 MVC. Hệ thống gồm các phân hệ: Đăng nhập & phân quyền (Manager/Employee), Quản lý đồ uống (CRUD, lọc, tìm kiếm), Quản lý & xử lý hóa đơn (POS, Kiosk, xem chi tiết), Quản lý nhân viên, và Thống kê (Doanh thu, Top 5 món, biểu đồ Chart.js). Hãy giúp tôi phân tích chi tiết: (1) Danh sách chức năng In-Scope cần kiểm thử kỹ, (2) Các yếu tố Out-of-Scope nên loại trừ, (3) Mục tiêu chất lượng của đợt kiểm thử, và (4) 4 rủi ro lớn nhất có thể xảy ra khi tích hợp nhiều nhánh Git của 5 thành viên kèm phương án phòng ngừa."*
+> *"Tôi đang đóng vai trò QA/Tester cho hệ thống web quản lý quán cà phê PolyKaFé viết bằng ASP.NET Core 8 MVC. Hệ thống gồm các phân hệ: Đăng nhập & phân quyền (Manager/Employee), Quản lý đồ uống (CRUD, lọc, tìm kiếm), Quản lý & xử lý hóa đơn (POS, Kiosk, xem chi tiết), Quản lý nhân viên, và Thống kê (Doanh thu, Top 5 món, biểu đồ Chart.js). Hãy giúp tôi phân tích chi tiết: (1) Danh sách chức năng In-Scope cần kiểm thử kỹ, (2) Các yếu tố Out-of-Scope nên loại trừ, (3) Mục tiêu chất lượng của đợt kiểm thử, và (4) 4 rủi ro lớn nhất có thể xảy ra khi tích hợp nhiều nhánh Git của 5 thành viên kèm phương án phòng ngừa."*
 
 ### 4.2. Prompt 2 — Lập kế hoạch kiểm thử (sử dụng tính năng Canvas của AI)
 > **Prompt:**  
-> *"Hãy bật chế độ Canvas để cùng tôi soạn thảo một bản Kế hoạch Kiểm thử (Test Plan) chuyên nghiệp cho dự án PolyCafe (.NET 8 MVC + SQL Server LocalDB). Nội dung cần trình bày rõ theo cấu trúc bảng biểu gồm: Phạm vi kiểm thử, Chiến lược kết hợp Manual Testing trên trình duyệt và Automation Testing (dựa trên bộ 35 checks của project CafePOSManagement.Checks), Phân bổ nguồn lực kiểm thử cho 5 thành viên Nhóm 6, Môi trường & Công cụ (Chrome DevTools, EF Core, GitHub PR), và Tiêu chí kết thúc kiểm thử (Exit Criteria) rõ ràng bằng số liệu đo lường được."*
+> *"Hãy bật chế độ Canvas để cùng tôi soạn thảo một bản Kế hoạch Kiểm thử (Test Plan) chuyên nghiệp cho dự án PolyKaFé (.NET 8 MVC + SQL Server LocalDB). Nội dung cần trình bày rõ theo cấu trúc bảng biểu gồm: Phạm vi kiểm thử, Chiến lược kết hợp Manual Testing trên trình duyệt và Automation Testing (dựa trên bộ 35 checks của project CafePOSManagement.Checks), Phân bổ nguồn lực kiểm thử cho 5 thành viên Nhóm 6, Môi trường & Công cụ (Chrome DevTools, EF Core, GitHub PR), và Tiêu chí kết thúc kiểm thử (Exit Criteria) rõ ràng bằng số liệu đo lường được."*
 
 ### 4.3. Prompt 3 — Xác định những vị trí hay xảy ra lỗi của hệ thống .NET Core MVC
 > **Prompt:**  
-> *"Dựa trên kiến trúc ASP.NET Core 8 MVC sử dụng Entity Framework Core, Cookie Authentication và Razor Views của hệ thống PolyCafe, hãy liệt kê các vị trí 'điểm nóng' thường xuyên phát sinh lỗi nhất (như Model Binding, Validation tiền tệ/ngày tháng, Anti-Forgery Token ở các lời gọi AJAX `fetch`, phân quyền `[Authorize]`, EF Core Migration trùng dữ liệu seed, và Race Condition khi chốt đơn hàng). Với mỗi vị trí, hãy chỉ rõ dấu hiệu nhận biết lỗi và cách viết Test Case để bắt được lỗi đó."*
+> *"Dựa trên kiến trúc ASP.NET Core 8 MVC sử dụng Entity Framework Core, Cookie Authentication và Razor Views của hệ thống PolyKaFé, hãy liệt kê các vị trí 'điểm nóng' thường xuyên phát sinh lỗi nhất (như Model Binding, Validation tiền tệ/ngày tháng, Anti-Forgery Token ở các lời gọi AJAX `fetch`, phân quyền `[Authorize]`, EF Core Migration trùng dữ liệu seed, và Race Condition khi chốt đơn hàng). Với mỗi vị trí, hãy chỉ rõ dấu hiệu nhận biết lỗi và cách viết Test Case để bắt được lỗi đó."*

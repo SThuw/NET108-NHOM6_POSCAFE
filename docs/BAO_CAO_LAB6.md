@@ -1,5 +1,5 @@
 # BÁO CÁO THỰC HÀNH LAB 6 — DỰ ÁN .NET 1 (NET108)
-**Đề tài:** Hệ thống Quản lý Bán hàng Quán Đồ uống (PolyCafe - POS Cafe)  
+**Đề tài:** Hệ thống Quản lý Bán hàng Quán Đồ uống (PolyKaFé - POS Cafe)  
 **Nhóm thực hiện:** Nhóm 6  
 **Lớp / Khóa:** Dự án .NET 1 (FPT Polytechnic)  
 **Kho lưu trữ GitHub:** [https://github.com/SThuw/NET108-NHOM6_POSCAFE](https://github.com/SThuw/NET108-NHOM6_POSCAFE)  
@@ -98,4 +98,4 @@ Tại trang `Views/RevenueReport/Index.cshtml` và `wwwroot/js/revenue-report.js
 ---
 
 ## KẾT LUẬN
-Nhóm 6 đã hoàn thành đầy đủ 100% các yêu cầu từ **Bài 1 đến Bài 3 của LAB 6**, tích hợp liền mạch trên hệ thống menu Quản lý của PolyCafe.
+Nhóm 6 đã hoàn thành đầy đủ 100% các yêu cầu từ **Bài 1 đến Bài 3 của LAB 6**, tích hợp liền mạch trên hệ thống menu Quản lý của PolyKaFé.

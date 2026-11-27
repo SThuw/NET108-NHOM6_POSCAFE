@@ -1,5 +1,5 @@
 # BÁO CÁO THỰC HÀNH LAB 5 — DỰ ÁN .NET 1 (NET108)
-**Đề tài:** Hệ thống Quản lý Bán hàng Quán Đồ uống (PolyCafe - POS Cafe)  
+**Đề tài:** Hệ thống Quản lý Bán hàng Quán Đồ uống (PolyKaFé - POS Cafe)  
 **Nhóm thực hiện:** Nhóm 6  
 **Lớp / Khóa:** Dự án .NET 1 (FPT Polytechnic)  
 **Kho lưu trữ GitHub:** [https://github.com/SThuw/NET108-NHOM6_POSCAFE](https://github.com/SThuw/NET108-NHOM6_POSCAFE)  
@@ -119,7 +119,7 @@ if (status == "stopped") query = query.Where(p => !p.IsAvailable);
 
 ---
 
-### 4.2. Giải pháp thêm OTP vào tính năng Quên mật khẩu của PolyCafe
+### 4.2. Giải pháp thêm OTP vào tính năng Quên mật khẩu của PolyKaFé
 
 Hiện tại, bài toán Bài 2 đang giải quyết theo hướng: *"Hệ thống tự đổi mật khẩu mới trong CSDL rồi gửi mật khẩu đó vào email"*. Hạn chế của cách này là người dùng bị ép dùng mật khẩu ngẫu nhiên của hệ thống và phải đổi lại lần nữa, đồng thời mật khẩu đăng nhập hiển thị dưới dạng văn bản thuần trong email.
 
@@ -127,7 +127,7 @@ Hiện tại, bài toán Bài 2 đang giải quyết theo hướng: *"Hệ thố
 
 #### A. Sơ đồ luồng hoạt động (Sequence Flow)
 ```text
-[Nhân viên]                     [Hệ thống PolyCafe]                  [Máy chủ Email]
+[Nhân viên]                     [Hệ thống PolyKaFé]                  [Máy chủ Email]
      |                                   |                                  |
      |--- 1. Nhập Email quên MK -------->|                                  |
      |                                   |--- 2. Tạo OTP (6 số, 5 phút) ----|
@@ -166,7 +166,7 @@ public class PasswordResetOtp
    ```csharp
    var otpCode = RandomNumberGenerator.GetInt32(100000, 999999).ToString(); // Mã 6 số
    ```
-2. **Bước 2 — Lưu trữ và gửi mail:** Lưu thông tin vào bảng `PasswordResetOtps` với `ExpiresAt = DateTime.UtcNow.AddMinutes(5)`. Gửi nội dung: *"Mã OTP xác thực đặt lại mật khẩu PolyCafe của bạn là: 123456 (Hiệu lực trong 5 phút)"*.
+2. **Bước 2 — Lưu trữ và gửi mail:** Lưu thông tin vào bảng `PasswordResetOtps` với `ExpiresAt = DateTime.UtcNow.AddMinutes(5)`. Gửi nội dung: *"Mã OTP xác thực đặt lại mật khẩu PolyKaFé của bạn là: 123456 (Hiệu lực trong 5 phút)"*.
 3. **Bước 3 — Tạo View `VerifyOtp.cshtml`:** Người dùng nhập 6 chữ số OTP.
 4. **Bước 4 — Xác thực & Reset:** Khi xác nhận mã đúng và còn hạn:
    - Đánh dấu `IsUsed = true`.

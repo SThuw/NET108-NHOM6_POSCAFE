@@ -1,5 +1,5 @@
 # BÁO CÁO THỰC HÀNH LAB 8 — TÀI LIỆU KỸ THUẬT & TRIỂN KHAI HỆ THỐNG
-**Đề tài:** Hệ thống Quản lý Bán hàng Quán Đồ uống (PolyCafe - CafePOS Management)  
+**Đề tài:** Hệ thống Quản lý Bán hàng Quán Đồ uống (PolyKaFé - CafePOS Management)  
 **Nhóm thực hiện:** Nhóm 6  
 **Lớp / Khóa:** Dự án .NET 1 (NET108 — FPT Polytechnic)  
 **Kho lưu trữ GitHub:** [https://github.com/SThuw/NET108-NHOM6_POSCAFE](https://github.com/SThuw/NET108-NHOM6_POSCAFE)  
@@ -10,7 +10,7 @@
 ## MỤC TIÊU LAB 8
 ✓ Hiểu vai trò và tầm quan trọng của tài liệu kỹ thuật trong dự án phần mềm.  
 ✓ Viết được tài liệu kỹ thuật cơ bản, chuẩn xác cho dự án Web ASP.NET Core C#.  
-✓ Trình bày rõ kiến trúc hệ thống, công nghệ và cấu trúc source code thực tế của PolyCafe.  
+✓ Trình bày rõ kiến trúc hệ thống, công nghệ và cấu trúc source code thực tế của PolyKaFé.  
 ✓ Trình bày đầy đủ các bước cài đặt, cấu hình, triển khai và kiểm tra hệ thống chạy thành công.  
 ✓ Ứng dụng AI để rà soát, phát hiện và sửa lỗi thuật ngữ/công nghệ trong tài liệu kỹ thuật.
 
@@ -19,7 +19,7 @@
 ## BÀI 1 (3 ĐIỂM): PHÂN TÍCH VÀ LẬP DANH MỤC TÀI LIỆU KỸ THUẬT
 
 ### 1.1. Xác định đối tượng đọc tài liệu kỹ thuật của dự án
-Tài liệu kỹ thuật của hệ thống **PolyCafe** phục vụ 4 nhóm đối tượng chính:
+Tài liệu kỹ thuật của hệ thống **PolyKaFé** phục vụ 4 nhóm đối tượng chính:
 1. **Lập trình viên (Developers hiện tại & thành viên mới):** Cần nắm kiến trúc 3 lớp + MVC, quy ước đặt tên, luồng dữ liệu EF Core/DAL để bảo trì hoặc phát triển thêm tính năng mà không gây xung đột.
 2. **Kiểm thử viên (QA / Testers):** Cần hiểu luồng nghiệp vụ, phân quyền (Manager/Employee/Kiosk), cấu trúc CSDL và các điểm tích hợp để viết Test Plan và Test Case chính xác.
 3. **Nhân sự vận hành & Triển khai (DevOps / IT Support):** Cần hướng dẫn cài đặt môi trường, chuỗi kết nối SQL Server, cấu hình SMTP và cách kiểm tra hệ thống hoạt động ổn định trên server/VPS hoặc máy trạm.
@@ -29,7 +29,7 @@ Tài liệu kỹ thuật của hệ thống **PolyCafe** phục vụ 4 nhóm đ�
 
 | STT | Loại tài liệu kỹ thuật | File lưu trữ trong dự án | Mục tiêu của tài liệu |
 | :-: | :--- | :--- | :--- |
-| **1** | **Tài liệu tổng quan hệ thống** | `README.md`, `docs/BAO_CAO_LAB3.md` | Giới thiệu mục tiêu nghiệp vụ, phạm vi chức năng, đối tượng sử dụng và luồng hoạt động tổng thể của hệ thống PolyCafe. |
+| **1** | **Tài liệu tổng quan hệ thống** | `README.md`, `docs/BAO_CAO_LAB3.md` | Giới thiệu mục tiêu nghiệp vụ, phạm vi chức năng, đối tượng sử dụng và luồng hoạt động tổng thể của hệ thống PolyKaFé. |
 | **2** | **Tài liệu kiến trúc hệ thống** | `docs/BAO_CAO_LAB8.md`, `docs/ASM1_DUC_AUTH_EMPLOYEES.md` | Mô tả kiến trúc Client–Server, mô hình ASP.NET Core MVC kết hợp 3-Layer (DAL/Services/EF Core), cấu trúc source code và quy ước lập trình. |
 | **3** | **Tài liệu cài đặt & triển khai** | `README.md`, `CHAY_WEB.bat`, `run.ps1` | Hướng dẫn yêu cầu phần mềm, cấu hình ConnectionStrings/SMTP, chạy EF Core Migration và cách kiểm tra ứng dụng khởi chạy thành công. |
 | **4** | **Tài liệu thiết kế CSDL & Dữ liệu mẫu** | `database/CafePOS_Data_Script.sql`, `Data/Migrations/` | Lưu trữ lược đồ 10 bảng (Products, Categories, Orders, OrderItems, Users, Cards, Discounts, cụm AI State Store) và script khởi tạo dữ liệu. |
@@ -40,7 +40,7 @@ Tài liệu kỹ thuật của hệ thống **PolyCafe** phục vụ 4 nhóm đ�
 ## BÀI 2 (2 ĐIỂM): GIỚI THIỆU DỰ ÁN VÀ KIẾN TRÚC HỆ THỐNG
 
 ### 2.1. Giới thiệu dự án
-- **Tên dự án:** **PolyCafe — Hệ thống Quản lý Bán hàng Quán Đồ uống (`CafePOSManagement`)**.
+- **Tên dự án:** **PolyKaFé — Hệ thống Quản lý Bán hàng Quán Đồ uống (`CafePOSManagement`)**.
 - **Mục tiêu nghiệp vụ:** Số hóa toàn bộ quy trình bán hàng tại quầy (POS), đặt món tự phục vụ (Kiosk), quản lý thực đơn, quản lý thẻ bàn/thẻ rung, quản lý nhân sự phân quyền, theo dõi hóa đơn và thống kê doanh thu trực quan theo thời gian thực.
 - **Phạm vi chức năng chính:**
   - *Bán hàng & Kiosk:* Đặt món, tìm kiếm không dấu, giỏ hàng, tính giảm giá thành viên VIP theo SĐT & số lần ghé, thuế VAT 5%, xuất biên lai/số thứ tự.
@@ -73,7 +73,7 @@ Tài liệu kỹ thuật của hệ thống **PolyCafe** phục vụ 4 nhóm đ�
 
 ### 3.1. Danh sách công nghệ sử dụng trong dự án
 
-| Thành phần | Công nghệ / Thư viện sử dụng trong PolyCafe |
+| Thành phần | Công nghệ / Thư viện sử dụng trong PolyKaFé |
 | :--- | :--- |
 | **Ngôn ngữ lập trình** | **C# 12** (.NET 8), HTML5, CSS3, JavaScript (ES6+) |
 | **Framework / Công nghệ Web** | **ASP.NET Core 8.0 MVC**, Razor Views (`.cshtml`), **Entity Framework Core 8.0** (Code First), **ADO.NET** (`Microsoft.Data.SqlClient`), Bootstrap 5, **Chart.js** |
@@ -147,7 +147,7 @@ D:\NET108\LAB03\
    Kết quả hiển thị **`ALL 35 CHECKS PASSED`** là tầng nghiệp vụ và tính toán chính xác 100%.
 2. **Kiểm tra trên trình duyệt Web:**
    - Truy cập `http://localhost:5088/Kiosk` ➔ Hiển thị màn hình Kiosk tự phục vụ PolyKaFé.
-   - Truy cập `http://localhost:5088/Login/Login` ➔ Đăng nhập tài khoản Quản lý (`thu@polycafe.vn` / `123456`).
+   - Truy cập `http://localhost:5088/Login/Login` ➔ Đăng nhập tài khoản Quản lý (`thu@PolyKaFé.vn` / `123456`).
    - Truy cập `http://localhost:5088/Lab3` ➔ Góc trên hiển thị nhãn xanh **`SQL Server: Kết nối tốt`**.
    - Kiểm tra đầy đủ các trang: `/Pos`, `/Products`, `/Employees`, `/Lab3?tab=orders`, `/OrderDetail/1`, `/RevenueReport` và `/TopSelling` (hiển thị đầy đủ biểu đồ Chart.js).
 
@@ -159,7 +159,7 @@ D:\NET108\LAB03\
 Nhóm đã sử dụng AI để kiểm tra chéo bản nháp tài liệu kỹ thuật của Lab 8 đối chiếu với mã nguồn thực tế trong `src/CafePOSManagement.Web`.
 
 #### Prompt đã sử dụng:
-> *"Hãy đóng vai Technical Lead kiểm tra lại toàn bộ tài liệu kỹ thuật & kiến trúc hệ thống PolyCafe vừa soạn. Đối chiếu với cấu trúc project ASP.NET Core 8 MVC thực tế, hãy chỉ ra và sửa toàn bộ các lỗi đánh máy, sai tên công nghệ, nhầm lẫn thuật ngữ giữa Java Web và .NET Core C# (nếu có)."*
+> *"Hãy đóng vai Technical Lead kiểm tra lại toàn bộ tài liệu kỹ thuật & kiến trúc hệ thống PolyKaFé vừa soạn. Đối chiếu với cấu trúc project ASP.NET Core 8 MVC thực tế, hãy chỉ ra và sửa toàn bộ các lỗi đánh máy, sai tên công nghệ, nhầm lẫn thuật ngữ giữa Java Web và .NET Core C# (nếu có)."*
 
 #### Kết quả các lỗi AI phát hiện và đã chuẩn hóa sửa lại:
 
